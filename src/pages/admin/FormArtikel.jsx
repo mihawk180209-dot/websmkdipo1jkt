@@ -52,47 +52,79 @@ const FormArtikel = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e) => {
-    // Cek jika user membatalkan pemilihan file
-    if (!e.target.files || e.target.files.length === 0) {
-      // Opsional: Kosongkan state jika ingin reset saat cancel
-      // setImageFile(null);
-      // setPreviewUrl(null);
-      return;
+  // --- HELPER: CONVERT KE WEBP ---
+  const convertImageToWebP = (file) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        // Convert ke WebP, Quality 0.8 (80%)
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const newFile = new File(
+                [blob],
+                file.name.replace(/\.[^/.]+$/, "") + ".webp",
+                {
+                  type: "image/webp",
+                  lastModified: Date.now(),
+                },
+              );
+              resolve(newFile);
+            } else {
+              reject(new Error("Gagal konversi gambar"));
+            }
+          },
+          "image/webp",
+          0.8,
+        );
+      };
+      img.onerror = (error) => reject(error);
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // --- HELPER: HAPUS GAMBAR LAMA ---
+  const deleteOldImage = async (url) => {
+    if (!url) return;
+    // Asumsi bucket bernama 'article-images' sesuai kode kakak
+    if (url.includes("/article-images/")) {
+      const filePath = url.split("/article-images/")[1];
+      if (filePath) {
+        await supabase.storage.from("article-images").remove([filePath]);
+      }
     }
+  };
+
+  const handleFileChange = (e) => {
+    if (!e.target.files || e.target.files.length === 0) return;
 
     const file = e.target.files[0];
 
-    // --- VALIDASI MULAI ---
-
-    // 1. Cek Tipe File (Hanya Gambar)
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "image/jpg",
-      "image/gif",
-    ];
+    // 1. Cek Tipe File
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
 
     if (!allowedTypes.includes(file.type)) {
       alert(
-        "⛔ Format salah! Mohon hanya upload file gambar (JPG, PNG, WEBP, GIF)."
+        "⛔ Format salah! Mohon hanya upload file gambar (JPG, PNG, WEBP).",
       );
-      e.target.value = ""; // Reset input file di browser
+      e.target.value = "";
       return;
     }
 
-    // 2. Cek Ukuran File (Maksimal 10MB sesuai request)
-    const maxSize = 10 * 1024 * 1024; // 10MB dalam bytes
+    // 2. Cek Ukuran File (Max 10MB)
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       alert("⚠️ File terlalu besar! Maksimal ukuran file adalah 10MB.");
-      e.target.value = ""; // Reset input file
+      e.target.value = "";
       return;
     }
 
-    // --- VALIDASI SELESAI ---
-
-    // Jika lolos, simpan ke state
     setImageFile(file);
     setPreviewUrl(URL.createObjectURL(file));
   };
@@ -104,26 +136,35 @@ const FormArtikel = () => {
     let finalImageUrl = currentImage;
 
     try {
+      // Jika ada file baru yang diupload
       if (imageFile) {
-        // Ambil ekstensi file (misal: jpg)
-        const fileExt = imageFile.name.split(".").pop();
+        // 1. Hapus gambar lama dulu jika mode EDIT (Biar hemat storage)
+        if (id && currentImage) {
+          await deleteOldImage(currentImage);
+        }
 
-        // Buat nama file acak & unik (Sanitasi)
-        // Contoh hasil: 170998822_a1b2c3d4.jpg
+        // 2. Convert gambar ke WebP
+        const webpFile = await convertImageToWebP(imageFile);
+
+        // 3. Buat nama file unik dengan akhiran .webp
         const fileName = `${Date.now()}_${Math.random()
           .toString(36)
-          .substring(2)}.${fileExt}`;
+          .substring(2)}.webp`;
 
-        // Upload ke Supabase
+        // 4. Upload ke Supabase
         const { error: uploadError } = await supabase.storage
           .from("article-images")
-          .upload(fileName, imageFile);
+          .upload(fileName, webpFile, {
+            contentType: "image/webp",
+            cacheControl: "3600",
+            upsert: false,
+          });
 
         if (uploadError) {
           throw new Error("Gagal upload gambar: " + uploadError.message);
         }
 
-        // Dapatkan URL publik
+        // 5. Dapatkan URL publik
         const { data: urlData } = supabase.storage
           .from("article-images")
           .getPublicUrl(fileName);
@@ -131,7 +172,7 @@ const FormArtikel = () => {
         finalImageUrl = urlData.publicUrl;
       }
 
-      // Siapkan data untuk disimpan ke Database
+      // Siapkan data Database
       const payload = {
         title: formData.title,
         category: formData.category,
@@ -158,7 +199,6 @@ const FormArtikel = () => {
         throw new Error("Gagal simpan artikel: " + dbError.message);
       }
 
-      // Jika sukses semua
       alert("Berhasil menyimpan artikel!");
       navigate("/admin/artikel");
     } catch (error) {
@@ -167,6 +207,7 @@ const FormArtikel = () => {
       setUploading(false);
     }
   };
+
   if (loadingData)
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-slate-400">
@@ -284,7 +325,7 @@ const FormArtikel = () => {
           {/* Panel Gambar */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <label className="block text-sm font-semibold text-slate-700 mb-3">
-              Gambar Unggulan
+              Gambar Unggulan (Auto WebP)
             </label>
 
             {/* Custom File Upload UI */}
@@ -318,7 +359,7 @@ const FormArtikel = () => {
                       Klik untuk upload
                     </p>
                     <p className="text-xs text-slate-400 mt-1">
-                      PNG, JPG, WEBP up to 10MB
+                      JPG/PNG akan otomatis diubah ke WebP
                     </p>
                   </div>
                 )}
