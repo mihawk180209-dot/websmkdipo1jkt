@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --color-primary: #f97316;
+  --color-secondary: #1e293b;
+  --color-accent: #22c55e;
+}
+
+/* Global Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Di v4, @apply akan jalan otomatis setelah @import "tailwindcss" */
+  overflow-x: hidden; /* Mencegah scroll ke samping pada level halaman utama */
+  width: 100%;
+  position: relative;
+  @apply bg-gray-50 text-gray-800 font-sans;
+}
+
+/* Custom Scrollbar */
+/* ::-webkit-scrollbar {
+  width: 2px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+} */
+/* ::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary);
+  border-radius: 9px;
+} */
