@@ -7,7 +7,8 @@ import {
   X,
   Globe,
   Users,
-  Shirt, // Import icon Users untuk Guru
+  Shirt,
+  Monitor, // Import icon Users untuk Guru
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
@@ -128,6 +129,17 @@ const AdminLayout = () => {
             <Shirt size={20} />{" "}
             {/* Jangan lupa import Shirt dari lucide-react */}
             Kelola Seragam
+          </Link>
+
+          <Link
+            to="/admin/fasilitas"
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive(
+              "/admin/fasilitas",
+            )}`}
+          >
+            <Monitor size={20} />
+            Fasilitas Sekolah
           </Link>
 
           {/* BAGIAN AKUN */}

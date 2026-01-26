@@ -1,5 +1,14 @@
-import { useLayoutEffect, useRef } from "react";
-import { Wifi, Monitor, BookOpen, Coffee, Zap, Shield } from "lucide-react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  Wifi,
+  Monitor,
+  BookOpen,
+  Coffee,
+  Zap,
+  Shield,
+  Loader2,
+} from "lucide-react";
+import { supabase } from "../../lib/supabase"; // Pastikan path benar
 
 // --- GSAP IMPORTS ---
 import gsap from "gsap";
@@ -8,64 +17,40 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 // Register Plugin
 gsap.registerPlugin(ScrollTrigger);
 
-// DATA FASILITAS
-const facilitiesData = [
-  {
-    id: 1,
-    title: "Laboratorium Komputer Utama",
-    category: "Teknologi",
-    desc: "Dilengkapi dengan 40 unit PC spesifikasi tinggi (Core i7, RTX Series) untuk menunjang praktikum TKJ dan simulasi jaringan.",
-    image:
-      "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=800&h=500",
-  },
-  {
-    id: 2,
-    title: "Studio Multimedia & DKV",
-    category: "Kreatif",
-    desc: "Ruang kreatif kedap suara dengan fasilitas Green Screen, kamera DSLR/Mirrorless, dan PC editing untuk siswa jurusan DKV.",
-    image:
-      "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=800&h=500",
-  },
-  {
-    id: 3,
-    title: "Perpustakaan Digital",
-    category: "Literasi",
-    desc: "Perpustakaan modern dengan ribuan koleksi buku fisik dan e-book, dilengkapi area baca lesehan yang nyaman dan ber-AC.",
-    image:
-      "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&q=80&w=800&h=500",
-  },
-  {
-    id: 4,
-    title: "Masjid Al-Hidayah",
-    category: "Ibadah",
-    desc: "Masjid sekolah yang luas dan bersih sebagai pusat kegiatan keagamaan, sholat berjamaah, dan pembentukan karakter akhlak mulia.",
-    image:
-      "https://images.unsplash.com/photo-1564121211835-e88c852648ab?auto=format&fit=crop&q=80&w=800&h=500",
-  },
-  {
-    id: 5,
-    title: "Lapangan Serbaguna",
-    category: "Olahraga",
-    desc: "Lapangan outdoor untuk kegiatan upacara bendera, olahraga (Futsal, Basket, Voli), dan kegiatan ekstrakurikuler.",
-    image:
-      "https://images.unsplash.com/photo-1562771242-a02d9090c90c?auto=format&fit=crop&q=80&w=800&h=500",
-  },
-  {
-    id: 6,
-    title: "Smart Classroom",
-    category: "Pembelajaran",
-    desc: "Ruang kelas nyaman ber-AC dilengkapi Proyektor/Smart TV dan CCTV untuk memantau keamanan dan kondusifitas belajar.",
-    image:
-      "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=800&h=500",
-  },
-];
-
 const Fasilitas = () => {
   const comp = useRef(null);
+  const [facilities, setFacilities] = useState([]);
+  const [loading, setLoading] = useState(true);
 
+  // 1. FETCH DATA DARI SUPABASE
+  useEffect(() => {
+    fetchFacilities();
+  }, []);
+
+  const fetchFacilities = async () => {
+    // Asumsi nama tabel 'facilities'
+    const { data, error } = await supabase
+      .from("facilities")
+      .select("*")
+      .order("id", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching facilities:", error);
+    } else {
+      setFacilities(data || []);
+    }
+    setLoading(false);
+  };
+
+  // 2. GSAP ANIMATION (Jalan setelah data ada)
   useLayoutEffect(() => {
+    // Jangan jalankan animasi jika masih loading atau data kosong
+    if (loading || facilities.length === 0) return;
+
     let ctx = gsap.context(() => {
-      // 1. HEADER ANIMATION (FIX: Pake fromTo)
+      ScrollTrigger.refresh(); // Refresh posisi trigger
+
+      // A. HEADER ANIMATION
       const tlHeader = gsap.timeline();
 
       gsap.to(".header-blob", {
@@ -91,7 +76,7 @@ const Fasilitas = () => {
           "-=0.5",
         );
 
-      // 2. FEATURE ICONS BAR (FIX: Pake fromTo)
+      // B. FEATURE ICONS BAR
       gsap.fromTo(
         ".feature-item",
         { scale: 0, autoAlpha: 0 },
@@ -108,25 +93,25 @@ const Fasilitas = () => {
         },
       );
 
-      // 3. GALLERY SECTION (FIX: Pake fromTo - INI YANG ILANG TADI)
+      // C. GALLERY SECTION (Animasi Grid)
       gsap.fromTo(
         ".facility-card",
-        { y: 60, autoAlpha: 0 }, // Mulai transparan & turun
+        { y: 60, autoAlpha: 0 },
         {
           y: 0,
-          autoAlpha: 1, // Jadi muncul
+          autoAlpha: 1,
           duration: 0.8,
           stagger: 0.15,
           ease: "power2.out",
           scrollTrigger: {
             trigger: ".gallery-grid",
-            start: "top 85%", // Trigger lebih awal biar aman
+            start: "top 85%",
             toggleActions: "play none none reverse",
           },
         },
       );
 
-      // 4. ADDITIONAL INFO CARD (FIX: Pake fromTo)
+      // D. ADDITIONAL INFO CARD
       gsap.fromTo(
         ".info-card",
         { y: 50, autoAlpha: 0, scale: 0.95 },
@@ -143,7 +128,7 @@ const Fasilitas = () => {
         },
       );
 
-      // 5. BACKGROUND ICON SPIN
+      // E. BACKGROUND ICON SPIN
       gsap.to(".bg-icon-spin", {
         rotation: 360,
         duration: 20,
@@ -153,7 +138,7 @@ const Fasilitas = () => {
     }, comp);
 
     return () => ctx.revert();
-  }, []);
+  }, [loading, facilities]); // Dependency array wajib ada!
 
   return (
     <div
@@ -177,7 +162,7 @@ const Fasilitas = () => {
       </div>
 
       {/* ==================== FEATURE ICONS BAR ==================== */}
-      <div className="feature-bar bg-primary py-8 shadow-lg relative -mt-8 mx-4 lg:mx-auto max-w-5xl rounded-xl z-20">
+      <div className="feature-bar bg-orange-600 py-8 shadow-lg relative -mt-8 mx-4 lg:mx-auto max-w-5xl rounded-xl z-20">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-white text-center">
           {/* Feature 1 */}
           <div className="feature-item flex flex-col items-center gap-2 border-r border-orange-400/50 last:border-0 group invisible">
@@ -233,63 +218,76 @@ const Fasilitas = () => {
       {/* ==================== GALLERY SECTION ==================== */}
       <section className="py-20">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="gallery-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {facilitiesData.map((item) => (
-              <div
-                key={item.id}
-                className="facility-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 group cursor-default hover:-translate-y-2 invisible"
-              >
-                {/* IMAGE */}
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  {/* Overlay Gradient on Hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          {/* LOADING STATE */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2
+                className="animate-spin text-orange-600 mb-4"
+                size={40}
+              />
+              <p className="text-gray-500">Memuat data fasilitas...</p>
+            </div>
+          ) : (
+            <div className="gallery-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {facilities.map((item) => (
+                <div
+                  key={item.id}
+                  className="facility-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 group cursor-default hover:-translate-y-2 invisible"
+                >
+                  {/* IMAGE */}
+                  <div className="relative h-64 overflow-hidden">
+                    <img
+                      src={item.image_url} // Pastikan kolom di DB adalah 'image_url'
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    {/* Overlay Gradient on Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                  {/* Category Badge */}
-                  <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm uppercase tracking-wider">
-                    {item.category}
+                    {/* Category Badge */}
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-orange-600 shadow-sm uppercase tracking-wider">
+                      {item.category}
+                    </div>
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="p-6 relative">
+                    {/* Decorative Line Animation */}
+                    <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-orange-600 to-orange-300 group-hover:w-full transition-all duration-500 ease-out"></div>
+
+                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
-
-                {/* CONTENT */}
-                <div className="p-6 relative">
-                  {/* Decorative Line Animation */}
-                  <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-primary to-orange-300 group-hover:w-full transition-all duration-500 ease-out"></div>
-
-                  <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-primary transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-                    {item.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* ==================== ADDITIONAL INFO CARD ==================== */}
-          <div className="info-card mt-16 bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 lg:p-12 text-white text-center relative overflow-hidden shadow-2xl invisible">
-            {/* Background Icon (GSAP Animation) */}
-            <div className="bg-icon-spin absolute top-0 right-0 p-12 opacity-10">
-              <BookOpen size={200} />
-            </div>
+          {!loading && (
+            <div className="info-card mt-16 bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 lg:p-12 text-white text-center relative overflow-hidden shadow-2xl invisible">
+              {/* Background Icon (GSAP Animation) */}
+              <div className="bg-icon-spin absolute top-0 right-0 p-12 opacity-10">
+                <BookOpen size={200} />
+              </div>
 
-            <div className="relative z-10 max-w-2xl mx-auto">
-              <h2 className="text-2xl lg:text-3xl font-bold mb-4">
-                Dukung Proses Belajar Mengajar
-              </h2>
-              <p className="text-gray-300 mb-0 leading-relaxed">
-                Kami terus berkomitmen untuk meremajakan dan melengkapi
-                fasilitas sekolah setiap tahunnya demi menciptakan lingkungan
-                belajar yang kondusif, aman, dan menyenangkan bagi seluruh
-                siswa.
-              </p>
+              <div className="relative z-10 max-w-2xl mx-auto">
+                <h2 className="text-2xl lg:text-3xl font-bold mb-4">
+                  Dukung Proses Belajar Mengajar
+                </h2>
+                <p className="text-gray-300 mb-0 leading-relaxed">
+                  Kami terus berkomitmen untuk meremajakan dan melengkapi
+                  fasilitas sekolah setiap tahunnya demi menciptakan lingkungan
+                  belajar yang kondusif, aman, dan menyenangkan bagi seluruh
+                  siswa.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
     </div>

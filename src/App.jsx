@@ -30,6 +30,8 @@ import ManageGuru from "./pages/admin/ManageGuru";
 import FormGuru from "./pages/admin/FormGuru";
 import ManageSeragam from "./pages/admin/ManageSeragam";
 import FormSeragam from "./pages/admin/FormSeragam";
+import ManageFasilitas from "./pages/admin/ManageFasilitas";
+import FormFasilitas from "./pages/admin/FormFasilitas";
 
 // Komponen Placeholder
 const PagePlaceholder = ({ title }) => (
@@ -90,6 +92,9 @@ function App() {
           <Route path="/admin/seragam" element={<ManageSeragam />} />
           <Route path="/admin/seragam/tambah" element={<FormSeragam />} />
           <Route path="/admin/seragam/edit/:id" element={<FormSeragam />} />
+          <Route path="/admin/fasilitas" element={<ManageFasilitas />} />
+          <Route path="/admin/fasilitas/tambah" element={<FormFasilitas />} />
+          <Route path="/admin/fasilitas/edit/:id" element={<FormFasilitas />} />
         </Route>
       </Route>
     </Routes>
