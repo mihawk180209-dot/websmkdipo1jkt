@@ -6,24 +6,29 @@ import {
   Menu,
   X,
   Globe,
+  Users, // Import icon Users untuk Guru
 } from "lucide-react";
 import { useState } from "react";
-import { supabase } from "../lib/supabase"; // Import supabase
+import { supabase } from "../lib/supabase";
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Helper untuk cek active link (termasuk sub-route)
   const isActive = (path) => {
-    return location.pathname === path
+    if (path === "/admin" && location.pathname === "/admin") {
+      return "bg-teal-600 text-white shadow-md shadow-teal-200";
+    }
+    return location.pathname.startsWith(path) && path !== "/admin"
       ? "bg-teal-600 text-white shadow-md shadow-teal-200"
       : "text-slate-500 hover:bg-slate-100 hover:text-slate-900";
   };
 
   const handleLogout = async () => {
     const confirm = window.confirm(
-      "Apakah Anda yakin ingin keluar dari Admin Panel?"
+      "Apakah Anda yakin ingin keluar dari Admin Panel?",
     );
 
     if (confirm) {
@@ -69,11 +74,13 @@ const AdminLayout = () => {
           <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
             Menu Utama
           </p>
+
+          {/* DASHBOARD */}
           <Link
             to="/admin"
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center justify-between px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive(
-              "/admin"
+              "/admin",
             )}`}
           >
             <div className="flex items-center gap-3">
@@ -81,16 +88,32 @@ const AdminLayout = () => {
               Dashboard
             </div>
           </Link>
+
+          {/* ARTIKEL */}
           <Link
             to="/admin/artikel"
             onClick={() => setIsSidebarOpen(false)}
             className={`flex items-center justify-between px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive(
-              "/admin/artikel"
+              "/admin/artikel",
             )}`}
           >
             <div className="flex items-center gap-3">
               <FileText size={20} />
               Kelola Artikel
+            </div>
+          </Link>
+
+          {/* DATA GURU & STAF (BARU) */}
+          <Link
+            to="/admin/guru"
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center justify-between px-4 py-3.5 text-sm font-medium rounded-xl transition-all duration-200 ${isActive(
+              "/admin/guru",
+            )}`}
+          >
+            <div className="flex items-center gap-3">
+              <Users size={20} />
+              Data Guru & Staf
             </div>
           </Link>
 

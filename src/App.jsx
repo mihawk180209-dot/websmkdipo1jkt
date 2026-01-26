@@ -26,6 +26,8 @@ import DetailArtikel from "./pages/DetailArtikel";
 import Dashboard from "./pages/admin/Dashboard";
 import ManageArtikel from "./pages/admin/ManageArtikel";
 import FormArtikel from "./pages/admin/FormArtikel";
+import ManageGuru from "./pages/admin/ManageGuru";
+import FormGuru from "./pages/admin/FormGuru";
 
 // Komponen Placeholder
 const PagePlaceholder = ({ title }) => (
@@ -80,6 +82,9 @@ function App() {
           <Route path="artikel" element={<ManageArtikel />} />
           <Route path="artikel/tambah" element={<FormArtikel />} />
           <Route path="artikel/edit/:id" element={<FormArtikel />} />
+          <Route path="/admin/guru" element={<ManageGuru />} />
+          <Route path="/admin/guru/tambah" element={<FormGuru />} />
+          <Route path="/admin/guru/edit/:id" element={<FormGuru />} />
         </Route>
       </Route>
     </Routes>
