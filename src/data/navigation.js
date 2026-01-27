@@ -1,3 +1,6 @@
+import { title } from "framer-motion/client";
+import { Target } from "lucide-react";
+
 // src/data/navigation.js
 export const navLinks = [
   { title: "Home", path: "/" },
@@ -5,10 +8,17 @@ export const navLinks = [
     title: "Tentang Kami",
     path: "/tentang",
     submenu: [
+      { title: "Overview Tentang Kami", path: "/tentang/overview" },
       { title: "Profil Sekolah", path: "/tentang/profil" },
       { title: "Visi & Misi", path: "/tentang/visi-misi" },
       { title: "Sejarah", path: "/tentang/sejarah" },
-      { title: "OSIS", path: "/tentang/osis" },
+      { title: "Program Unggulan", path: "/tentang/program-unggulan" },
+      {
+        title: "OSIS",
+        path: "https://osissmkdipo1.netlify.app", // <--- Ganti link web OSIS di sini
+        isExternal: true,
+        target: "_blank", // <--- Penanda ini link keluar
+      },
       { title: "Seragam", path: "/tentang/seragam" },
       { title: "Fasilitas", path: "/tentang/fasilitas" },
       { title: "Struktur Organisasi", path: "/tentang/struktur" },

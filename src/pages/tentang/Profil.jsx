@@ -332,9 +332,11 @@ const Profil = () => {
                   Visi Sekolah
                 </h3>
                 <p className="text-gray-300 italic mb-6 leading-relaxed relative z-10">
-                  "Terwujudnya SMK Diponegoro 1 Jakarta sebagai pusat pendidikan
-                  dan pelatihan kejuruan yang unggul, berkarakter, dan berdaya
-                  saing global."
+                  “Melahirkan institusi pendidikan vokasi unggulan yang
+                  melahirkan generasi profesional, adaptif, dan berdaya saing
+                  global; berlandaskan Pancasila, menguasai teknologi
+                  terbarukan, serta mampu berkarya dan menciptakan perubahan
+                  positif dalam masyarakat."
                 </p>
                 <a
                   href="/tentang/visi-misi"

@@ -23,33 +23,32 @@ const VisiMisi = () => {
   }, []);
 
   const missions = [
-    "Membekali warga sekolah dengan keimanan dan ketaqwaan kepada Allah SWT.",
-    "Meningkatkan pemahaman terhadap ajaran agama sehingga menjadi landasan dalam bersikap dan bertindak.",
-    "Melaksanakan proses pembelajaran yang mengarah kepada pembentukan pribadi yang Mandiri dan berjiwa kompetitif.",
-    "Meningkatkan kompetensi warga sekolah..",
-    "Memperkuat kerjasama dengan dunia usaha dan industri.",
+    "Membekali murid dengan keterampilan praktis dan pemikiran inovatif untuk menciptakan karya dan solusi yang berdampak di bidang desain visual maupun teknologi informasi.",
+    "Membangun karakter profesional yang adaptif, kolaboratif, dan beretika, agar lulusan mampu bersaing dan bekerja secara kompeten di berbagai lingkungan kerja.",
+    "Menanamkan nilai-nilai Pancasila, kebhinekaan, dan tanggung jawab sosial dalam setiap proses pembelejaran dan hasil karya murid.",
+    "Mendorong semangat berkarya dan berwirausaha berbasis teknologi dan budaya lokal, agar murid dapat menjadi pelaku perubahan yang relevan dengan perkembangan zaman dan kebutuhan masyarakat.",
   ];
 
   const values = [
     {
       icon: <Users size={32} />,
-      title: "Berkarakter",
-      desc: "Mencetak lulusan yang jujur, disiplin, dan bertanggung jawab.",
+      title: "Profesionalisme",
+      desc: "Melambangkan sikap kerja yang tangguh, bertanggung jawab, siap industri, dan menjunjung etika tinggi.",
     },
     {
       icon: <Lightbulb size={32} />,
       title: "Inovatif",
-      desc: "Selalu beradaptasi dengan teknologi dan cara baru.",
+      desc: "Menggambarkan semangat berkarya, beripikir kreatif, dan menciptakan solusi baru di bidang desain maupun teknologi.",
     },
     {
       icon: <Globe size={32} />,
-      title: "Berdaya Saing",
-      desc: "Siap berkompetisi di pasar kerja nasional maupun global.",
+      title: "Kolaborasi",
+      desc: "Mampu bekerja sama lintas bidang dan latar belakang dengan semangat saling menghargai, untuk menghasilkan karya dan solusi yang lebih kuat.",
     },
     {
       icon: <Heart size={32} />,
-      title: "Peduli",
-      desc: "Memiliki kepekaan sosial dan kepedulian lingkungan yang tinggi.",
+      title: "Berkarakter",
+      desc: "Mewakili nilai-nilai kebhinekaan, Pancasila, empati sosial, dan tanggung jawab sebagai warga negara yang baik.",
     },
   ];
 
@@ -104,20 +103,21 @@ const VisiMisi = () => {
             Visi Kami
           </h2>
           <blockquote className="text-2xl lg:text-4xl font-serif font-medium text-gray-900 leading-snug">
-            “Terbentuknya Insan yang Kuat dalam Imtaq Maju dalam Ipteks dan
-            Prima dalam Layanan{" "}
+            “Melahirkan institusi pendidikan vokasi unggulan yang melahirkan
+            generasi{" "}
             <span className="text-primary underline decoration-4 decoration-primary/30">
-              unggul
+              profesional
             </span>
             ,{" "}
             <span className="text-primary underline decoration-4 decoration-primary/30">
-              berkarakter
+              adaptif
             </span>
             , dan{" "}
             <span className="text-primary underline decoration-4 decoration-primary/30">
-              berdaya saing global
+              berdaya saing global;
             </span>
-            ."
+            berlandaskan Pancasila, menguasai teknologi terbarukan, serta mampu
+            berkarya dan menciptakan perubahan positif dalam masyarakat."
           </blockquote>
         </div>
       </div>
@@ -140,16 +140,16 @@ const VisiMisi = () => {
                 data-aos-delay="200"
                 className="text-gray-600 text-lg leading-relaxed mb-8"
               >
-                Menghasilkan lulusan yang bertaqwa dan akhlak Mulia
+                Menyelenggarakan pendidikan vokasi berbasis teknologi dan
+                kreativitas yang kontekstual dan terintegrasi dengan kebutuhan
+                industri masa kini dan masa depan.
               </p>
               <div
                 data-aos="zoom-in"
                 data-aos-delay="400"
                 className="hidden lg:block p-6 bg-gray-50 rounded-2xl border border-gray-100"
               >
-                <p className="font-bold text-gray-800 mb-2">
-                  Komitmen Pendidikan
-                </p>
+                <p className="font-bold text-gray-800 mb-2"></p>
                 <p className="text-sm text-gray-600">
                   Kami berkomitmen memberikan layanan pendidikan terbaik dengan
                   standar kualitas yang terus ditingkatkan.

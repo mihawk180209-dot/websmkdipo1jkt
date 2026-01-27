@@ -21,6 +21,8 @@ import TKJ from "./pages/Jurusan/TKJ";
 import DKV from "./pages/Jurusan/DKV";
 import Artikel from "./pages/Artikel";
 import DetailArtikel from "./pages/DetailArtikel";
+import ProgramUnggulan from "./pages/tentang/ProgramUnggulan";
+import DetailProgram from "./pages/DetailProgram";
 
 // --- Pages Admin ---
 import Dashboard from "./pages/admin/Dashboard";
@@ -32,6 +34,8 @@ import ManageSeragam from "./pages/admin/ManageSeragam";
 import FormSeragam from "./pages/admin/FormSeragam";
 import ManageFasilitas from "./pages/admin/ManageFasilitas";
 import FormFasilitas from "./pages/admin/FormFasilitas";
+import ManageProgram from "./pages/admin/ManageProgram";
+import FormProgram from "./pages/admin/FormProgram";
 
 // Komponen Placeholder
 const PagePlaceholder = ({ title }) => (
@@ -50,10 +54,12 @@ function App() {
         <Route path="/" element={<Home />} />
 
         {/* Tentang */}
-        <Route path="/tentang" element={<Overview />} />
+        <Route path="/tentang/overview" element={<Overview />} />
         <Route path="/tentang/profil" element={<Profil />} />
         <Route path="/tentang/visi-misi" element={<VisiMisi />} />
         <Route path="/tentang/sejarah" element={<Sejarah />} />
+        <Route path="tentang/program-unggulan" element={<ProgramUnggulan />} />
+        <Route path="/program/:id" element={<DetailProgram />} />
         <Route
           path="/tentang/osis"
           element={<PagePlaceholder title="OSIS" />}
@@ -95,6 +101,9 @@ function App() {
           <Route path="/admin/fasilitas" element={<ManageFasilitas />} />
           <Route path="/admin/fasilitas/tambah" element={<FormFasilitas />} />
           <Route path="/admin/fasilitas/edit/:id" element={<FormFasilitas />} />
+          <Route path="/admin/program" element={<ManageProgram />} />
+          <Route path="/admin/program/tambah/" element={<FormProgram />} />
+          <Route path="/admin/program/edit/:id" element={<FormProgram />} />
         </Route>
       </Route>
     </Routes>

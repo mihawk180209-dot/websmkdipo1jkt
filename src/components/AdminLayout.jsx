@@ -8,7 +8,8 @@ import {
   Globe,
   Users,
   Shirt,
-  Monitor, // Import icon Users untuk Guru
+  Monitor,
+  Layers, // <--- TAMBAHAN ICON BARU
 } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "../lib/supabase";
@@ -105,7 +106,7 @@ const AdminLayout = () => {
             </div>
           </Link>
 
-          {/* DATA GURU & STAF (BARU) */}
+          {/* DATA GURU & STAF */}
           <Link
             to="/admin/guru"
             onClick={() => setIsSidebarOpen(false)}
@@ -119,6 +120,7 @@ const AdminLayout = () => {
             </div>
           </Link>
 
+          {/* SERAGAM */}
           <Link
             to="/admin/seragam"
             onClick={() => setIsSidebarOpen(false)}
@@ -126,11 +128,11 @@ const AdminLayout = () => {
               "/admin/seragam",
             )}`}
           >
-            <Shirt size={20} />{" "}
-            {/* Jangan lupa import Shirt dari lucide-react */}
+            <Shirt size={20} />
             Kelola Seragam
           </Link>
 
+          {/* FASILITAS */}
           <Link
             to="/admin/fasilitas"
             onClick={() => setIsSidebarOpen(false)}
@@ -140,6 +142,18 @@ const AdminLayout = () => {
           >
             <Monitor size={20} />
             Fasilitas Sekolah
+          </Link>
+
+          {/* PROGRAM UNGGULAN (BARU DISINI) */}
+          <Link
+            to="/admin/program"
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive(
+              "/admin/program",
+            )}`}
+          >
+            <Layers size={20} />
+            Program Unggulan
           </Link>
 
           {/* BAGIAN AKUN */}

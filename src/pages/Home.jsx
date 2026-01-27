@@ -218,7 +218,9 @@ const Home = () => {
   });
 
   return (
-    <div ref={container} className="overflow-x-hidden font-sans">
+    // PERBAIKAN: Hapus 'overflow-x-hidden' disini.
+    // Kita biarkan 'body' yang handle overflow-x dari CSS global.
+    <div ref={container} className="w-full font-sans">
       {/* ==================== HERO SECTION ==================== */}
       <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/30 pt-24 pb-20 lg:pt-32 lg:pb-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">

@@ -10,6 +10,11 @@ import {
   PenTool,
 } from "lucide-react";
 
+// --- IMPORT ICON GAMBAR LO DISINI ---
+// Pastikan path-nya sesuai sama tempat lo simpen file gambarnya
+import tkjCustomIcon from "../../assets/icon-tkj2.png"; // Ganti nama file sesuai punya lo
+import dkvCustomIcon from "../../assets/icon-dkv2.png"; // Ganti nama file sesuai punya lo
+
 // --- GSAP IMPORTS ---
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -172,7 +177,7 @@ const Jurusan = () => {
               <div className="h-64 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
 
-                {/* Floating Icons (GSAP Animated) */}
+                {/* Floating Icons (GSAP Animated) - INI TETEP BAWAAN */}
                 <div className="float-icon-tkj-1 absolute -right-10 -bottom-10">
                   <Monitor
                     size={120}
@@ -184,9 +189,15 @@ const Jurusan = () => {
                 </div>
 
                 <div className="relative z-10 text-center">
+                  {/* --- ICON TENGAH TKJ (GANTI DISINI) --- */}
                   <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 text-white shadow-lg group-hover:rotate-12 transition-transform duration-500">
-                    <Monitor size={40} />
+                    <img
+                      src={tkjCustomIcon}
+                      alt="Logo TKJ"
+                      className="w-15 h-15 object-contain" // object-contain biar gambarnya ga gepeng
+                    />
                   </div>
+
                   <h2 className="text-3xl font-bold text-white tracking-wide">
                     TKJ
                   </h2>
@@ -234,7 +245,7 @@ const Jurusan = () => {
               <div className="h-64 bg-gradient-to-br from-purple-500 to-purple-700 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
 
-                {/* Floating Icons (GSAP Animated) */}
+                {/* Floating Icons (GSAP Animated) - INI TETEP BAWAAN */}
                 <div className="float-icon-dkv-1 absolute -left-10 -bottom-10">
                   <Palette
                     size={120}
@@ -246,9 +257,15 @@ const Jurusan = () => {
                 </div>
 
                 <div className="relative z-10 text-center">
+                  {/* --- ICON TENGAH DKV (GANTI DISINI) --- */}
                   <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 text-white shadow-lg group-hover:-rotate-12 transition-transform duration-500">
-                    <Palette size={40} />
+                    <img
+                      src={dkvCustomIcon}
+                      alt="Logo DKV"
+                      className="w-15 h-15 object-contain"
+                    />
                   </div>
+
                   <h2 className="text-3xl font-bold text-white tracking-wide">
                     DKV
                   </h2>

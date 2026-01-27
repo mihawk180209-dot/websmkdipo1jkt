@@ -1,5 +1,6 @@
+// src/components/MobileMenu.jsx
 import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom"; // <--- IMPORT PENTING
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import Dropdown from "./Dropdown";
@@ -13,18 +14,15 @@ const MobileMenu = ({ isOpen, onClose }) => {
   const timeline = useRef(null);
 
   useEffect(() => {
-    // Pastikan timeline dibuat dalam context agar bersih saat unmount
     let ctx = gsap.context(() => {
       timeline.current = gsap.timeline({ paused: true });
 
-      // 1. Overlay Fade In
       timeline.current.to(overlayRef.current, {
         autoAlpha: 1,
         duration: 0.3,
         ease: "power2.out",
       });
 
-      // 2. Menu Slide In
       timeline.current.to(
         menuRef.current,
         {
@@ -35,7 +33,6 @@ const MobileMenu = ({ isOpen, onClose }) => {
         "-=0.2",
       );
 
-      // 3. Header Animation
       timeline.current.from(
         ".mobile-header",
         {
@@ -47,7 +44,6 @@ const MobileMenu = ({ isOpen, onClose }) => {
         "-=0.3",
       );
 
-      // 4. Links Animation
       timeline.current.from(
         ".mobile-link-item",
         {
@@ -59,31 +55,31 @@ const MobileMenu = ({ isOpen, onClose }) => {
         },
         "-=0.2",
       );
-    }, containerRef); // Scope animation ke containerRef
+    }, containerRef);
 
     return () => ctx.revert();
   }, []);
 
-  // Kontrol Play/Reverse berdasarkan state isOpen
   useEffect(() => {
     if (timeline.current) {
       if (isOpen) {
         timeline.current.play();
-        // Mencegah scroll pada body saat menu terbuka
         document.body.style.overflow = "hidden";
       } else {
         timeline.current.reverse();
-        // Mengembalikan scroll saat menu tertutup
         document.body.style.overflow = "auto";
       }
     }
   }, [isOpen]);
 
-  // --- BAGIAN KUNCI: CREATE PORTAL ---
-  // Ini memindahkan rendering menu keluar dari Navbar, langsung ke Body
+  // --- PORTAL RENDER ---
   return createPortal(
-    <div ref={containerRef}>
-      {/* OVERLAY / BACKDROP */}
+    <div
+      ref={containerRef}
+      // Wrapper "invisible" agar tidak menggeser layout utama
+      className="absolute top-0 left-0 w-0 h-0 z-[9999]"
+    >
+      {/* OVERLAY */}
       <div
         ref={overlayRef}
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] invisible opacity-0"
@@ -91,12 +87,12 @@ const MobileMenu = ({ isOpen, onClose }) => {
         aria-hidden="true"
       />
 
-      {/* SIDEBAR MENU */}
+      {/* MENU CONTAINER */}
       <div
         ref={menuRef}
         className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-white shadow-2xl z-[10000] translate-x-full"
       >
-        {/* Header Menu */}
+        {/* Header */}
         <div className="mobile-header flex items-center justify-between p-4 border-b border-gray-100">
           <span className="text-lg font-bold text-primary">Menu</span>
           <button
@@ -107,13 +103,14 @@ const MobileMenu = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Scrollable Content */}
+        {/* Links */}
         <nav className="h-full overflow-y-auto pb-20 p-2">
           {navLinks
             .filter((item) => item.title !== "PPDB" && item.title !== "BKK")
             .map((item, idx) => (
               <div key={idx} className="mobile-link-item">
                 {item.submenu ? (
+                  // Pass 'closeMenu' ke Dropdown
                   <Dropdown item={item} isMobile={true} closeMenu={onClose} />
                 ) : (
                   <NavLink
@@ -134,7 +131,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
               </div>
             ))}
 
-          {/* LINK BKK */}
+          {/* BKK Link */}
           <div className="mobile-link-item">
             <a
               href="https://bkk-dipo.vercel.app/"
@@ -146,7 +143,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
             </a>
           </div>
 
-          {/* TOMBOL PPDB */}
+          {/* PPDB Button */}
           <div className="mobile-link-item mt-6 px-4">
             <a
               href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
@@ -161,7 +158,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
         </nav>
       </div>
     </div>,
-    document.body, // <--- Target Portal: Render langsung di <body>
+    document.body,
   );
 };
 
