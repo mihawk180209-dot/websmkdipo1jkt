@@ -14,7 +14,7 @@ const Seragam = () => {
   const [uniformData, setUniformData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. FETCH DATA DARI SUPABASE (LOGIC TETAP)
+  // 1. FETCH DATA DARI SUPABASE
   useEffect(() => {
     fetchUniforms();
   }, []);
@@ -33,75 +33,95 @@ const Seragam = () => {
     setLoading(false);
   };
 
-  // 2. GSAP ANIMATION & INTERACTION
+  // 2. GSAP ANIMATION (ANTI-GHOSTING / SAFE MODE)
   useLayoutEffect(() => {
+    // Tunggu loading kelar
     if (loading) return;
 
-    let ctx = gsap.context(() => {
-      ScrollTrigger.refresh();
+    // Delay 100ms biar DOM stabil sebelum animasi jalan
+    const timer = setTimeout(() => {
+      let ctx = gsap.context(() => {
+        // Refresh posisi trigger biar akurat
+        ScrollTrigger.refresh();
 
-      // A. HEADER ANIMATION (Style Baru)
-      const tlHeader = gsap.timeline();
+        // A. HEADER ANIMATION (Pakai fromTo biar pasti muncul)
+        const tlHeader = gsap.timeline();
 
-      // Blob floating
-      gsap.to(".header-blob", {
-        scale: 1.2,
-        rotation: 15,
-        x: 20,
-        y: 20,
-        duration: 8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+        // Blob floating
+        gsap.to(".header-blob", {
+          scale: 1.2,
+          rotation: 15,
+          x: 20,
+          y: 20,
+          duration: 8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
 
-      tlHeader.from(".anim-header", {
-        y: 40,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.15,
-        ease: "power3.out",
-      });
+        tlHeader.fromTo(
+          ".anim-header",
+          { y: 40, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+          },
+        );
 
-      // B. GRID ITEMS ANIMATION
-      gsap.from(".anim-card", {
-        y: 60,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "back.out(1.2)",
-        scrollTrigger: {
-          trigger: ".gallery-section",
-          start: "top 80%",
-        },
-      });
+        // B. GRID ITEMS ANIMATION (Batch Trigger)
+        // Cek dulu elemennya ada ga
+        if (document.querySelector(".gallery-section")) {
+          gsap.fromTo(
+            ".anim-card",
+            { y: 60, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.8,
+              stagger: 0.15,
+              ease: "back.out(1.2)",
+              scrollTrigger: {
+                trigger: ".gallery-section", // Trigger containernya
+                start: "top 85%", // Muncul pas masuk layar dikit
+              },
+            },
+          );
+        }
 
-      // C. NOTE SECTION
-      gsap.from(".anim-note", {
-        scale: 0.95,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".note-section",
-          start: "top 90%",
-        },
-      });
+        // C. NOTE SECTION
+        gsap.fromTo(
+          ".anim-note",
+          { scale: 0.95, autoAlpha: 0 },
+          {
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".note-section",
+              start: "top 90%",
+            },
+          },
+        );
 
-      // D. ICON PULSE
-      gsap.to(".info-icon-pulse", {
-        scale: 1.1,
-        duration: 1,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-    }, comp);
+        // D. ICON PULSE
+        gsap.to(".info-icon-pulse", {
+          scale: 1.1,
+          duration: 1,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      }, comp);
+    }, 100); // Timeout 100ms
 
-    return () => ctx.revert();
+    return () => clearTimeout(timer);
   }, [loading, uniformData]);
 
-  // --- INTERAKSI HOVER (GSAP - SEPERTI SEBELUMNYA) ---
+  // --- INTERAKSI HOVER ---
   const handleMouseEnter = (e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
@@ -109,22 +129,18 @@ const Seragam = () => {
     const icon = card.querySelector(".anim-icon");
     const badge = card.querySelector(".anim-badge");
 
-    // Card Lift & Shadow
+    // Card Lift
     gsap.to(card, {
       y: -10,
-      boxShadow: "0 20px 30px -10px rgba(249, 115, 22, 0.15)", // Orange shadow
-      borderColor: "#fdba74", // orange-300
+      boxShadow: "0 20px 30px -10px rgba(249, 115, 22, 0.15)",
+      borderColor: "#fdba74",
       duration: 0.4,
       ease: "power2.out",
     });
 
-    // Image Zoom
-    gsap.to(img, { scale: 1.1, duration: 0.6, ease: "power2.out" });
-
-    // Title & Icon Color
-    gsap.to([title, icon], { color: "#ea580c", duration: 0.3 }); // orange-600
-
-    // Badge Fill
+    // Zoom & Colors
+    gsap.to(img, { scale: 1.1, duration: 0.6 });
+    gsap.to([title, icon], { color: "#ea580c", duration: 0.3 });
     gsap.to(badge, {
       backgroundColor: "#f97316",
       color: "#fff",
@@ -143,13 +159,13 @@ const Seragam = () => {
     gsap.to(card, {
       y: 0,
       boxShadow: "none",
-      borderColor: "#f1f5f9", // slate-100
+      borderColor: "#f1f5f9",
       duration: 0.4,
       ease: "power2.out",
     });
-    gsap.to(img, { scale: 1, duration: 0.6, ease: "power2.out" });
-    gsap.to(title, { color: "#0f172a", duration: 0.3 }); // slate-900
-    gsap.to(icon, { color: "#cbd5e1", duration: 0.3 }); // slate-300
+    gsap.to(img, { scale: 1, duration: 0.6 });
+    gsap.to(title, { color: "#0f172a", duration: 0.3 });
+    gsap.to(icon, { color: "#cbd5e1", duration: 0.3 });
     gsap.to(badge, {
       backgroundColor: "#ffedd5",
       color: "#ea580c",
@@ -162,25 +178,24 @@ const Seragam = () => {
       ref={comp}
       className="min-h-screen bg-[#F8FAFC] font-sans overflow-x-hidden"
     >
-      {/* ==================== HEADER SECTION (Updated Theme) ==================== */}
+      {/* ==================== HEADER SECTION ==================== */}
       <div className="relative py-20 lg:py-24 overflow-hidden">
-        {/* Background Decoration */}
         <div className="header-blob absolute top-0 right-0 w-96 h-96 bg-orange-200 rounded-full blur-3xl opacity-30 translate-x-1/3 -translate-y-1/3"></div>
         <div className="absolute top-1/2 left-0 w-64 h-64 bg-slate-200 rounded-full blur-3xl opacity-30 -translate-x-1/2 -translate-y-1/2"></div>
 
         <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
-          <div className="anim-header inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-bold mb-6">
+          <div className="anim-header inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-bold mb-6 opacity-0">
             <Sparkles size={16} /> Tata Tertib
           </div>
 
-          <h1 className="anim-header text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+          <h1 className="anim-header text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight opacity-0">
             Seragam{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
               Sekolah
             </span>
           </h1>
 
-          <p className="anim-header text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="anim-header text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed opacity-0">
             Ketentuan penggunaan seragam di SMK Diponegoro 1 Jakarta untuk
             menanamkan kedisiplinan dan kerapian siswa.
           </p>
@@ -216,7 +231,7 @@ const Seragam = () => {
                     <img
                       src={item.image_url}
                       alt={item.title}
-                      className="anim-img w-full h-full object-cover" // Transisi dihandle GSAP
+                      className="anim-img w-full h-full object-cover"
                     />
 
                     {/* Gradient Overlay */}
@@ -249,10 +264,10 @@ const Seragam = () => {
             </div>
           )}
 
-          {/* ==================== NOTE SECTION (Updated Style) ==================== */}
+          {/* ==================== NOTE SECTION ==================== */}
           {!loading && (
             <div className="note-section mt-20">
-              <div className="anim-note bg-white border border-slate-100 rounded-3xl p-8 lg:p-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left shadow-sm relative overflow-hidden">
+              <div className="anim-note bg-white border border-slate-100 rounded-3xl p-8 lg:p-10 flex flex-col md:flex-row items-center gap-8 text-center md:text-left shadow-sm relative overflow-hidden opacity-0">
                 {/* Decoration bg */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
 
