@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
-import { ArrowRight, Calendar, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, Calendar, Loader2, Sparkles, Layers } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -15,6 +15,7 @@ const ProgramUnggulan = () => {
   // Ref untuk scoping animasi
   const containerRef = useRef(null);
 
+  // 1. FETCH DATA
   useEffect(() => {
     fetchPrograms();
   }, []);
@@ -27,7 +28,7 @@ const ProgramUnggulan = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setPrograms(data);
+      setPrograms(data || []);
     } catch (error) {
       console.error("Error fetching programs:", error.message);
     } finally {
@@ -35,43 +36,65 @@ const ProgramUnggulan = () => {
     }
   };
 
-  // --- GSAP ANIMATION SETUP ---
+  // 2. GSAP ANIMATION (SAFE MODE / ANTI-GHOSTING)
   useLayoutEffect(() => {
     if (loading) return; // Tunggu data ready
 
-    // Context cleaning otomatis
-    let ctx = gsap.context(() => {
-      // 1. Animasi Header (Judul, Badge, Deskripsi)
-      gsap.from(".anim-header", {
-        y: 40,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".header-container",
-          start: "top 85%",
-        },
-      });
+    // Delay 100ms agar DOM stabil
+    const timer = setTimeout(() => {
+      let ctx = gsap.context(() => {
+        ScrollTrigger.refresh();
 
-      // 2. Animasi Kartu Muncul (Staggered)
-      gsap.from(".anim-card", {
-        y: 60,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15, // Jeda antar kartu
-        ease: "back.out(1.2)", // Efek membal sedikit
-        scrollTrigger: {
-          trigger: ".cards-grid",
-          start: "top 80%",
-        },
-      });
-    }, containerRef);
+        // A. Background Blob
+        gsap.to(".header-blob", {
+          scale: 1.2,
+          rotation: 15,
+          x: 20,
+          y: 20,
+          duration: 8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
 
-    return () => ctx.revert();
+        // B. Header Animation (Judul, Badge, Deskripsi)
+        gsap.fromTo(
+          ".anim-header",
+          { y: 30, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power3.out",
+          },
+        );
+
+        // C. Kartu Muncul (Staggered Batch)
+        if (document.querySelector(".cards-grid")) {
+          gsap.fromTo(
+            ".anim-card",
+            { y: 50, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.6,
+              stagger: 0.1, // Jeda antar kartu
+              ease: "back.out(1.2)", // Efek membal sedikit
+              scrollTrigger: {
+                trigger: ".cards-grid",
+                start: "top 85%", // Trigger pas masuk layar
+              },
+            },
+          );
+        }
+      }, containerRef);
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [loading]);
 
-  // --- INTERAKSI HOVER (PENGGANTI CSS) ---
+  // --- INTERAKSI HOVER (GSAP) ---
   const handleMouseEnter = (e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
@@ -84,7 +107,8 @@ const ProgramUnggulan = () => {
     gsap.to(card, {
       y: -10,
       boxShadow: "0 20px 30px -10px rgba(249, 115, 22, 0.15)", // Orange shadow halus
-      duration: 0.4,
+      borderColor: "#fdba74", // orange-300
+      duration: 0.3,
       ease: "power2.out",
     });
 
@@ -95,10 +119,10 @@ const ProgramUnggulan = () => {
       ease: "power2.out",
     });
 
-    // 3. Overlay Darken (biar teks makin jelas)
+    // 3. Overlay Darken
     gsap.to(overlay, {
-      opacity: 0.4, // dari 0.6 ke 0.4 (lebih terang dikit atau gelap sesuai selera)
-      duration: 0.4,
+      opacity: 0.4,
+      duration: 0.3,
     });
 
     // 4. Title Color
@@ -111,6 +135,7 @@ const ProgramUnggulan = () => {
     gsap.to(btn, {
       backgroundColor: "#f97316", // orange-500
       color: "#ffffff",
+      borderColor: "#f97316",
       duration: 0.3,
     });
 
@@ -134,48 +159,53 @@ const ProgramUnggulan = () => {
     gsap.to(card, {
       y: 0,
       boxShadow: "none",
-      duration: 0.4,
+      borderColor: "#f1f5f9", // slate-100
+      duration: 0.3,
       ease: "power2.out",
     });
     gsap.to(img, { scale: 1, duration: 0.6, ease: "power2.out" });
-    gsap.to(overlay, { opacity: 0.6, duration: 0.4 });
+    gsap.to(overlay, { opacity: 0.6, duration: 0.3 });
     gsap.to(title, { color: "#0f172a", duration: 0.3 }); // slate-900
     gsap.to(btn, {
-      backgroundColor: "#f8fafc",
-      color: "#334155",
+      backgroundColor: "#f8fafc", // slate-50
+      color: "#334155", // slate-700
+      borderColor: "transparent",
       duration: 0.3,
-    }); // slate-50 text-slate-700
+    });
     gsap.to(arrow, { x: 0, duration: 0.3 });
   };
 
   return (
-    <section ref={containerRef} className="py-24 bg-[#F8FAFC]">
-      <div className="container mx-auto px-4">
-        {/* Header Section */}
-        <div className="header-container text-center mb-16 relative">
-          <div className="anim-header absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-orange-200 rounded-full blur-3xl opacity-50"></div>
+    <section ref={containerRef} className="min-h-screen bg-[#F8FAFC] pb-24">
+      {/* Header Section (Unified Theme) */}
+      <div className="relative py-20 lg:py-24 overflow-hidden bg-white border-b border-slate-100 mb-16">
+        <div className="header-blob absolute top-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-50 translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-slate-100 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3"></div>
 
-          <div className="anim-header inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 text-orange-600 text-sm font-bold mb-4">
-            <Sparkles size={16} /> SMK Diponegoro 1 Jakarta
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="anim-header inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-sm font-bold mb-6 opacity-0">
+            <Sparkles size={16} /> Kompetensi Keahlian
           </div>
 
-          <h2 className="anim-header text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+          <h2 className="anim-header text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight opacity-0">
             Program{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
               Unggulan
             </span>
           </h2>
 
-          <p className="anim-header text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
+          <p className="anim-header text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed opacity-0">
             Menyiapkan talenta digital masa depan dengan kurikulum berbasis
-            industri dan teknologi terkini.
+            industri dan teknologi terkini di SMK Diponegoro 1 Jakarta.
           </p>
         </div>
+      </div>
 
+      <div className="container mx-auto px-4 lg:px-8">
         {/* Loading State */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-            <Loader2 className="animate-spin mb-4" size={40} />
+            <Loader2 className="animate-spin mb-4 text-orange-500" size={40} />
             <p className="font-medium">Memuat program terbaik...</p>
           </div>
         ) : (
@@ -184,31 +214,31 @@ const ProgramUnggulan = () => {
             {programs.map((program) => (
               <div
                 key={program.id}
-                // HAPUS class hover/transition bawaan CSS, ganti dengan logic JS
-                className="anim-card bg-white rounded-3xl overflow-hidden border border-slate-100 flex flex-col h-full cursor-pointer"
+                className="anim-card bg-white rounded-3xl overflow-hidden border border-slate-100 flex flex-col h-full cursor-default opacity-0"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
               >
                 {/* Image Wrapper */}
-                <div className="relative h-60 overflow-hidden">
+                <div className="relative h-64 overflow-hidden bg-slate-100">
                   <img
                     src={program.image_url || "https://placehold.co/600x400"}
                     alt={program.title}
-                    className="anim-img w-full h-full object-cover" // Hapus transition CSS
+                    className="anim-img w-full h-full object-cover"
                   />
-                  <div className="anim-overlay absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                  {/* Overlay Gradient */}
+                  <div className="anim-overlay absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity" />
 
                   {/* Badge Floating */}
                   <div className="absolute top-4 left-4 z-10">
-                    <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-orange-600 text-xs font-bold rounded-lg shadow-sm">
-                      Program Unggulan
+                    <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-orange-600 text-xs font-bold rounded-lg shadow-sm flex items-center gap-2">
+                      <Layers size={12} /> Program Unggulan
                     </span>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-8 flex flex-col flex-grow">
-                  <div className="flex items-center gap-2 text-slate-400 text-xs font-medium mb-3">
+                  <div className="flex items-center gap-2 text-slate-400 text-xs font-medium mb-4">
                     <Calendar size={14} />
                     {new Date(program.created_at).toLocaleDateString("id-ID", {
                       year: "numeric",
@@ -217,7 +247,7 @@ const ProgramUnggulan = () => {
                     })}
                   </div>
 
-                  <h3 className="anim-title text-xl font-bold text-slate-900 mb-3 line-clamp-2">
+                  <h3 className="anim-title text-xl font-bold text-slate-900 mb-3 line-clamp-2 transition-colors">
                     {program.title}
                   </h3>
 
@@ -227,14 +257,10 @@ const ProgramUnggulan = () => {
 
                   <Link
                     to={`/program/${program.id}`}
-                    // Hapus hover CSS di sini
-                    className="anim-btn inline-flex items-center justify-between w-full px-5 py-3 bg-slate-50 text-slate-700 font-semibold rounded-xl"
+                    className="anim-btn inline-flex items-center justify-between w-full px-5 py-3 bg-slate-50 text-slate-600 font-bold rounded-xl transition-all border border-transparent"
                   >
                     <span>Baca Selengkapnya</span>
-                    <ArrowRight
-                      size={18}
-                      className="anim-arrow" // Hapus transform CSS
-                    />
+                    <ArrowRight size={18} className="anim-arrow" />
                   </Link>
                 </div>
               </div>

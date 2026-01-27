@@ -30,7 +30,7 @@ const DetailArtikel = () => {
   if (loading)
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
       </div>
     );
 
@@ -40,7 +40,7 @@ const DetailArtikel = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Artikel Tidak Ditemukan
         </h2>
-        <Link to="/artikel" className="text-teal-600 hover:underline">
+        <Link to="/artikel" className="text-orange-600 hover:underline">
           Kembali ke Beranda
         </Link>
       </div>
@@ -53,7 +53,7 @@ const DetailArtikel = () => {
         <div className="container mx-auto px-4 h-16 flex items-center">
           <Link
             to="/artikel"
-            className="flex items-center gap-2 text-gray-500 hover:text-teal-600 transition font-medium"
+            className="flex items-center gap-2 text-gray-500 hover:text-orange-700 transition font-medium"
           >
             <ArrowLeft size={20} />
             <span className="hidden sm:inline">Kembali ke Daftar Artikel</span>
@@ -65,7 +65,7 @@ const DetailArtikel = () => {
         {/* Meta Header */}
         <header className="mb-8 text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-sm font-bold tracking-wide uppercase flex items-center gap-1">
+            <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-sm font-bold tracking-wide uppercase flex items-center gap-1">
               <Tag size={14} /> {article.category}
             </span>
           </div>
@@ -98,13 +98,13 @@ const DetailArtikel = () => {
             <img
               src={article.image_url}
               alt={article.title}
-              className="w-full h-auto object-cover max-h-[500px]"
+              className="w-full h-auto object-cover max-h-[450px]"
             />
           </div>
         )}
 
         {/* Content Body */}
-        <div className="prose prose-lg prose-teal mx-auto text-gray-700 leading-loose">
+        <div className="prose prose-lg prose-orange mx-auto text-gray-700 leading-loose">
           {/* Menggunakan white-space-pre-wrap untuk menjaga paragraf */}
           {article.content.split("\n").map(
             (paragraph, idx) =>
@@ -112,7 +112,7 @@ const DetailArtikel = () => {
                 <p key={idx} className="mb-6 text-lg">
                   {paragraph}
                 </p>
-              )
+              ),
           )}
         </div>
       </article>
@@ -124,7 +124,7 @@ const DetailArtikel = () => {
             Suka artikel ini?
           </h3>
           <Link to="/artikel">
-            <button className="px-6 py-3 bg-white border border-gray-300 rounded-full text-gray-700 font-semibold hover:border-teal-600 hover:text-teal-600 transition shadow-sm">
+            <button className="px-6 py-3 bg-white border border-gray-300 rounded-full text-gray-700 font-semibold hover:border-orange-600 hover:text-orange-600 transition shadow-sm">
               Baca Artikel Lainnya
             </button>
           </Link>

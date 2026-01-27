@@ -1,26 +1,32 @@
-import { useState, useEffect } from "react";
-import { Search, User, Loader2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "../../lib/supabase"; // Sesuaikan path ini
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { Search, User, Loader2, Sparkles, GraduationCap } from "lucide-react";
+import { supabase } from "../../lib/supabase"; // Sesuaikan path
+
+// --- GSAP IMPORTS ---
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// Register Plugin
+gsap.registerPlugin(ScrollTrigger);
 
 const Guru = () => {
+  const comp = useRef(null);
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Semua");
 
-  // --- 1. FETCH DATA DARI SUPABASE ---
+  // --- 1. FETCH DATA ---
   useEffect(() => {
     fetchTeachers();
   }, []);
 
   const fetchTeachers = async () => {
     setLoading(true);
-    // Ambil data dari tabel 'teachers' (sesuaikan nama tabel kakak)
     const { data, error } = await supabase
       .from("teachers")
       .select("*")
-      .order("id", { ascending: true }); // Bisa diganti order by name
+      .order("id", { ascending: true });
 
     if (error) {
       console.error("Error fetching teachers:", error);
@@ -32,192 +38,304 @@ const Guru = () => {
 
   // --- 2. FILTER LOGIC ---
   const filteredData = teachers.filter((item) => {
-    // Search (Case insensitive)
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.role.toLowerCase().includes(searchTerm.toLowerCase());
-
-    // Tab Category Filter
-    // Pastikan di database kolom 'category' isinya: "Pimpinan", "Guru", atau "Staf"
     const matchesTab = activeTab === "Semua" || item.category === activeTab;
-
     return matchesSearch && matchesTab;
   });
 
+  // --- 3. GSAP ANIMATION (SAFE MODE / ANTI-GHOSTING) ---
+  useLayoutEffect(() => {
+    // Delay 100ms agar DOM stabil sebelum animasi jalan
+    const timer = setTimeout(() => {
+      let ctx = gsap.context(() => {
+        ScrollTrigger.refresh();
+
+        // A. Background Blob Animation
+        gsap.to(".header-blob", {
+          scale: 1.2,
+          rotation: 15,
+          x: 20,
+          y: 20,
+          duration: 8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+
+        // B. Header Text (Judul & Desc)
+        gsap.fromTo(
+          ".anim-header",
+          { y: 30, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power3.out",
+          },
+        );
+
+        // C. Toolbar (Search & Filter)
+        gsap.fromTo(
+          ".anim-toolbar",
+          { y: 20, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.6,
+            delay: 0.4, // Muncul setelah header
+            ease: "power2.out",
+          },
+        );
+
+        // D. Grid Cards (Jalan setiap filter berubah)
+        if (!loading) {
+          gsap.fromTo(
+            ".anim-card",
+            { y: 30, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.5,
+              stagger: 0.05, // Stagger cepat biar responsif
+              ease: "back.out(1.2)",
+              overwrite: "auto", // Mencegah konflik animasi saat filter cepat
+            },
+          );
+
+          // Empty State
+          if (filteredData.length === 0) {
+            gsap.fromTo(
+              ".anim-empty",
+              { scale: 0.9, autoAlpha: 0 },
+              { scale: 1, autoAlpha: 1, duration: 0.4 },
+            );
+          }
+        }
+      }, comp);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [loading, filteredData, activeTab]); // Dependencies penting!
+
+  // --- INTERACTION HOVER (Sesuai Tema Sejarah) ---
+  const handleMouseEnter = (e) => {
+    const card = e.currentTarget;
+    const imgWrapper = card.querySelector(".img-wrapper");
+    const name = card.querySelector(".anim-name");
+
+    // Card Lift
+    gsap.to(card, {
+      y: -8,
+      boxShadow: "0 20px 30px -10px rgba(249, 115, 22, 0.15)", // Orange shadow
+      borderColor: "#fdba74", // orange-300
+      duration: 0.3,
+      ease: "power2.out",
+    });
+
+    // Image Border
+    gsap.to(imgWrapper, {
+      borderColor: "#f97316", // orange-500
+      scale: 1.05,
+      duration: 0.4,
+    });
+
+    // Text Color
+    gsap.to(name, { color: "#ea580c", duration: 0.3 });
+  };
+
+  const handleMouseLeave = (e) => {
+    const card = e.currentTarget;
+    const imgWrapper = card.querySelector(".img-wrapper");
+    const name = card.querySelector(".anim-name");
+
+    // Reset
+    gsap.to(card, {
+      y: 0,
+      boxShadow: "none",
+      borderColor: "#f1f5f9", // slate-100
+      duration: 0.3,
+      ease: "power2.out",
+    });
+
+    gsap.to(imgWrapper, {
+      borderColor: "#e2e8f0", // slate-200
+      scale: 1,
+      duration: 0.4,
+    });
+
+    gsap.to(name, { color: "#0f172a", duration: 0.3 }); // slate-900
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 font-sans pb-20">
-      {/* HERO HEADER */}
-      <div className="bg-white pt-24 pb-12 border-b border-gray-100 px-6">
-        <motion.div
-          className="container mx-auto text-center"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <span className="inline-block py-1 px-3 rounded-full bg-orange-100 text-orange-600 text-sm font-bold mb-4">
-            SDM Unggul
-          </span>
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Guru & Staf
+    <div
+      ref={comp}
+      className="min-h-screen bg-[#F8FAFC] font-sans pb-24 overflow-x-hidden"
+    >
+      {/* ==================== HERO HEADER (Tema Sejarah Style) ==================== */}
+      <div className="relative py-20 lg:py-24 overflow-hidden bg-white border-b border-slate-100">
+        {/* Background Decoration */}
+        <div className="header-blob absolute top-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-50 translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-slate-100 rounded-full blur-3xl -translate-x-1/2 translate-y-1/3"></div>
+
+        <div className="container mx-auto px-4 lg:px-8 relative z-10 text-center">
+          {/* Badge */}
+          <div className="anim-header flex justify-center mb-6">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-sm font-bold border border-orange-100">
+              <Sparkles size={16} /> SDM Unggul & Berkarakter
+            </span>
+          </div>
+
+          <h1 className="anim-header text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
+            Guru &{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+              Tenaga Pendidik
+            </span>
           </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+
+          <p className="anim-header text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
             Berkenalan dengan tenaga pendidik dan kependidikan profesional yang
-            siap membimbing siswa SMK Diponegoro 1 Jakarta.
+            siap membimbing siswa SMK Diponegoro 1 Jakarta menuju masa depan
+            gemilang.
           </p>
 
           {/* SEARCH & FILTER BAR */}
-          <motion.div
-            className="mt-10 max-w-4xl mx-auto flex flex-col md:flex-row gap-4 items-center justify-between"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            {/* Tabs Filter */}
-            <div className="flex p-1 bg-gray-100 rounded-lg overflow-x-auto max-w-full">
-              {["Semua", "Pimpinan", "Guru", "Staf"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all relative whitespace-nowrap ${
-                    activeTab === tab
-                      ? "text-orange-600 shadow-sm"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {activeTab === tab && (
-                    <motion.div
-                      layoutId="activeTab"
-                      className="absolute inset-0 bg-white rounded-md shadow-sm"
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                  <span className="relative z-10">{tab}</span>
-                </button>
-              ))}
-            </div>
+          <div className="anim-toolbar mt-12 max-w-4xl mx-auto">
+            <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+              {/* Tabs */}
+              <div className="flex p-1 bg-slate-50 rounded-xl overflow-x-auto max-w-full no-scrollbar w-full md:w-auto">
+                {["Semua", "Pimpinan", "Guru", "Staf"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={`px-4 py-2 text-sm font-bold rounded-lg transition-all whitespace-nowrap flex-1 md:flex-none ${
+                      activeTab === tab
+                        ? "bg-white text-orange-600 shadow-sm ring-1 ring-slate-100"
+                        : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
 
-            {/* Search Input */}
-            <div className="relative w-full md:w-64">
-              <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-              <input
-                type="text"
-                placeholder="Cari nama atau mapel..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all"
-              />
+              {/* Search */}
+              <div className="relative w-full md:w-72 pr-2">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  placeholder="Cari nama atau jabatan..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-slate-700 placeholder-slate-400 transition-all"
+                />
+              </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
-      {/* GRID DISPLAY */}
-      <section className="py-16 px-6">
-        <div className="container mx-auto">
+      {/* ==================== GRID DISPLAY ==================== */}
+      <section className="py-16 px-4 lg:px-8">
+        <div className="container mx-auto max-w-7xl">
           {/* LOADING STATE */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-64">
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
               <Loader2
-                className="animate-spin text-orange-500 mb-4"
+                className="animate-spin mb-4 text-orange-500"
                 size={40}
               />
-              <p className="text-gray-500 font-medium">Memuat Data Guru...</p>
+              <p className="font-medium">Memuat Data Guru...</p>
             </div>
           ) : (
-            <motion.div
-              layout
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8"
-            >
-              <AnimatePresence mode="popLayout">
-                {filteredData.length > 0 ? (
-                  filteredData.map((item) => (
-                    <motion.div
-                      layout
-                      key={item.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      transition={{ duration: 0.3 }}
-                      whileHover={{ y: -5 }}
-                      viewport={{ once: true }}
-                      className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300 group flex flex-col items-center text-center cursor-default"
-                    >
-                      {/* Image Container */}
-                      <div className="relative mb-6">
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-300 blur opacity-40 group-hover:opacity-70 transition-opacity"></div>
-                        <div className="w-32 h-32 rounded-full p-1 bg-white relative z-10">
-                          <img
-                            src={
-                              item.image_url ||
-                              "https://via.placeholder.com/150?text=No+Image"
-                            }
-                            alt={item.name}
-                            className="w-full h-full rounded-full object-cover border-2 border-gray-100 group-hover:border-orange-500 transition-colors"
-                          />
-                        </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 min-h-[400px]">
+              {filteredData.length > 0 ? (
+                filteredData.map((item) => (
+                  <div
+                    key={item.id}
+                    className="anim-card bg-white rounded-3xl p-6 border border-slate-100 cursor-default group flex flex-col items-center text-center opacity-0"
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    {/* Image Container */}
+                    <div className="relative mb-6">
+                      {/* Glow Back */}
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-400 to-red-400 blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
 
-                        {/* Badge Category */}
-                        <span
-                          className={`absolute bottom-0 right-0 px-3 py-1 text-xs font-bold text-white rounded-full z-20 border-2 border-white
-                            ${
-                              item.category === "Pimpinan"
-                                ? "bg-purple-500"
-                                : item.category === "Guru"
-                                  ? "bg-orange-500"
-                                  : "bg-gray-500"
-                            }
-                          `}
-                        >
-                          {item.category}
-                        </span>
+                      {/* Image Wrapper */}
+                      <div className="img-wrapper w-32 h-32 rounded-full p-1.5 bg-white border-2 border-slate-200 relative z-10 transition-all duration-300">
+                        <img
+                          src={
+                            item.image_url ||
+                            "https://via.placeholder.com/150?text=No+Image"
+                          }
+                          alt={item.name}
+                          className="w-full h-full rounded-full object-cover"
+                        />
                       </div>
 
-                      {/* Text Info */}
-                      <h3
-                        className="text-lg font-bold text-gray-900 group-hover:text-orange-600 transition-colors line-clamp-1 w-full"
-                        title={item.name}
+                      {/* Badge Category */}
+                      <span
+                        className={`absolute bottom-0 right-0 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider rounded-full z-20 border-2 border-white shadow-sm
+                          ${
+                            item.category === "Pimpinan"
+                              ? "bg-violet-500"
+                              : item.category === "Guru"
+                                ? "bg-orange-500"
+                                : "bg-slate-500"
+                          }
+                        `}
                       >
-                        {item.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 font-medium mt-1 mb-4 h-10 flex items-center justify-center line-clamp-2 w-full">
+                        {item.category}
+                      </span>
+                    </div>
+
+                    {/* Text Info */}
+                    <h3
+                      className="anim-name text-lg font-bold text-slate-900 transition-colors line-clamp-1 w-full"
+                      title={item.name}
+                    >
+                      {item.name}
+                    </h3>
+
+                    <div className="mt-2 mb-6 h-10 w-full flex items-center justify-center">
+                      <p className="text-sm text-slate-500 font-medium bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 line-clamp-2">
                         {item.role}
                       </p>
-
-                      {/* Button Profile */}
-                      <button className="mt-auto text-sm font-bold text-orange-600 bg-orange-50 hover:bg-orange-600 hover:text-white px-6 py-2 rounded-full transition-all w-full opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300">
-                        Lihat Profil
-                      </button>
-                    </motion.div>
-                  ))
-                ) : (
-                  // Empty State
-                  <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="col-span-full text-center py-20"
-                  >
-                    <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-                      <User size={40} className="text-gray-400" />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800">
-                      Tidak ditemukan
-                    </h3>
-                    <p className="text-gray-500">
-                      Coba cari dengan kata kunci lain.
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+
+                    {/* Button Profile */}
+                    <button className="mt-auto w-full py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all flex items-center justify-center gap-2 group/btn">
+                      <GraduationCap size={16} />
+                      Lihat Profil
+                    </button>
+                  </div>
+                ))
+              ) : (
+                // Empty State
+                <div className="anim-empty col-span-full text-center py-20 opacity-0">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-full mb-6">
+                    <User size={40} className="text-slate-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">
+                    Tidak ditemukan
+                  </h3>
+                  <p className="text-slate-500 max-w-md mx-auto">
+                    Maaf, kami tidak menemukan data yang cocok dengan kata kunci
+                    "
+                    <span className="font-semibold text-orange-600">
+                      {searchTerm}
+                    </span>
+                    ". Coba gunakan kata kunci lain.
+                  </p>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </section>

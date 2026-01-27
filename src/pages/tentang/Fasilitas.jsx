@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import {
   Wifi,
   Monitor,
@@ -7,8 +7,11 @@ import {
   Zap,
   Shield,
   Loader2,
+  Sparkles,
+  Layers,
+  Info,
 } from "lucide-react";
-import { supabase } from "../../lib/supabase"; // Pastikan path benar
+import { supabase } from "../../lib/supabase";
 
 // --- GSAP IMPORTS ---
 import gsap from "gsap";
@@ -22,13 +25,12 @@ const Fasilitas = () => {
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 1. FETCH DATA DARI SUPABASE
+  // 1. FETCH DATA
   useEffect(() => {
     fetchFacilities();
   }, []);
 
   const fetchFacilities = async () => {
-    // Asumsi nama tabel 'facilities'
     const { data, error } = await supabase
       .from("facilities")
       .select("*")
@@ -42,44 +44,32 @@ const Fasilitas = () => {
     setLoading(false);
   };
 
-  // 2. GSAP ANIMATION (Jalan setelah data ada)
+  // 2. GSAP ANIMATION: HEADER & STATIC UI (Jalan Langsung, Gak Nunggu Data)
   useLayoutEffect(() => {
-    // Jangan jalankan animasi jika masih loading atau data kosong
-    if (loading || facilities.length === 0) return;
-
     let ctx = gsap.context(() => {
-      ScrollTrigger.refresh(); // Refresh posisi trigger
-
-      // A. HEADER ANIMATION
-      const tlHeader = gsap.timeline();
-
+      // Background Blob
       gsap.to(".header-blob", {
+        scale: 1.2,
+        rotation: 15,
+        x: 20,
         y: 20,
-        x: 10,
-        scale: 1.1,
-        duration: 4,
+        duration: 8,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut",
       });
 
-      tlHeader
-        .fromTo(
-          ".header-title",
-          { y: -30, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
-        )
-        .fromTo(
-          ".header-desc",
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
-          "-=0.5",
-        );
+      // Header Text (Pakai fromTo biar pasti)
+      gsap.fromTo(
+        ".anim-header",
+        { y: 30, autoAlpha: 0 },
+        { y: 0, autoAlpha: 1, duration: 1, stagger: 0.1, ease: "power3.out" },
+      );
 
-      // B. FEATURE ICONS BAR
+      // Feature Icons
       gsap.fromTo(
         ".feature-item",
-        { scale: 0, autoAlpha: 0 },
+        { scale: 0.8, autoAlpha: 0 },
         {
           scale: 1,
           autoAlpha: 1,
@@ -88,73 +78,130 @@ const Fasilitas = () => {
           ease: "back.out(1.7)",
           scrollTrigger: {
             trigger: ".feature-bar",
-            start: "top 85%",
+            start: "top 95%",
           },
         },
       );
-
-      // C. GALLERY SECTION (Animasi Grid)
-      gsap.fromTo(
-        ".facility-card",
-        { y: 60, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".gallery-grid",
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
-
-      // D. ADDITIONAL INFO CARD
-      gsap.fromTo(
-        ".info-card",
-        { y: 50, autoAlpha: 0, scale: 0.95 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          scale: 1,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".info-card",
-            start: "top 90%",
-          },
-        },
-      );
-
-      // E. BACKGROUND ICON SPIN
-      gsap.to(".bg-icon-spin", {
-        rotation: 360,
-        duration: 20,
-        repeat: -1,
-        ease: "linear",
-      });
     }, comp);
 
     return () => ctx.revert();
-  }, [loading, facilities]); // Dependency array wajib ada!
+  }, []); // Dependency kosong = Jalan sekali pas mount
+
+  // 3. GSAP ANIMATION: DYNAMIC CARDS (Jalan Setelah Data Ready)
+  useLayoutEffect(() => {
+    if (loading) return; // Skip kalau masih loading
+
+    // Timeout dikit buat mastiin layout udah render sempurna
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh(); // Refresh trigger layout baru
+
+      let ctx = gsap.context(() => {
+        // Gallery Grid
+        if (document.querySelector(".gallery-grid")) {
+          gsap.fromTo(
+            ".anim-card",
+            { y: 50, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.6,
+              stagger: 0.1,
+              ease: "power2.out",
+              scrollTrigger: {
+                trigger: ".gallery-grid",
+                start: "top 85%",
+              },
+            },
+          );
+        }
+
+        // Info Section
+        gsap.fromTo(
+          ".anim-info",
+          { scale: 0.95, autoAlpha: 0 },
+          {
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".info-section",
+              start: "top 90%",
+            },
+          },
+        );
+
+        // BG Icon Spin
+        gsap.to(".bg-icon-spin", {
+          rotation: 360,
+          duration: 30,
+          repeat: -1,
+          ease: "linear",
+        });
+      }, comp);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [loading, facilities]); // Jalan ulang kalau data berubah
+
+  // --- INTERACTION HOVER ---
+  const handleMouseEnter = (e) => {
+    const card = e.currentTarget;
+    const img = card.querySelector(".anim-img");
+    const title = card.querySelector(".anim-title");
+
+    gsap.to(card, {
+      y: -10,
+      boxShadow: "0 20px 30px -10px rgba(249, 115, 22, 0.15)",
+      borderColor: "#fdba74",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+
+    gsap.to(img, { scale: 1.1, duration: 0.5 });
+    gsap.to(title, { color: "#ea580c", duration: 0.3 });
+  };
+
+  const handleMouseLeave = (e) => {
+    const card = e.currentTarget;
+    const img = card.querySelector(".anim-img");
+    const title = card.querySelector(".anim-title");
+
+    gsap.to(card, {
+      y: 0,
+      boxShadow: "none",
+      borderColor: "#f1f5f9",
+      duration: 0.3,
+      ease: "power2.out",
+    });
+
+    gsap.to(img, { scale: 1, duration: 0.5 });
+    gsap.to(title, { color: "#1f2937", duration: 0.3 });
+  };
 
   return (
     <div
       ref={comp}
-      className="min-h-screen bg-gray-50 font-sans overflow-x-hidden"
+      className="min-h-screen bg-[#F8FAFC] font-sans overflow-x-hidden"
     >
       {/* ==================== HEADER SECTION ==================== */}
-      <div className="bg-white py-16 lg:py-20 border-b border-gray-100 relative overflow-hidden">
-        {/* Background Decoration */}
-        <div className="header-blob absolute top-0 right-0 w-64 h-64 bg-orange-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-1/2 -translate-y-1/2"></div>
+      <div className="relative py-20 lg:py-24 overflow-hidden bg-white border-b border-slate-100">
+        <div className="header-blob absolute top-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-50 translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-slate-100 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3"></div>
 
         <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
-          <h1 className="header-title text-4xl lg:text-5xl font-bold text-gray-900 mb-4 invisible">
-            Fasilitas Sekolah
+          <div className="anim-header inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-sm font-bold mb-6 opacity-0">
+            <Sparkles size={16} /> Sarana Prasarana
+          </div>
+
+          <h1 className="anim-header text-4xl lg:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight opacity-0">
+            Fasilitas{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+              Sekolah
+            </span>
           </h1>
-          <p className="header-desc text-gray-600 text-lg max-w-2xl mx-auto invisible">
+
+          <p className="anim-header text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed opacity-0">
             Sarana dan prasarana modern untuk mendukung kenyamanan belajar serta
             pengembangan bakat siswa SMK Diponegoro 1 Jakarta.
           </p>
@@ -162,105 +209,97 @@ const Fasilitas = () => {
       </div>
 
       {/* ==================== FEATURE ICONS BAR ==================== */}
-      <div className="feature-bar bg-orange-600 py-8 shadow-lg relative -mt-8 mx-4 lg:mx-auto max-w-5xl rounded-xl z-20">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-white text-center">
-          {/* Feature 1 */}
-          <div className="feature-item flex flex-col items-center gap-2 border-r border-orange-400/50 last:border-0 group invisible">
-            <div>
-              <Wifi
-                size={28}
-                className="group-hover:scale-110 transition-transform duration-300"
-              />
+      <div className="feature-bar relative container mx-auto px-4 -mt-10 z-20">
+        <div className="bg-orange-600 rounded-2xl shadow-xl shadow-orange-200 py-8 px-4 lg:px-12 max-w-5xl mx-auto text-white">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-x divide-orange-400/30">
+            {/* Feature 1 */}
+            <div className="feature-item flex flex-col items-center gap-3 group px-2 opacity-0">
+              <div className="p-3 bg-orange-500 rounded-xl group-hover:bg-white group-hover:text-orange-600 transition-colors duration-300 shadow-sm">
+                <Wifi size={24} />
+              </div>
+              <span className="font-semibold text-sm md:text-base">
+                Free WiFi Zone
+              </span>
             </div>
-            <span className="font-semibold text-sm md:text-base">
-              Free WiFi Zone
-            </span>
-          </div>
-          {/* Feature 2 */}
-          <div className="feature-item flex flex-col items-center gap-2 border-r border-orange-400/50 last:border-0 group invisible">
-            <div>
-              <Monitor
-                size={28}
-                className="group-hover:scale-110 transition-transform duration-300"
-              />
+            {/* Feature 2 */}
+            <div className="feature-item flex flex-col items-center gap-3 group px-2 opacity-0">
+              <div className="p-3 bg-orange-500 rounded-xl group-hover:bg-white group-hover:text-orange-600 transition-colors duration-300 shadow-sm">
+                <Monitor size={24} />
+              </div>
+              <span className="font-semibold text-sm md:text-base">
+                Full AC Lab
+              </span>
             </div>
-            <span className="font-semibold text-sm md:text-base">
-              Full AC Lab
-            </span>
-          </div>
-          {/* Feature 3 */}
-          <div className="feature-item flex flex-col items-center gap-2 border-r border-orange-400/50 last:border-0 group invisible">
-            <div>
-              <Shield
-                size={28}
-                className="group-hover:scale-110 transition-transform duration-300"
-              />
+            {/* Feature 3 */}
+            <div className="feature-item flex flex-col items-center gap-3 group px-2 opacity-0">
+              <div className="p-3 bg-orange-500 rounded-xl group-hover:bg-white group-hover:text-orange-600 transition-colors duration-300 shadow-sm">
+                <Shield size={24} />
+              </div>
+              <span className="font-semibold text-sm md:text-base">
+                24 Jam CCTV
+              </span>
             </div>
-            <span className="font-semibold text-sm md:text-base">
-              24 Jam CCTV
-            </span>
-          </div>
-          {/* Feature 4 */}
-          <div className="feature-item flex flex-col items-center gap-2 group invisible">
-            <div>
-              <Zap
-                size={28}
-                className="group-hover:scale-110 transition-transform duration-300"
-              />
+            {/* Feature 4 */}
+            <div className="feature-item flex flex-col items-center gap-3 group px-2 opacity-0">
+              <div className="p-3 bg-orange-500 rounded-xl group-hover:bg-white group-hover:text-orange-600 transition-colors duration-300 shadow-sm">
+                <Zap size={24} />
+              </div>
+              <span className="font-semibold text-sm md:text-base">
+                Genset Ready
+              </span>
             </div>
-            <span className="font-semibold text-sm md:text-base">
-              Genset Ready
-            </span>
           </div>
         </div>
       </div>
 
       {/* ==================== GALLERY SECTION ==================== */}
-      <section className="py-20">
+      <section className="py-20 lg:py-24">
         <div className="container mx-auto px-4 lg:px-8">
           {/* LOADING STATE */}
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2
-                className="animate-spin text-orange-600 mb-4"
-                size={40}
-              />
-              <p className="text-gray-500">Memuat data fasilitas...</p>
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <Loader2 className="animate-spin mb-4" size={40} />
+              <p className="font-medium">Memuat data fasilitas...</p>
             </div>
           ) : (
             <div className="gallery-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {facilities.map((item) => (
                 <div
                   key={item.id}
-                  className="facility-card bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 group cursor-default hover:-translate-y-2 invisible"
+                  className="anim-card bg-white rounded-3xl border border-slate-100 overflow-hidden flex flex-col h-full cursor-default opacity-0"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
                 >
                   {/* IMAGE */}
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative h-64 overflow-hidden bg-slate-100">
                     <img
-                      src={item.image_url} // Pastikan kolom di DB adalah 'image_url'
+                      src={item.image_url}
                       alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="anim-img w-full h-full object-cover"
                     />
-                    {/* Overlay Gradient on Hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                    {/* Category Badge */}
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-orange-600 shadow-sm uppercase tracking-wider">
-                      {item.category}
+                    {/* Badge */}
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-orange-600 text-xs font-bold rounded-lg shadow-sm uppercase tracking-wide flex items-center gap-2">
+                        <Layers size={12} /> {item.category}
+                      </span>
                     </div>
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 pointer-events-none"></div>
                   </div>
 
                   {/* CONTENT */}
-                  <div className="p-6 relative">
-                    {/* Decorative Line Animation */}
-                    <div className="absolute top-0 left-0 w-0 h-1 bg-gradient-to-r from-orange-600 to-orange-300 group-hover:w-full transition-all duration-500 ease-out"></div>
-
-                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors">
+                  <div className="p-8 flex flex-col flex-grow relative">
+                    <h3 className="anim-title text-xl font-bold text-gray-800 mb-3 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+                    <p className="text-slate-500 text-sm leading-relaxed mb-4 flex-grow line-clamp-3">
                       {item.description}
                     </p>
+
+                    <div className="pt-4 border-t border-slate-50 flex items-center gap-2 text-xs text-slate-400 font-medium">
+                      <Info size={14} /> Fasilitas Penunjang KBM
+                    </div>
                   </div>
                 </div>
               ))}
@@ -269,22 +308,36 @@ const Fasilitas = () => {
 
           {/* ==================== ADDITIONAL INFO CARD ==================== */}
           {!loading && (
-            <div className="info-card mt-16 bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-8 lg:p-12 text-white text-center relative overflow-hidden shadow-2xl invisible">
-              {/* Background Icon (GSAP Animation) */}
-              <div className="bg-icon-spin absolute top-0 right-0 p-12 opacity-10">
-                <BookOpen size={200} />
-              </div>
+            <div className="info-section mt-24">
+              <div className="anim-info bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-10 lg:p-14 text-white text-center relative overflow-hidden shadow-2xl opacity-0">
+                <div
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(#ffffff 1px, transparent 1px)",
+                    backgroundSize: "20px 20px",
+                  }}
+                ></div>
 
-              <div className="relative z-10 max-w-2xl mx-auto">
-                <h2 className="text-2xl lg:text-3xl font-bold mb-4">
-                  Dukung Proses Belajar Mengajar
-                </h2>
-                <p className="text-gray-300 mb-0 leading-relaxed">
-                  Kami terus berkomitmen untuk meremajakan dan melengkapi
-                  fasilitas sekolah setiap tahunnya demi menciptakan lingkungan
-                  belajar yang kondusif, aman, dan menyenangkan bagi seluruh
-                  siswa.
-                </p>
+                <div className="bg-icon-spin absolute -top-10 -right-10 opacity-5 text-white pointer-events-none">
+                  <BookOpen size={300} />
+                </div>
+
+                <div className="relative z-10 max-w-3xl mx-auto">
+                  <div className="inline-flex items-center justify-center p-4 bg-white/10 rounded-2xl mb-6 backdrop-blur-sm border border-white/10">
+                    <Coffee size={32} className="text-orange-400" />
+                  </div>
+                  <h2 className="text-3xl lg:text-4xl font-bold mb-6 tracking-tight">
+                    Dukung Proses{" "}
+                    <span className="text-orange-400">Belajar Mengajar</span>
+                  </h2>
+                  <p className="text-slate-300 text-lg leading-relaxed mb-0">
+                    Kami terus berkomitmen untuk meremajakan dan melengkapi
+                    fasilitas sekolah setiap tahunnya demi menciptakan
+                    lingkungan belajar yang kondusif, aman, dan menyenangkan
+                    bagi seluruh siswa.
+                  </p>
+                </div>
               </div>
             </div>
           )}

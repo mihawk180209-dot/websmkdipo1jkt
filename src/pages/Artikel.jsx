@@ -106,7 +106,7 @@ const Artikel = () => {
       {/* ==================== HEADER SECTION ==================== */}
       <div className="bg-white border-b border-gray-100 pt-24 pb-16 px-4 mb-12">
         <div className="container mx-auto max-w-4xl text-center">
-          <span className="header-pill inline-block py-1 px-3 rounded-full bg-teal-50 text-teal-600 text-sm font-bold mb-4 tracking-wide invisible">
+          <span className="header-pill inline-block py-1 px-3 rounded-full bg-orange-50 text-orange-600 text-sm font-bold mb-4 tracking-wide invisible">
             BLOG & INFORMASI
           </span>
           <h1 className="header-title text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight invisible">
@@ -182,7 +182,7 @@ const Artikel = () => {
                     )}
 
                     {/* Badge Kategori */}
-                    <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-teal-700 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
+                    <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-orange-600 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
                       {item.category || "Umum"}
                     </span>
                   </div>
@@ -191,11 +191,11 @@ const Artikel = () => {
                   <div className="p-6 flex flex-col flex-grow">
                     {/* Tanggal */}
                     <div className="flex items-center text-xs text-gray-500 mb-3 gap-2">
-                      <Calendar size={14} className="text-teal-500" />
+                      <Calendar size={14} className="text-orange-500" />
                       <span>{formatDate(item.created_at)}</span>
                     </div>
 
-                    <h3 className="font-bold text-xl text-gray-900 mb-3 leading-snug group-hover:text-teal-600 transition-colors line-clamp-2">
+                    <h3 className="font-bold text-xl text-gray-900 mb-3 leading-snug group-hover:text-black-600 transition-colors line-clamp-2">
                       <Link to={`/artikel/${item.id}`}>{item.title}</Link>
                     </h3>
 
@@ -205,7 +205,7 @@ const Artikel = () => {
 
                     <Link
                       to={`/artikel/${item.id}`}
-                      className="inline-flex items-center gap-2 text-teal-600 font-bold text-sm hover:text-teal-800 transition-colors group/link mt-auto"
+                      className="inline-flex items-center gap-2 text-orange-600 font-bold text-sm hover:text-orange-700 transition-colors group/link mt-auto"
                     >
                       Baca Selengkapnya
                       <ArrowRight
