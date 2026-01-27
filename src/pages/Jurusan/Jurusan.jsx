@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Monitor,
@@ -8,12 +8,13 @@ import {
   Award,
   Cpu,
   PenTool,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 
-// --- IMPORT ICON GAMBAR LO DISINI ---
-// Pastikan path-nya sesuai sama tempat lo simpen file gambarnya
-import tkjCustomIcon from "../../assets/icon-tkj2.png"; // Ganti nama file sesuai punya lo
-import dkvCustomIcon from "../../assets/icon-dkv2.png"; // Ganti nama file sesuai punya lo
+// --- IMPORT ICON GAMBAR ---
+import tkjCustomIcon from "../../assets/icon-tkj2.png";
+import dkvCustomIcon from "../../assets/icon-dkv2.png";
 
 // --- GSAP IMPORTS ---
 import gsap from "gsap";
@@ -25,141 +26,155 @@ gsap.registerPlugin(ScrollTrigger);
 const Jurusan = () => {
   const comp = useRef(null);
 
+  // --- GSAP ANIMATION (SAFE MODE / ANTI-GHOSTING) ---
   useLayoutEffect(() => {
-    let ctx = gsap.context(() => {
-      // 1. HEADER ANIMATION
-      const tlHeader = gsap.timeline();
+    // Delay 100ms agar DOM stabil
+    const timer = setTimeout(() => {
+      let ctx = gsap.context(() => {
+        ScrollTrigger.refresh();
 
-      tlHeader
-        .fromTo(
-          ".header-pill",
-          { y: -20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "back.out(1.7)" },
-        )
-        .fromTo(
-          ".header-title",
-          { scale: 0.9, autoAlpha: 0 },
-          { scale: 1, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
-          "-=0.6",
-        )
-        .fromTo(
-          ".header-desc",
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
-          "-=0.5",
+        // 1. HEADER ANIMATION
+        gsap.to(".header-blob", {
+          scale: 1.2,
+          rotation: 15,
+          x: 20,
+          y: 20,
+          duration: 8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+
+        gsap.fromTo(
+          ".anim-header",
+          { y: 30, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power3.out",
+          },
         );
 
-      // 2. JURUSAN CARDS (Staggered Entrance)
-      gsap.fromTo(
-        ".jurusan-card",
-        { y: 80, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 1,
-          stagger: 0.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".jurusan-grid",
-            start: "top 85%",
+        // 2. JURUSAN CARDS (Batch Trigger)
+        if (document.querySelector(".jurusan-grid")) {
+          gsap.fromTo(
+            ".jurusan-card",
+            { y: 60, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.8,
+              stagger: 0.2,
+              ease: "back.out(1.2)",
+              scrollTrigger: {
+                trigger: ".jurusan-grid",
+                start: "top 85%", // Trigger pas masuk layar
+              },
+            },
+          );
+        }
+
+        // 3. FLOATING ICONS (Looping)
+        // Monitor & CPU (TKJ)
+        gsap.to(".float-icon-tkj-1", {
+          y: -15,
+          rotation: 5,
+          duration: 3,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+        gsap.to(".float-icon-tkj-2", {
+          y: -10,
+          duration: 4,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: 1,
+        });
+
+        // Palette & PenTool (DKV)
+        gsap.to(".float-icon-dkv-1", {
+          y: -15,
+          rotation: -5,
+          duration: 3.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+        gsap.to(".float-icon-dkv-2", {
+          y: -10,
+          duration: 4.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: 0.5,
+        });
+
+        // 4. FEATURES GRID
+        gsap.fromTo(
+          ".feature-card",
+          { y: 40, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".features-grid",
+              start: "top 85%",
+            },
           },
-        },
-      );
+        );
 
-      // 3. FLOATING ICONS ANIMATION (Looping)
-      // Ikon Monitor & CPU (TKJ)
-      gsap.to(".float-icon-tkj-1", {
-        y: -15,
-        rotation: 5,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".float-icon-tkj-2", {
-        y: -10,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: 1,
-      });
-
-      // Ikon Palette & PenTool (DKV)
-      gsap.to(".float-icon-dkv-1", {
-        y: -15,
-        rotation: -5,
-        duration: 3.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".float-icon-dkv-2", {
-        y: -10,
-        duration: 4.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: 0.5,
-      });
-
-      // 4. WHY CHOOSE US (Features)
-      gsap.fromTo(
-        ".feature-card",
-        { scale: 0.8, autoAlpha: 0 },
-        {
-          scale: 1,
-          autoAlpha: 1,
-          duration: 0.6,
-          stagger: 0.15,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: ".features-grid",
-            start: "top 80%",
+        // 5. CTA SECTION
+        gsap.fromTo(
+          ".anim-cta",
+          { y: 50, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".cta-section",
+              start: "top 90%",
+            },
           },
-        },
-      );
+        );
+      }, comp);
+    }, 100); // 100ms delay
 
-      // 5. CTA SECTION
-      gsap.fromTo(
-        ".cta-content",
-        { scale: 0.95, autoAlpha: 0 },
-        {
-          scale: 1,
-          autoAlpha: 1,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".cta-section",
-            start: "top 85%",
-          },
-        },
-      );
-    }, comp);
-
-    return () => ctx.revert();
+    return () => clearTimeout(timer);
   }, []);
 
   return (
     <div
       ref={comp}
-      className="min-h-screen bg-gray-50 font-sans overflow-x-hidden"
+      className="min-h-screen bg-[#F8FAFC] font-sans overflow-x-hidden"
     >
       {/* ==================== HEADER SECTION ==================== */}
-      <div className="bg-white py-16 lg:py-24 border-b border-gray-100 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        <div className="absolute top-10 right-10 w-32 h-32 bg-purple-100 rounded-full blur-3xl opacity-60 animate-pulse"></div>
-        <div className="absolute bottom-10 left-10 w-32 h-32 bg-teal-100 rounded-full blur-3xl opacity-60 animate-pulse delay-1000"></div>
+      <div className="relative py-20 lg:py-24 overflow-hidden bg-white border-b border-slate-100">
+        {/* Background Blob */}
+        <div className="header-blob absolute top-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-50 translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-slate-100 rounded-full blur-3xl -translate-x-1/3 translate-y-1/3"></div>
 
         <div className="container mx-auto px-4 lg:px-8 text-center relative z-10">
-          <span className="header-pill inline-block py-1 px-3 rounded-full bg-orange-100 text-primary text-sm font-bold mb-4 invisible">
-            Masa Depanmu Dimulai Di Sini
-          </span>
-          <h1 className="header-title text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 invisible">
-            Program Keahlian
+          <div className="anim-header inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-sm font-bold mb-6 opacity-0">
+            <Sparkles size={16} /> Masa Depanmu Dimulai Di Sini
+          </div>
+
+          <h1 className="anim-header text-4xl lg:text-6xl font-extrabold text-slate-900 mb-6 tracking-tight opacity-0">
+            Program{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+              Keahlian
+            </span>
           </h1>
-          <p className="header-desc text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed invisible">
+
+          <p className="anim-header text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed opacity-0">
             SMK Diponegoro 1 Jakarta menyelenggarakan pendidikan vokasi berbasis
             teknologi dan kreativitas yang selaras dengan tuntutan Dunia Usaha
             dan Dunia Industri (DUDI).
@@ -168,139 +183,178 @@ const Jurusan = () => {
       </div>
 
       {/* ==================== MAJORS SELECTION (HERO CARDS) ==================== */}
-      <section className="py-20 -mt-10 relative z-20">
+      <section className="py-20 -mt-16 relative z-20">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="jurusan-grid grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
-            {/* TKJ CARD (THEME: TEAL / BIRU TOSCA) */}
-            <div className="jurusan-card group relative bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 flex flex-col h-full invisible">
-              {/* Image Header */}
-              <div className="h-64 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+          <div className="jurusan-grid grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-6xl mx-auto">
+            {/* TKJ CARD (THEME: TEAL / CYAN) */}
+            <div className="jurusan-card group relative bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-slate-100 flex flex-col h-full opacity-0">
+              {/* Header Image */}
+              <div className="h-72 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
+                {/* Pattern Overlay */}
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(#fff 1px, transparent 1px)",
+                    backgroundSize: "20px 20px",
+                  }}
+                ></div>
 
-                {/* Floating Icons (GSAP Animated) - INI TETEP BAWAAN */}
-                <div className="float-icon-tkj-1 absolute -right-10 -bottom-10">
+                {/* Floating Icons (GSAP) */}
+                <div className="float-icon-tkj-1 absolute -right-10 -bottom-10 opacity-20">
                   <Monitor
-                    size={120}
-                    className="text-white/20 rotate-12 group-hover:scale-110 transition-transform duration-500"
+                    size={140}
+                    className="text-white rotate-12 group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <div className="float-icon-tkj-2 absolute top-10 left-10">
-                  <Cpu size={80} className="text-white/20" />
+                <div className="float-icon-tkj-2 absolute top-10 left-10 opacity-20">
+                  <Cpu size={80} className="text-white" />
                 </div>
 
                 <div className="relative z-10 text-center">
-                  {/* --- ICON TENGAH TKJ (GANTI DISINI) --- */}
-                  <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 text-white shadow-lg group-hover:rotate-12 transition-transform duration-500">
+                  {/* ICON CUSTOM */}
+                  <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 border border-white/30 text-white shadow-lg group-hover:rotate-12 transition-transform duration-500">
                     <img
                       src={tkjCustomIcon}
                       alt="Logo TKJ"
-                      className="w-15 h-15 object-contain" // object-contain biar gambarnya ga gepeng
+                      className="w-16 h-16 object-contain drop-shadow-md"
                     />
                   </div>
 
-                  <h2 className="text-3xl font-bold text-white tracking-wide">
+                  <h2 className="text-4xl font-extrabold text-white tracking-wide mb-1">
                     TKJ
                   </h2>
-                  <p className="text-teal-100 text-sm font-medium">
+                  <p className="text-teal-100 font-medium">
                     Teknik Komputer & Jaringan
                   </p>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-8 flex flex-col flex-grow">
-                <p className="text-gray-600 mb-6 leading-relaxed flex-grow">
+              <div className="p-8 lg:p-10 flex flex-col flex-grow">
+                <p className="text-slate-600 mb-8 leading-relaxed flex-grow text-lg">
                   Mencetak teknisi handal yang ahli dalam perakitan komputer,
                   instalasi jaringan (LAN/WAN), administrasi server, mikrotik,
                   hingga keamanan siber (Cyber Security).
                 </p>
 
-                <div className="space-y-3 mb-8">
-                  <div className="flex items-center gap-3 text-sm text-gray-700">
-                    <div className="p-1.5 bg-teal-50 text-teal-600 rounded-md">
-                      <Briefcase size={16} />
+                <div className="space-y-4 mb-10">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-teal-50 text-teal-600 rounded-xl mt-0.5">
+                      <Briefcase size={20} />
                     </div>
-                    <span>Prospek: Network Engineer, IT Support</span>
+                    <div>
+                      <h4 className="font-bold text-slate-900">
+                        Prospek Karir
+                      </h4>
+                      <p className="text-sm text-slate-500">
+                        Network Engineer, IT Support, Cyber Security Analyst
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-700">
-                    <div className="p-1.5 bg-teal-50 text-teal-600 rounded-md">
-                      <Award size={16} />
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-teal-50 text-teal-600 rounded-xl mt-0.5">
+                      <Award size={20} />
                     </div>
-                    <span>Sertifikasi: Mikrotik MTCNA</span>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Sertifikasi</h4>
+                      <p className="text-sm text-slate-500">
+                        Mikrotik MTCNA, BNSP Teknisi Jaringan
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <Link
                   to="/jurusan/tkj"
-                  className="block w-full py-3 bg-teal-50 text-teal-700 text-center font-bold rounded-xl hover:bg-teal-600 hover:text-white transition-all shadow-sm hover:shadow-lg"
+                  className="block w-full py-4 bg-teal-50 text-teal-700 text-center font-bold rounded-2xl hover:bg-teal-600 hover:text-white transition-all shadow-sm hover:shadow-lg border border-teal-100 hover:border-teal-600"
                 >
                   Jelajahi TKJ
                 </Link>
               </div>
             </div>
 
-            {/* DKV CARD (THEME: PURPLE / UNGU) */}
-            <div className="jurusan-card group relative bg-white rounded-3xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-gray-100 flex flex-col h-full invisible">
-              {/* Image Header */}
-              <div className="h-64 bg-gradient-to-br from-purple-500 to-purple-700 relative flex items-center justify-center overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-20"></div>
+            {/* DKV CARD (THEME: PURPLE / VIOLET) */}
+            <div className="jurusan-card group relative bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-slate-100 flex flex-col h-full opacity-0">
+              {/* Header Image */}
+              <div className="h-72 bg-gradient-to-br from-violet-500 to-fuchsia-600 relative flex items-center justify-center overflow-hidden">
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(#fff 1px, transparent 1px)",
+                    backgroundSize: "20px 20px",
+                  }}
+                ></div>
 
-                {/* Floating Icons (GSAP Animated) - INI TETEP BAWAAN */}
-                <div className="float-icon-dkv-1 absolute -left-10 -bottom-10">
+                {/* Floating Icons */}
+                <div className="float-icon-dkv-1 absolute -left-10 -bottom-10 opacity-20">
                   <Palette
-                    size={120}
-                    className="text-white/20 -rotate-12 group-hover:scale-110 transition-transform duration-500"
+                    size={140}
+                    className="text-white -rotate-12 group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <div className="float-icon-dkv-2 absolute top-10 right-10">
-                  <PenTool size={80} className="text-white/20" />
+                <div className="float-icon-dkv-2 absolute top-10 right-10 opacity-20">
+                  <PenTool size={80} className="text-white" />
                 </div>
 
                 <div className="relative z-10 text-center">
-                  {/* --- ICON TENGAH DKV (GANTI DISINI) --- */}
-                  <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 text-white shadow-lg group-hover:-rotate-12 transition-transform duration-500">
+                  {/* ICON CUSTOM */}
+                  <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 border border-white/30 text-white shadow-lg group-hover:-rotate-12 transition-transform duration-500">
                     <img
                       src={dkvCustomIcon}
                       alt="Logo DKV"
-                      className="w-15 h-15 object-contain"
+                      className="w-16 h-16 object-contain drop-shadow-md"
                     />
                   </div>
 
-                  <h2 className="text-3xl font-bold text-white tracking-wide">
+                  <h2 className="text-4xl font-extrabold text-white tracking-wide mb-1">
                     DKV
                   </h2>
-                  <p className="text-purple-100 text-sm font-medium">
+                  <p className="text-violet-100 font-medium">
                     Desain Komunikasi Visual
                   </p>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-8 flex flex-col flex-grow">
-                <p className="text-gray-600 mb-6 leading-relaxed flex-grow">
+              <div className="p-8 lg:p-10 flex flex-col flex-grow">
+                <p className="text-slate-600 mb-8 leading-relaxed flex-grow text-lg">
                   Mengembangkan kreativitas visual melalui penguasaan software
                   desain grafis, fotografi, videografi, animasi 2D/3D, dan
-                  desain UI/UX untuk kebutuhan industri kreatif.
+                  desain UI/UX untuk kebutuhan industri kreatif modern.
                 </p>
 
-                <div className="space-y-3 mb-8">
-                  <div className="flex items-center gap-3 text-sm text-gray-700">
-                    <div className="p-1.5 bg-purple-50 text-purple-600 rounded-md">
-                      <Briefcase size={16} />
+                <div className="space-y-4 mb-10">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-violet-50 text-violet-600 rounded-xl mt-0.5">
+                      <Briefcase size={20} />
                     </div>
-                    <span>Prospek: Graphic Designer, Video Editor</span>
+                    <div>
+                      <h4 className="font-bold text-slate-900">
+                        Prospek Karir
+                      </h4>
+                      <p className="text-sm text-slate-500">
+                        Graphic Designer, Video Editor, UI/UX Designer
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-700">
-                    <div className="p-1.5 bg-purple-50 text-purple-600 rounded-md">
-                      <Award size={16} />
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-violet-50 text-violet-600 rounded-xl mt-0.5">
+                      <Award size={20} />
                     </div>
-                    <span>Sertifikasi: Adobe Associate</span>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Sertifikasi</h4>
+                      <p className="text-sm text-slate-500">
+                        Adobe Associate, BNSP Desainer Grafis
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <Link
                   to="/jurusan/dkv"
-                  className="block w-full py-3 bg-purple-50 text-purple-600 text-center font-bold rounded-xl hover:bg-purple-600 hover:text-white transition-all shadow-sm hover:shadow-lg"
+                  className="block w-full py-4 bg-violet-50 text-violet-700 text-center font-bold rounded-2xl hover:bg-violet-600 hover:text-white transition-all shadow-sm hover:shadow-lg border border-violet-100 hover:border-violet-600"
                 >
                   Jelajahi DKV
                 </Link>
@@ -311,72 +365,76 @@ const Jurusan = () => {
       </section>
 
       {/* ==================== WHY CHOOSE US ==================== */}
-      <section className="py-16 bg-white border-t border-gray-100">
+      <section className="py-20 bg-white border-t border-slate-100">
         <div className="container mx-auto px-4 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-slate-900 mb-12">
             Mengapa Memilih Jurusan Kami?
           </h2>
 
-          <div className="features-grid grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="features-grid grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {[
               {
-                icon: <Briefcase size={28} />,
+                icon: <Briefcase size={32} />,
                 title: "Siap Kerja",
-                desc: "Kurikulum disesuaikan dengan kebutuhan industri (Link & Match) sehingga lulusan siap langsung bekerja.",
-                color: "bg-green-100 text-green-600",
+                desc: "Kurikulum Link & Match dengan industri memastikan lulusan memiliki skill yang dibutuhkan pasar kerja.",
+                color: "bg-green-50 text-green-600 border-green-100",
               },
               {
-                icon: <Monitor size={28} />,
+                icon: <Monitor size={32} />,
                 title: "Fasilitas Lengkap",
-                desc: "Didukung laboratorium praktik standar industri dengan spesifikasi perangkat keras terbaru.",
-                color: "bg-blue-100 text-blue-600",
+                desc: "Laboratorium praktik berstandar industri dengan spesifikasi PC dan perangkat jaringan terbaru.",
+                color: "bg-blue-50 text-blue-600 border-blue-100",
               },
               {
-                icon: <Award size={28} />,
+                icon: <CheckCircle2 size={32} />,
                 title: "Sertifikasi BNSP",
-                desc: "Lulusan dibekali sertifikat kompetensi dari BNSP yang diakui secara nasional dan internasional.",
-                color: "bg-purple-100 text-purple-600",
+                desc: "Lulusan dibekali sertifikat kompetensi nasional yang diakui sebagai bukti keahlian profesional.",
+                color: "bg-orange-50 text-orange-600 border-orange-100",
               },
             ].map((item, idx) => (
               <div
                 key={idx}
-                className="feature-card p-6 bg-gray-50 rounded-2xl hover:bg-white hover:shadow-lg transition-all duration-300 hover:-translate-y-1 invisible"
+                className="feature-card p-8 bg-white rounded-3xl border border-slate-100 hover:shadow-xl hover:border-slate-200 transition-all duration-300 hover:-translate-y-2 opacity-0"
               >
                 <div
-                  className={`w-14 h-14 ${item.color} rounded-full flex items-center justify-center mx-auto mb-4 transform hover:scale-110 transition-transform`}
+                  className={`w-16 h-16 ${item.color} border rounded-2xl flex items-center justify-center mx-auto mb-6`}
                 >
                   {item.icon}
                 </div>
-                <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm">{item.desc}</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">
+                  {item.title}
+                </h3>
+                <p className="text-slate-500 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ==================== CTA REGISTER ==================== */}
-      <section className="cta-section py-20 bg-primary relative overflow-hidden">
-        {/* Decorative Circles */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full translate-x-1/2 -translate-y-1/2 animate-pulse"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-10 rounded-full -translate-x-1/2 translate-y-1/2"></div>
+      {/* ==================== CTA SECTION (Updated to Dark Theme) ==================== */}
+      <section className="cta-section container mx-auto px-4 mt-16 mb-24 max-w-5xl text-center">
+        <div className="anim-cta bg-gradient-to-r from-slate-900 to-slate-800 rounded-[3rem] p-10 md:p-16 shadow-2xl text-white relative overflow-hidden group opacity-0">
+          {/* Decoration */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500 opacity-10 rounded-full blur-[80px] transform translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500 opacity-10 rounded-full blur-[60px] transform -translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
 
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="cta-content invisible">
-            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6">
-              Sudah Menentukan Pilihan?
+          <div className="relative z-10">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+              Sudah Menentukan{" "}
+              <span className="text-orange-500">Pilihanmu?</span>
             </h2>
-            <p className="text-orange-100 text-lg mb-8 max-w-2xl mx-auto">
-              Jangan ragu untuk berkonsultasi atau langsung mendaftarkan diri.
-              Kuota setiap jurusan terbatas.
+            <p className="text-slate-300 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+              Jangan ragu untuk bergabung bersama kami. Kuota setiap jurusan
+              terbatas, amankan kursimu sekarang untuk masa depan yang lebih
+              cerah.
             </p>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              {/* LINK EXTERNAL PPDB */}
               <a
                 href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-4 bg-white text-primary font-bold rounded-full shadow-lg hover:bg-gray-100 transition flex items-center justify-center gap-2 transform hover:scale-105"
+                className="px-8 py-4 bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-900/30 hover:bg-orange-700 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2"
               >
                 Daftar Sekarang <ArrowRight size={20} />
               </a>
@@ -384,7 +442,7 @@ const Jurusan = () => {
                 href="https://bkk-dipo.vercel.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-8 py-4 bg-orange-600 text-white border border-white/30 font-bold rounded-full hover:bg-orange-700 transition transform hover:scale-105"
+                className="px-8 py-4 bg-white/10 text-white border border-white/20 font-bold rounded-xl hover:bg-white hover:text-slate-900 transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-sm"
               >
                 Info Penyaluran Kerja
               </a>

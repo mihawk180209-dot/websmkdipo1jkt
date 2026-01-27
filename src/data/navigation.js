@@ -30,6 +30,7 @@ export const navLinks = [
     title: "Program Keahlian",
     path: "/jurusan",
     submenu: [
+      { title: "Overview Program Keahlian", path: "/jurusan/jurusan" },
       { title: "Teknik Komputer & Jaringan", path: "/jurusan/tkj" },
       { title: "Desain Komunikasi Visual", path: "/jurusan/dkv" },
     ],
