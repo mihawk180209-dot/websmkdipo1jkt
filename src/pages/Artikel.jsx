@@ -1,7 +1,15 @@
 import { useEffect, useState, useLayoutEffect, useRef } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../lib/supabase"; // Sesuaikan path ini
 import { Link } from "react-router-dom";
-import { Calendar, ArrowRight, FileText, ImageOff } from "lucide-react";
+import {
+  Calendar,
+  ArrowRight,
+  FileText,
+  ImageOff,
+  Sparkles,
+  LayoutGrid,
+  Loader2,
+} from "lucide-react";
 
 // --- GSAP IMPORTS ---
 import gsap from "gsap";
@@ -32,53 +40,63 @@ const Artikel = () => {
     setLoading(false);
   };
 
-  // --- GSAP ANIMATION (Jalan setiap kali loading selesai) ---
+  // --- GSAP ANIMATION (SAFE MODE / ANTI-GHOSTING) ---
   useLayoutEffect(() => {
     if (loading) return; // Jangan jalan kalau masih loading
 
-    let ctx = gsap.context(() => {
-      // 1. HEADER ANIMATION
-      const tlHeader = gsap.timeline();
+    // Delay 100ms agar DOM stabil
+    const timer = setTimeout(() => {
+      let ctx = gsap.context(() => {
+        ScrollTrigger.refresh();
 
-      tlHeader
-        .fromTo(
-          ".header-pill",
-          { y: -20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "back.out(1.7)" },
-        )
-        .fromTo(
-          ".header-title",
-          { scale: 0.9, autoAlpha: 0 },
-          { scale: 1, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
-          "-=0.6",
-        )
-        .fromTo(
-          ".header-desc",
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
-          "-=0.5",
-        );
+        // 1. HEADER ANIMATION (Safe Fade In)
+        const tlHeader = gsap.timeline();
 
-      // 2. ARTICLE GRID ANIMATION (Staggered)
-      // Kita gunakan requestAnimationFrame agar DOM benar-benar siap
-      requestAnimationFrame(() => {
-        gsap.fromTo(
-          ".article-card",
-          { y: 50, autoAlpha: 0 },
+        // Blob Animation
+        gsap.to(".header-blob", {
+          scale: 1.2,
+          rotation: 15,
+          x: 20,
+          y: 20,
+          duration: 8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+
+        tlHeader.fromTo(
+          ".anim-header",
+          { y: 30, autoAlpha: 0 },
           {
             y: 0,
             autoAlpha: 1,
             duration: 0.8,
-            stagger: 0.1, // Muncul berurutan dengan jeda 0.1s
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: ".articles-grid",
-              start: "top 85%", // Trigger saat grid masuk viewport
-            },
+            stagger: 0.1,
+            ease: "power3.out",
           },
         );
 
-        // Animasi untuk Empty State (jika tidak ada artikel)
+        // 2. ARTICLE GRID ANIMATION (Batch Trigger)
+        // Trigger container-nya agar lebih stabil
+        if (document.querySelector(".articles-grid")) {
+          gsap.fromTo(
+            ".article-card",
+            { y: 50, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.6,
+              stagger: 0.1, // Muncul berurutan
+              ease: "back.out(1.2)",
+              scrollTrigger: {
+                trigger: ".articles-grid",
+                start: "top 85%", // Trigger pas grid masuk layar
+              },
+            },
+          );
+        }
+
+        // Animasi Empty State
         if (articles.length === 0) {
           gsap.fromTo(
             ".empty-state",
@@ -86,11 +104,11 @@ const Artikel = () => {
             { scale: 1, autoAlpha: 1, duration: 0.8, ease: "back.out(1.7)" },
           );
         }
-      });
-    }, comp);
+      }, comp);
+    }, 100);
 
-    return () => ctx.revert();
-  }, [loading, articles]); // Re-run animasi saat loading selesai atau artikel berubah
+    return () => clearTimeout(timer);
+  }, [loading, articles]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -101,20 +119,76 @@ const Artikel = () => {
     });
   };
 
+  // --- INTERAKSI HOVER ---
+  const handleMouseEnter = (e) => {
+    const card = e.currentTarget;
+    const img = card.querySelector(".anim-img");
+    const title = card.querySelector(".anim-title");
+
+    // Card Lift
+    gsap.to(card, {
+      y: -8,
+      boxShadow: "0 20px 30px -10px rgba(249, 115, 22, 0.15)", // Orange shadow
+      borderColor: "#fdba74", // orange-300
+      duration: 0.3,
+      ease: "power2.out",
+    });
+
+    // Image Zoom
+    gsap.to(img, {
+      scale: 1.1,
+      duration: 0.6,
+      ease: "power2.out",
+    });
+
+    // Title Color
+    gsap.to(title, { color: "#ea580c", duration: 0.3 });
+  };
+
+  const handleMouseLeave = (e) => {
+    const card = e.currentTarget;
+    const img = card.querySelector(".anim-img");
+    const title = card.querySelector(".anim-title");
+
+    // Reset
+    gsap.to(card, {
+      y: 0,
+      boxShadow: "none",
+      borderColor: "#f1f5f9", // slate-100
+      duration: 0.3,
+      ease: "power2.out",
+    });
+
+    gsap.to(img, { scale: 1, duration: 0.6 });
+    gsap.to(title, { color: "#1f2937", duration: 0.3 }); // gray-800
+  };
+
   return (
-    <div ref={comp} className="min-h-screen bg-gray-50 pb-20 font-sans">
+    <div
+      ref={comp}
+      className="min-h-screen bg-[#F8FAFC] pb-24 font-sans overflow-x-hidden"
+    >
       {/* ==================== HEADER SECTION ==================== */}
-      <div className="bg-white border-b border-gray-100 pt-24 pb-16 px-4 mb-12">
-        <div className="container mx-auto max-w-4xl text-center">
-          <span className="header-pill inline-block py-1 px-3 rounded-full bg-orange-50 text-orange-600 text-sm font-bold mb-4 tracking-wide invisible">
-            BLOG & INFORMASI
-          </span>
-          <h1 className="header-title text-4xl lg:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight invisible">
-            Artikel Terbaru
+      <div className="relative py-20 lg:py-24 overflow-hidden bg-white border-b border-slate-100 mb-12">
+        {/* Background Decoration */}
+        <div className="header-blob absolute top-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-50 translate-x-1/3 -translate-y-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-slate-100 rounded-full blur-3xl -translate-x-1/2 translate-y-1/3"></div>
+
+        <div className="container mx-auto px-4 text-center relative z-10">
+          <div className="anim-header inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-orange-600 text-sm font-bold mb-6 opacity-0">
+            <Sparkles size={16} /> Blog & Informasi
+          </div>
+
+          <h1 className="anim-header text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight opacity-0">
+            Artikel{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-500">
+              Terbaru
+            </span>
           </h1>
-          <p className="header-desc text-gray-500 text-lg max-w-2xl mx-auto invisible">
+
+          <p className="anim-header text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed opacity-0">
             Dapatkan informasi terkini seputar kegiatan sekolah, prestasi siswa,
-            dan perkembangan teknologi di SMK DIPO 1.
+            dan perkembangan teknologi di SMK Diponegoro 1 Jakarta.
           </p>
         </div>
       </div>
@@ -123,37 +197,23 @@ const Artikel = () => {
       <div className="container mx-auto px-4 lg:px-8 max-w-7xl">
         {loading ? (
           // SKELETON LOADING STATE
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl shadow-sm overflow-hidden h-96 animate-pulse border border-gray-100"
-              >
-                <div className="h-48 bg-gray-200 w-full"></div>
-                <div className="p-6 space-y-4">
-                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-full"></div>
-                    <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+            <Loader2 className="animate-spin mb-4 text-orange-500" size={40} />
+            <p className="font-medium">Memuat artikel terbaru...</p>
           </div>
         ) : (
           // ARTICLE GRID
           <div className="articles-grid grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {articles.length === 0 ? (
               // EMPTY STATE
-              <div className="empty-state col-span-full py-20 text-center invisible">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-                  <FileText size={40} className="text-gray-400" />
+              <div className="empty-state col-span-full py-20 text-center opacity-0">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-slate-100 rounded-full mb-6">
+                  <FileText size={40} className="text-slate-400" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className="text-xl font-bold text-slate-800 mb-2">
                   Belum ada artikel
                 </h3>
-                <p className="text-gray-500 mt-2">
+                <p className="text-slate-500">
                   Nantikan update terbaru dari kami segera.
                 </p>
               </div>
@@ -161,56 +221,68 @@ const Artikel = () => {
               articles.map((item) => (
                 <div
                   key={item.id}
-                  className="article-card group bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300 flex flex-col h-full invisible"
+                  className="article-card group bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full cursor-default opacity-0"
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
                 >
                   {/* Gambar Container */}
-                  <div className="relative h-56 bg-gray-100 overflow-hidden">
+                  <div className="relative h-60 bg-slate-100 overflow-hidden">
                     {item.image_url ? (
                       <>
                         <img
                           src={item.image_url}
                           alt={item.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="anim-img w-full h-full object-cover" // Transisi dihandle JS
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </>
                     ) : (
-                      <div className="flex flex-col items-center justify-center h-full text-gray-400 bg-gray-50">
+                      <div className="flex flex-col items-center justify-center h-full text-slate-400 bg-slate-50">
                         <ImageOff size={32} className="mb-2 opacity-50" />
-                        <span className="text-sm">Tidak ada gambar</span>
+                        <span className="text-sm font-medium">
+                          Tidak ada gambar
+                        </span>
                       </div>
                     )}
 
                     {/* Badge Kategori */}
-                    <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-orange-600 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm">
-                      {item.category || "Umum"}
-                    </span>
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="bg-white/90 backdrop-blur-md text-orange-600 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2">
+                        <LayoutGrid size={12} />
+                        {item.category || "Umum"}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Konten */}
-                  <div className="p-6 flex flex-col flex-grow">
+                  <div className="p-8 flex flex-col flex-grow relative">
                     {/* Tanggal */}
-                    <div className="flex items-center text-xs text-gray-500 mb-3 gap-2">
+                    <div className="flex items-center text-xs font-bold text-slate-400 mb-4 gap-2 uppercase tracking-wide">
                       <Calendar size={14} className="text-orange-500" />
                       <span>{formatDate(item.created_at)}</span>
                     </div>
 
-                    <h3 className="font-bold text-xl text-gray-900 mb-3 leading-snug group-hover:text-black-600 transition-colors line-clamp-2">
-                      <Link to={`/artikel/${item.id}`}>{item.title}</Link>
+                    <h3 className="anim-title font-bold text-xl text-slate-900 mb-4 leading-snug transition-colors line-clamp-2">
+                      <Link
+                        to={`/artikel/${item.id}`}
+                        className="hover:underline decoration-orange-500 underline-offset-4 decoration-2"
+                      >
+                        {item.title}
+                      </Link>
                     </h3>
 
-                    <p className="text-gray-600 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed">
+                    <p className="text-slate-500 text-sm line-clamp-3 mb-6 flex-grow leading-relaxed">
                       {item.content}
                     </p>
 
                     <Link
                       to={`/artikel/${item.id}`}
-                      className="inline-flex items-center gap-2 text-orange-600 font-bold text-sm hover:text-orange-700 transition-colors group/link mt-auto"
+                      className="inline-flex items-center justify-between w-full px-5 py-3 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-orange-500 hover:text-white transition-all duration-300 border border-slate-200 hover:border-orange-500 group/btn"
                     >
-                      Baca Selengkapnya
+                      <span>Baca Selengkapnya</span>
                       <ArrowRight
-                        size={16}
-                        className="transition-transform group-hover/link:translate-x-1"
+                        size={18}
+                        className="transition-transform group-hover/btn:translate-x-1"
                       />
                     </Link>
                   </div>
