@@ -42,8 +42,11 @@ const FormProgram = lazy(() => import("./pages/admin/FormProgram"));
 
 // Loading Component (Muncul pas pindah halaman)
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen bg-slate-50">
-    <Loader2 className="animate-spin text-orange-600 w-10 h-10" />
+  <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+    <Loader2 className="animate-spin text-orange-600 w-12 h-12 mb-4" />
+    <p className="text-slate-500 font-medium animate-pulse">
+      Memuat halaman...
+    </p>
   </div>
 );
 
