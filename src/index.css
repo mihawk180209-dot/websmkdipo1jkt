@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", sans-serif;
+  /* Font Sans otomatis digunakan oleh class font-sans dan body */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Variabel custom untuk heading */
+  --font-heading: "Poppins", sans-serif;
+
+  /* Tetap pertahankan warna yang sudah ada */
   --color-primary: #f97316;
   --color-secondary: #1e293b;
   --color-accent: #22c55e;
@@ -12,22 +18,24 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
-  /* Di v4, @apply akan jalan otomatis setelah @import "tailwindcss" */
-  overflow-x: hidden; /* Mencegah scroll ke samping pada level halaman utama */
-  width: 100%;
-  position: relative;
-  @apply bg-gray-50 text-gray-800 font-sans;
-}
+@layer base {
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    /* Menerapkan Inter sebagai default body */
+    font-family: var(--font-sans);
+    @apply bg-gray-50 text-gray-800;
+  }
 
-/* Custom Scrollbar */
-/* ::-webkit-scrollbar {
-  width: 2px;
+  /* Menerapkan Poppins otomatis ke semua tag heading */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    @apply font-bold; /* Membuat heading otomatis tebal */
+  }
 }
-::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-} */
-/* ::-webkit-scrollbar-thumb {
-  background-color: var(--color-primary);
-  border-radius: 9px;
-} */
