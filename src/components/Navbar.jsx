@@ -4,7 +4,7 @@ import { Menu } from "lucide-react";
 import { navLinks } from "../data/navigation";
 import Dropdown from "./Dropdown";
 import MobileMenu from "./Mobilemenu";
-import logo from "../assets/logo yayasan al-hidayah-02.png";
+import logo from "../assets/logo yayasan al-hidayah-02.webp";
 
 // --- GSAP IMPORT ---
 import gsap from "gsap";

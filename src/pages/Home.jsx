@@ -1,15 +1,33 @@
 import React, { useRef } from "react";
-import { ArrowRight, BookOpen, Users, Trophy, Quote } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Users,
+  Trophy,
+  Quote,
+  Monitor,
+  Cpu,
+  Briefcase,
+  Award,
+  Palette,
+  PenTool,
+  Calendar,
+} from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 // GSAP IMPORTS
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// GANTI FOTO KEPSEK DI SINI
+// ASSETS IMPORT
+// Pastikan path ini sesuai dengan struktur foldermu
 import fotokepsek from "../assets/Bu Ipeh.webp";
-import logo from "../assets/logo yayasan al-hidayah-02.png";
+import logo from "../assets/logo yayasan al-hidayah-02.webp";
+import tkjCustomIcon from "../assets/icon-tkj2.webp";
+import dkvCustomIcon from "../assets/icon-dkv2.webp";
 
 // Register GSAP Plugins
 gsap.registerPlugin(ScrollTrigger);
@@ -19,32 +37,37 @@ const Home = () => {
 
   useGSAP(
     () => {
-      // --- 1. HERO SECTION ANIMATIONS (On Load) --- //
+      // --- 1. HERO SECTION ANIMATIONS (Fix Ghosting pakai fromTo) --- //
       const tlHero = gsap.timeline();
 
-      // Badge, Title, Desc, Buttons (Staggered Fade Up)
+      // Badge, Title, Desc, Buttons
       tlHero
-        .from(".hero-element", {
-          y: 60,
-          opacity: 0,
-          duration: 1,
-          stagger: 0.15,
-          ease: "power3.out",
-        })
-        // Logo Entrance (Pop effect)
-        .from(
-          ".hero-logo",
+        .fromTo(
+          ".hero-element",
+          { y: 60, opacity: 0 }, // Start state
           {
-            scale: 0.5,
-            opacity: 0,
-            rotation: -10,
+            y: 0,
+            opacity: 1,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+          }, // End state
+        )
+        // Logo Entrance
+        .fromTo(
+          ".hero-logo",
+          { scale: 0.5, opacity: 0, rotation: -10 },
+          {
+            scale: 1,
+            opacity: 1,
+            rotation: 0,
             duration: 1.2,
             ease: "elastic.out(1, 0.5)",
           },
           "-=0.8",
         );
 
-      // Background Blobs (Infinite Floating) - Replaces animate={{ repeat: Infinity }}
+      // Background Blobs (Infinite Floating - Aman pakai .to)
       gsap.to(".blob-orange", {
         scale: 1.1,
         opacity: 0.5,
@@ -63,7 +86,7 @@ const Home = () => {
         ease: "sine.inOut",
       });
 
-      // Logo Floating (Infinite Hover)
+      // Logo Floating
       gsap.to(".hero-logo-img", {
         y: -15,
         duration: 2.5,
@@ -72,33 +95,38 @@ const Home = () => {
         ease: "sine.inOut",
       });
 
-      // --- 2. SAMBUTAN KEPSEK (ScrollTrigger) --- //
-      // Foto Slide in from Left
-      gsap.from(".kepsek-image-wrapper", {
-        scrollTrigger: {
-          trigger: ".kepsek-section",
-          start: "top 75%",
+      // --- 2. SAMBUTAN KEPSEK (ScrollTrigger Fix) --- //
+      gsap.fromTo(
+        ".kepsek-image-wrapper",
+        { x: -100, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".kepsek-section",
+            start: "top 75%",
+          },
         },
-        x: -100,
-        opacity: 0,
-        duration: 1.2,
-        ease: "power3.out",
-      });
+      );
 
-      // Text Slide in from Right
-      gsap.from(".kepsek-text-wrapper", {
-        scrollTrigger: {
-          trigger: ".kepsek-section",
-          start: "top 75%",
+      gsap.fromTo(
+        ".kepsek-text-wrapper",
+        { x: 100, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 1.2,
+          ease: "power3.out",
+          delay: 0.2,
+          scrollTrigger: {
+            trigger: ".kepsek-section",
+            start: "top 75%",
+          },
         },
-        x: 100,
-        opacity: 0,
-        duration: 1.2,
-        ease: "power3.out",
-        delay: 0.2, // Sedikit delay setelah foto
-      });
+      );
 
-      // Progress Bar Animation
       gsap.fromTo(
         ".kepsek-progress",
         { width: 0 },
@@ -109,30 +137,36 @@ const Home = () => {
         },
       );
 
-      // --- 3. STATS SECTION (Staggered Scroll) --- //
-      gsap.from(".stat-card", {
-        scrollTrigger: {
-          trigger: ".stats-container",
-          start: "top 85%",
+      // --- 3. STATS SECTION (ScrollTrigger Fix) --- //
+      gsap.fromTo(
+        ".stat-card",
+        { y: 60, scale: 0.8, opacity: 0 },
+        {
+          y: 0,
+          scale: 1,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: ".stats-container",
+            start: "top 85%",
+          },
         },
-        y: 60,
-        scale: 0.8,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "back.out(1.7)", // Bounce effect
-      });
+      );
 
-      // --- 4. JURUSAN SECTION --- //
-      // Header Text
-      gsap.from(".jurusan-header", {
-        scrollTrigger: { trigger: ".jurusan-header", start: "top 85%" },
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-      });
+      // --- 4. JURUSAN SECTION (ScrollTrigger Fix) --- //
+      gsap.fromTo(
+        ".jurusan-header",
+        { y: 30, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          scrollTrigger: { trigger: ".jurusan-header", start: "top 85%" },
+        },
+      );
 
-      // Divider Line
       gsap.fromTo(
         ".jurusan-divider",
         { width: 0 },
@@ -144,28 +178,67 @@ const Home = () => {
         },
       );
 
-      // Jurusan Cards
-      gsap.from(".jurusan-card", {
-        scrollTrigger: {
-          trigger: ".jurusan-cards-container",
-          start: "top 80%",
+      // Animation Kartu Jurusan (Slide Up)
+      gsap.fromTo(
+        ".jurusan-card",
+        { y: 100, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          stagger: 0.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".jurusan-cards-container",
+            start: "top 80%",
+          },
         },
-        y: 100,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out",
+      );
+
+      // --- 5. FLOATING ICONS (JURUSAN BACKGROUND) --- //
+      // Monitor & CPU (TKJ)
+      gsap.to(".float-icon-tkj-1", {
+        y: -15,
+        rotation: 5,
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+      gsap.to(".float-icon-tkj-2", {
+        y: -10,
+        duration: 4,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: 1,
+      });
+
+      // Palette & PenTool (DKV)
+      gsap.to(".float-icon-dkv-1", {
+        y: -15,
+        rotation: -5,
+        duration: 3.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+      gsap.to(".float-icon-dkv-2", {
+        y: -10,
+        duration: 4.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        delay: 0.5,
       });
     },
     { scope: container },
   );
 
   // --- INTERACTION HANDLERS (HOVER) --- //
-  // Because we removed framer's whileHover, we use GSAP contextSafe for interactions
-
   const { contextSafe } = useGSAP({ scope: container });
 
-  // Generic Hover Scale
+  // Generic Hover Scale for Stats
   const onHoverScale = contextSafe((e) => {
     gsap.to(e.currentTarget, {
       scale: 1.05,
@@ -186,40 +259,25 @@ const Home = () => {
     gsap.to(e.currentTarget, { y: 0, scale: 1, duration: 0.2 });
   });
 
-  // Jurusan Card Hover (Complex: Lift card, Rotate Icon, Fade BG)
-  const onCardHover = contextSafe((e) => {
-    const card = e.currentTarget;
-    const icon = card.querySelector(".card-icon");
-    const bg = card.querySelector(".card-bg-overlay");
-    const title = card.querySelector("h3");
+  const [homeArticles, setHomeArticles] = useState([]);
+  const [loadingArticles, setLoadingArticles] = useState(true);
 
-    gsap.to(card, { y: -10, duration: 0.4, ease: "power2.out" });
-    if (icon)
-      gsap.to(icon, {
-        scale: 1.2,
-        rotate: 10,
-        duration: 0.4,
-        ease: "back.out(1.7)",
-      });
-    if (bg) gsap.to(bg, { opacity: 1, duration: 0.4 });
-    if (title) gsap.to(title, { color: card.dataset.color, duration: 0.3 }); // Optional color change
-  });
+  useEffect(() => {
+    fetchHomeArticles();
+  }, []);
 
-  const onCardReset = contextSafe((e) => {
-    const card = e.currentTarget;
-    const icon = card.querySelector(".card-icon");
-    const bg = card.querySelector(".card-bg-overlay");
-    const title = card.querySelector("h3");
+  const fetchHomeArticles = async () => {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(3);
 
-    gsap.to(card, { y: 0, duration: 0.4, ease: "power2.out" });
-    if (icon) gsap.to(icon, { scale: 1, rotate: 0, duration: 0.4 });
-    if (bg) gsap.to(bg, { opacity: 0, duration: 0.4 });
-    if (title) gsap.to(title, { clearProps: "color", duration: 0.3 });
-  });
+    if (!error) setHomeArticles(data || []);
+    setLoadingArticles(false);
+  };
 
   return (
-    // PERBAIKAN: Hapus 'overflow-x-hidden' disini.
-    // Kita biarkan 'body' yang handle overflow-x dari CSS global.
     <div ref={container} className="w-full font-sans">
       {/* ==================== HERO SECTION ==================== */}
       <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/30 pt-24 pb-20 lg:pt-32 lg:pb-32">
@@ -295,8 +353,6 @@ const Home = () => {
                 {/* Background Shape */}
                 <div className="absolute top-4 -right-4 w-full h-full bg-orange-100 rounded-3xl -z-10 transition-transform duration-500 group-hover:rotate-6"></div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-teal-50 rounded-full -z-10 blur-xl"></div>
-
-                {/* {GANTI FOTO KEPSEK} */}
 
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl border-[6px] border-white">
                   <img
@@ -417,82 +473,331 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ==================== JURUSAN SECTION ==================== */}
+      {/* ==================== JURUSAN SECTION (UPDATED) ==================== */}
       <section className="py-20 bg-gray-50/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           {/* Header */}
-          <div className="jurusan-header text-center mb-16">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-800 mb-4">
-              Program Keahlian
+          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 mb-4 justify-center">
+              <span className="w-8 h-1 bg-primary rounded-full"></span>
+              <span className="text-primary font-bold tracking-wider uppercase text-sm">
+                Pilihan Masa Depan
+              </span>
+              <span className="w-8 h-1 bg-primary rounded-full"></span>
+            </div>
+
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight">
+              Program{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
+                Keahlian
+              </span>
             </h2>
-            <div className="jurusan-divider h-1.5 bg-primary mx-auto rounded-full w-0"></div>
-            <p className="mt-4 text-gray-600 max-w-2xl mx-auto text-lg">
+
+            <p className="mt-4 text-gray-500 text-lg">
               Pilih masa depanmu dengan program keahlian yang relevan dengan
-              industri.
+              kebutuhan industri masa kini.
             </p>
           </div>
 
-          {/* Cards Container */}
-          <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {/* TKJ Card */}
-            <div
-              className="jurusan-card bg-white rounded-3xl shadow-xl overflow-hidden group border border-gray-100 transition-colors hover:border-cyan-400/30 cursor-pointer"
-              data-color="#0891b2" // Color for hover logic
-              onMouseEnter={onCardHover}
-              onMouseLeave={onCardReset}
-            >
-              <div className="h-64 bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center relative overflow-hidden">
-                <div className="card-bg-overlay absolute inset-0 bg-white/10 opacity-0" />
-                <span className="card-icon text-8xl drop-shadow-lg cursor-default block">
-                  💻
-                </span>
+          {/* ==================== CARDS CONTAINER ==================== */}
+          <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-6xl mx-auto">
+            {/* TKJ CARD (THEME: TEAL / CYAN) */}
+            <div className="jurusan-card group relative bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-slate-100 flex flex-col h-full">
+              {/* Header Image */}
+              <div className="h-72 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
+                {/* Pattern Overlay */}
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(#fff 1px, transparent 1px)",
+                    backgroundSize: "20px 20px",
+                  }}
+                ></div>
+
+                {/* Floating Icons */}
+                <div className="float-icon-tkj-1 absolute -right-10 -bottom-10 opacity-20">
+                  <Monitor
+                    size={140}
+                    className="text-white rotate-12 group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <div className="float-icon-tkj-2 absolute top-10 left-10 opacity-20">
+                  <Cpu size={80} className="text-white" />
+                </div>
+
+                <div className="relative z-10 text-center">
+                  {/* ICON CUSTOM */}
+                  <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 border border-white/30 text-white shadow-lg group-hover:rotate-12 transition-transform duration-500">
+                    <img
+                      src={tkjCustomIcon}
+                      alt="Logo TKJ"
+                      className="w-16 h-16 object-contain drop-shadow-md"
+                    />
+                  </div>
+
+                  <h2 className="text-4xl font-extrabold text-white tracking-wide mb-1">
+                    TKJ
+                  </h2>
+                  <p className="text-teal-100 font-medium">
+                    Teknik Komputer & Jaringan
+                  </p>
+                </div>
               </div>
-              <div className="p-10 relative">
-                <h3 className="text-2xl font-bold mb-3 text-gray-800 transition-colors">
-                  Teknik Komputer & Jaringan
-                </h3>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  Ahli dalam perakitan, jaringan, server, dan keamanan siber.
+
+              {/* Content */}
+              <div className="p-8 lg:p-10 flex flex-col flex-grow">
+                <p className="text-slate-600 mb-8 leading-relaxed flex-grow text-lg">
+                  Mencetak teknisi handal yang ahli dalam perakitan komputer,
+                  instalasi jaringan (LAN/WAN), administrasi server, mikrotik,
+                  hingga keamanan siber (Cyber Security).
                 </p>
+
+                <div className="space-y-4 mb-10">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-teal-50 text-teal-600 rounded-xl mt-0.5">
+                      <Briefcase size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">
+                        Prospek Karir
+                      </h4>
+                      <p className="text-sm text-slate-500">
+                        Network Engineer, IT Support, Cyber Security Analyst
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-teal-50 text-teal-600 rounded-xl mt-0.5">
+                      <Award size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Sertifikasi</h4>
+                      <p className="text-sm text-slate-500">
+                        Mikrotik MTCNA, BNSP Teknisi Jaringan
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <Link
                   to="/jurusan/tkj"
-                  className="inline-flex items-center justify-center w-full px-6 py-4 bg-cyan-50 text-cyan-700 font-bold rounded-2xl hover:bg-teal-500 hover:text-white transition-all hover:shadow-lg hover:shadow-cyan-200"
+                  className="block w-full py-4 bg-teal-50 text-teal-700 text-center font-bold rounded-2xl hover:bg-teal-600 hover:text-white transition-all shadow-sm hover:shadow-lg border border-teal-100 hover:border-teal-600"
                 >
-                  Jelajahi TKJ <ArrowRight size={18} className="ml-2" />
+                  Jelajahi TKJ
                 </Link>
               </div>
             </div>
 
-            {/* DKV Card */}
-            <div
-              className="jurusan-card bg-white rounded-3xl shadow-xl overflow-hidden group border border-gray-100 transition-colors hover:border-purple-400/30 cursor-pointer"
-              data-color="#9333ea"
-              onMouseEnter={onCardHover}
-              onMouseLeave={onCardReset}
-            >
-              <div className="h-64 bg-gradient-to-br from-purple-500 to-fuchsia-600 flex items-center justify-center relative overflow-hidden">
-                <div className="card-bg-overlay absolute inset-0 bg-white/10 opacity-0" />
-                <span className="card-icon text-8xl drop-shadow-lg cursor-default block">
-                  🎨
-                </span>
+            {/* DKV CARD (THEME: PURPLE / VIOLET) */}
+            <div className="jurusan-card group relative bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-slate-100 flex flex-col h-full">
+              {/* Header Image */}
+              <div className="h-72 bg-gradient-to-br from-violet-500 to-fuchsia-600 relative flex items-center justify-center overflow-hidden">
+                <div
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(#fff 1px, transparent 1px)",
+                    backgroundSize: "20px 20px",
+                  }}
+                ></div>
+
+                {/* Floating Icons */}
+                <div className="float-icon-dkv-1 absolute -left-10 -bottom-10 opacity-20">
+                  <Palette
+                    size={140}
+                    className="text-white -rotate-12 group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <div className="float-icon-dkv-2 absolute top-10 right-10 opacity-20">
+                  <PenTool size={80} className="text-white" />
+                </div>
+
+                <div className="relative z-10 text-center">
+                  {/* ICON CUSTOM */}
+                  <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 border border-white/30 text-white shadow-lg group-hover:-rotate-12 transition-transform duration-500">
+                    <img
+                      src={dkvCustomIcon}
+                      alt="Logo DKV"
+                      className="w-16 h-16 object-contain drop-shadow-md"
+                    />
+                  </div>
+
+                  <h2 className="text-4xl font-extrabold text-white tracking-wide mb-1">
+                    DKV
+                  </h2>
+                  <p className="text-violet-100 font-medium">
+                    Desain Komunikasi Visual
+                  </p>
+                </div>
               </div>
-              <div className="p-10 relative">
-                <h3 className="text-2xl font-bold mb-3 text-gray-800 transition-colors">
-                  Desain Komunikasi Visual
-                </h3>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  Kreativitas tanpa batas di dunia digital, grafis, dan
-                  multimedia.
+
+              {/* Content */}
+              <div className="p-8 lg:p-10 flex flex-col flex-grow">
+                <p className="text-slate-600 mb-8 leading-relaxed flex-grow text-lg">
+                  Mengembangkan kreativitas visual melalui penguasaan software
+                  desain grafis, fotografi, videografi, animasi 2D/3D, dan
+                  desain UI/UX untuk kebutuhan industri kreatif modern.
                 </p>
+
+                <div className="space-y-4 mb-10">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-violet-50 text-violet-600 rounded-xl mt-0.5">
+                      <Briefcase size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">
+                        Prospek Karir
+                      </h4>
+                      <p className="text-sm text-slate-500">
+                        Graphic Designer, UI/UX Designer, Photographer
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 bg-violet-50 text-violet-600 rounded-xl mt-0.5">
+                      <Award size={20} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Sertifikasi</h4>
+                      <p className="text-sm text-slate-500">
+                        Adobe Certified Professional (ACP), BNSP Desain
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <Link
                   to="/jurusan/dkv"
-                  className="inline-flex items-center justify-center w-full px-6 py-4 bg-purple-50 text-purple-600 font-bold rounded-2xl hover:bg-purple-600 hover:text-white transition-all hover:shadow-lg hover:shadow-purple-200"
+                  className="block w-full py-4 bg-violet-50 text-violet-700 text-center font-bold rounded-2xl hover:bg-violet-600 hover:text-white transition-all shadow-sm hover:shadow-lg border border-violet-100 hover:border-violet-600"
                 >
-                  Jelajahi DKV <ArrowRight size={18} className="ml-2" />
+                  Jelajahi DKV
                 </Link>
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ==================== ARTIKEL TERBARU ==================== */}
+      <section className="artikel-section py-24 bg-white relative overflow-hidden">
+        {/* Dekorasi Background */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-50 -translate-x-1/2 -translate-y-1/2"></div>
+
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20 relative z-10">
+          {/* Header Section (Centered) */}
+          <div className="artikel-header text-center max-w-3xl mx-auto mb-16">
+            <div className="inline-flex items-center gap-2 mb-4 justify-center">
+              <span className="w-8 h-1 bg-primary rounded-full"></span>
+              <span className="text-primary font-bold tracking-wider uppercase text-sm">
+                Dokumentasi Sekolah
+              </span>
+              <span className="w-8 h-1 bg-primary rounded-full"></span>
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight">
+              Artikel &{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
+                Kegiatan Terbaru
+              </span>
+            </h2>
+            <p className="text-gray-500 mt-4 text-lg">
+              Ikuti perkembangan terbaru, prestasi siswa, dan informasi edukatif
+              dari SMK Diponegoro 1 Jakarta.
+            </p>
+          </div>
+
+          {/* Content Section */}
+          {loadingArticles ? (
+            <div className="flex flex-col items-center py-20">
+              <div className="w-12 h-12 border-4 border-orange-100 border-t-primary rounded-full animate-spin"></div>
+              <p className="text-gray-400 mt-4 font-medium">
+                Menyusun informasi...
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="artikel-grid grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {homeArticles.length > 0 ? (
+                  homeArticles.map((item) => (
+                    <Link
+                      key={item.id}
+                      to={`/artikel/${item.id}`}
+                      className="artikel-card group bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-orange-200/40 transition-all duration-500 overflow-hidden flex flex-col h-full hover:-translate-y-2"
+                    >
+                      {/* Image Wrapper */}
+                      <div className="relative h-60 overflow-hidden">
+                        {item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.title}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full bg-slate-50 text-slate-400">
+                            <Monitor size={48} className="opacity-20" />
+                          </div>
+                        )}
+                        {/* Date Badge */}
+                        <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm">
+                          <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
+                            <Calendar size={14} />
+                            {new Date(item.created_at).toLocaleDateString(
+                              "id-ID",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Content Body */}
+                      <div className="p-8 flex flex-col flex-grow">
+                        <h3 className="font-extrabold text-xl text-gray-900 line-clamp-2 mb-4 group-hover:text-primary transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-500 line-clamp-3 leading-relaxed mb-6 flex-grow">
+                          {item.content}
+                        </p>
+
+                        <div className="pt-6 border-t border-slate-50 flex items-center text-primary font-bold text-sm">
+                          Baca Selengkapnya
+                          <ArrowRight
+                            size={16}
+                            className="ml-2 group-hover:translate-x-2 transition-transform"
+                          />
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                    <p className="text-gray-400">
+                      Belum ada artikel yang diterbitkan.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Button (Now at Bottom Center) */}
+              <div className="artikel-footer mt-16 flex justify-center">
+                <Link
+                  to="/artikel"
+                  onMouseEnter={onButtonHover}
+                  onMouseLeave={onButtonReset}
+                  className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-orange-200 hover:shadow-xl hover:bg-orange-600 transition-all duration-300 group"
+                >
+                  Lihat Semua Artikel
+                  <ArrowRight
+                    size={20}
+                    className="group-hover:translate-x-2 transition-transform"
+                  />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
     </div>

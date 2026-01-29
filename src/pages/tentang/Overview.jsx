@@ -15,7 +15,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Import Logo (Sesuaikan path)
-import logo from "../../assets/logo yayasan al-hidayah-02.png";
+import logo from "../../assets/logo yayasan al-hidayah-02.webp";
 
 // Register Plugin
 gsap.registerPlugin(ScrollTrigger);

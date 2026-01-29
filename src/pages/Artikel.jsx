@@ -142,7 +142,7 @@ const Artikel = () => {
     });
 
     // Title Color
-    gsap.to(title, { color: "#ea580c", duration: 0.3 });
+    gsap.to(title, { color: "#ea580c", duration: 0.1 });
   };
 
   const handleMouseLeave = (e) => {
