@@ -15,7 +15,7 @@ export const navLinks = [
       { title: "Program Unggulan", path: "/tentang/program-unggulan" },
       {
         title: "OSIS",
-        path: "https://osissmkdipo1.netlify.app", // <--- Ganti link web OSIS di sini
+        path: "https://osissmkdipo1jkt.vercel.app", // <--- Ganti link web OSIS di sini
         isExternal: true,
         target: "_blank", // <--- Penanda ini link keluar
       },

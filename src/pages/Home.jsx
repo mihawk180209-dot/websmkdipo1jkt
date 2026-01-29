@@ -7,8 +7,8 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// ASSETS
-import fotokepsek from "../assets/Bu Ipeh.jpg";
+// GANTI FOTO KEPSEK DI SINI
+import fotokepsek from "../assets/Bu Ipeh.webp";
 import logo from "../assets/logo yayasan al-hidayah-02.png";
 
 // Register GSAP Plugins
@@ -295,6 +295,8 @@ const Home = () => {
                 {/* Background Shape */}
                 <div className="absolute top-4 -right-4 w-full h-full bg-orange-100 rounded-3xl -z-10 transition-transform duration-500 group-hover:rotate-6"></div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-teal-50 rounded-full -z-10 blur-xl"></div>
+
+                {/* {GANTI FOTO KEPSEK} */}
 
                 <div className="relative rounded-3xl overflow-hidden shadow-2xl border-[6px] border-white">
                   <img
