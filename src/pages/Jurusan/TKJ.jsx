@@ -324,7 +324,7 @@ const TKJ = () => {
         <div className="absolute inset-0 z-0">
           <div className="w-full h-full">
             <img
-              src="https://images.unsplash.com/photo-1558494949-ef526b0042a0?auto=format&fit=crop&q=80&w=1920"
+              src="https://unsplash.com/photos/a-close-up-of-a-network-with-wires-connected-to-it-dyUp7WPu5q4?utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink"
               alt="Server Room"
               className="hero-bg-img w-full h-full object-cover opacity-0" // Start invisible for GSAP
             />
