@@ -67,6 +67,36 @@ const TKJ = () => {
   );
 
   useEffect(() => {
+    /* =======================
+       SEO METADATA (PAGE NAME)
+       ======================= */
+    try {
+      if (typeof document !== "undefined") {
+        document.title = "TKJ — Teknik Komputer & Jaringan | SMK Diponegoro 1";
+
+        let metaDesc = document.querySelector('meta[name="description"]');
+        if (!metaDesc) {
+          metaDesc = document.createElement("meta");
+          metaDesc.name = "description";
+          document.head.appendChild(metaDesc);
+        }
+        metaDesc.content =
+          "Pelajari jurusan TKJ (Teknik Komputer dan Jaringan) di SMK Diponegoro 1 Jakarta. Fokus jaringan, server, cloud, dan keamanan siber.";
+
+        let canonical = document.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+          canonical = document.createElement("link");
+          canonical.rel = "canonical";
+          document.head.appendChild(canonical);
+        }
+        canonical.href = window.location.href;
+      }
+    } catch (e) {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
     const rIC =
       typeof window !== "undefined" && window.requestIdleCallback
         ? window.requestIdleCallback.bind(window)

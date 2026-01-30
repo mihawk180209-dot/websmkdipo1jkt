@@ -34,33 +34,63 @@ const Overview = () => {
         gsap.fromTo(
           ".anim-hero",
           { y: 30, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "power3.out",
+          },
         );
 
         // 2. Intro Section (Left & Right)
         gsap.fromTo(
           ".anim-intro-left",
           { x: -30, autoAlpha: 0 },
-          { x: 0, autoAlpha: 1, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".intro-section", start: "top 80%" } },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: { trigger: ".intro-section", start: "top 80%" },
+          },
         );
 
         gsap.fromTo(
           ".anim-intro-right",
           { x: 30, autoAlpha: 0 },
-          { x: 0, autoAlpha: 1, duration: 1, ease: "power3.out", delay: 0.1, scrollTrigger: { trigger: ".intro-section", start: "top 80%" } },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 1,
+            ease: "power3.out",
+            delay: 0.1,
+            scrollTrigger: { trigger: ".intro-section", start: "top 80%" },
+          },
         );
 
         // 3. Grid Menu Cards (Staggered Batch)
         gsap.fromTo(
           ".anim-card-entry",
           { y: 40, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.5)", scrollTrigger: { trigger: ".grid-container", start: "top 85%" } },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "back.out(1.5)",
+            scrollTrigger: { trigger: ".grid-container", start: "top 85%" },
+          },
         );
       }, comp);
     };
 
-    const ric = (typeof window !== "undefined" && (window.requestIdleCallback || null)) || null;
-    const handle = ric ? window.requestIdleCallback(startAnim) : setTimeout(startAnim, 120);
+    const ric =
+      (typeof window !== "undefined" && (window.requestIdleCallback || null)) ||
+      null;
+    const handle = ric
+      ? window.requestIdleCallback(startAnim)
+      : setTimeout(startAnim, 120);
 
     return () => {
       try {
@@ -128,10 +158,26 @@ const Overview = () => {
   // Memoize static menu data to avoid re-creating on each render
   const exploreMenus = useMemo(
     () => [
-      { title: "Sejarah", icon: <History size={28} />, path: "/tentang/sejarah" },
-      { title: "Guru & Staf", icon: <Users size={28} />, path: "/tentang/guru" },
-      { title: "Fasilitas", icon: <Building size={28} />, path: "/tentang/fasilitas" },
-      { title: "Struktur Org", icon: <FileText size={28} />, path: "/tentang/struktur" },
+      {
+        title: "Sejarah",
+        icon: <History size={28} />,
+        path: "/tentang/sejarah",
+      },
+      {
+        title: "Guru & Staf",
+        icon: <Users size={28} />,
+        path: "/tentang/guru",
+      },
+      {
+        title: "Fasilitas",
+        icon: <Building size={28} />,
+        path: "/tentang/fasilitas",
+      },
+      {
+        title: "Struktur Org",
+        icon: <FileText size={28} />,
+        path: "/tentang/struktur",
+      },
       { title: "Seragam", icon: <Shirt size={28} />, path: "/tentang/seragam" },
     ],
     [],
@@ -140,7 +186,7 @@ const Overview = () => {
   // Lightweight SEO metadata (DOM) without adding dependencies
   useEffect(() => {
     try {
-      document.title = "Tentang — SMK Diponegoro 1 Jakarta";
+      document.title = "Overview Tentang Kami — SMK Diponegoro 1 Jakarta";
       let meta = document.querySelector('meta[name="description"]');
       if (!meta) {
         meta = document.createElement("meta");
