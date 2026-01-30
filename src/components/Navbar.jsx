@@ -1,47 +1,58 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  lazy,
+  Suspense,
+} from "react";
+import { NavLink } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { navLinks } from "../data/navigation";
 import Dropdown from "./Dropdown";
-import MobileMenu from "./Mobilemenu";
 import logo from "../assets/logo yayasan al-hidayah-02.webp";
-
-// --- GSAP IMPORT ---
 import gsap from "gsap";
+
+// 🔥 Lazy-load MobileMenu (HUGE perf win)
+const MobileMenu = lazy(() => import("./Mobilemenu"));
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
 
-  // --- REFS UNTUK ANIMASI ---
+  // --- REFS ---
   const headerRef = useRef(null);
   const logoRef = useRef(null);
-  const navLinksRef = useRef(null); // Container untuk link desktop
-  const ppdbBtnRef = useRef(null); // Ref khusus tombol PPDB
+  const ppdbBtnRef = useRef(null);
   const menuButtonRef = useRef(null);
 
-  // --- LOGIC SCROLL (throttled via requestAnimationFrame to reduce re-renders) ---
+  /* =========================
+     SCROLL HANDLER (rAF)
+  ========================= */
   useEffect(() => {
     let ticking = false;
-    const handleScroll = () => {
+
+    const onScroll = () => {
       if (ticking) return;
       ticking = true;
-      window.requestAnimationFrame(() => {
+
+      requestAnimationFrame(() => {
         const scrolled = window.scrollY > 20;
         setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
         ticking = false;
       });
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // --- GSAP ANIMATION: ENTRANCE & SCROLL EFFECT ---
-  // --- GSAP ANIMATION: ENTRANCE & SCROLL EFFECT ---
-  // UseEffect + rAF start to avoid blocking first paint (preserve timings)
+  /* =========================
+     GSAP: ENTRANCE
+  ========================= */
   useEffect(() => {
-    let ctx = gsap.context(() => {
+    const ctx = gsap.context(() => {
       const tl = gsap.timeline();
 
       tl.from(headerRef.current, {
@@ -83,50 +94,29 @@ const Navbar = () => {
         );
     }, headerRef);
 
-    // start after paint to avoid blocking LCP
-    const startId = window.requestAnimationFrame(() => {});
-
-    return () => {
-      try {
-        ctx.revert();
-      } catch (e) {
-        /* ignore */
-      }
-      try {
-        window.cancelAnimationFrame(startId);
-      } catch (e) {
-        /* ignore */
-      }
-    };
+    return () => ctx.revert();
   }, []);
 
-  // --- GSAP ANIMATION: REACTIVE SCROLL CHANGE ---
-  // Menggantikan class conditional CSS agar transisi padding lebih smooth
+  /* =========================
+     GSAP: SCROLL STYLE
+  ========================= */
   useEffect(() => {
-    if (isScrolled) {
-      gsap.to(headerRef.current, {
-        paddingTop: "0.5rem",
-        paddingBottom: "0.5rem",
-        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-        backgroundColor: "rgba(255, 255, 255, 0.95)", // Sedikit transparan
-        backdropFilter: "blur(8px)",
-        duration: 0.3,
-        ease: "power2.out",
-      });
-    } else {
-      gsap.to(headerRef.current, {
-        paddingTop: "1rem", // setara py-4
-        paddingBottom: "1rem",
-        boxShadow: "none",
-        backgroundColor: "rgba(255, 255, 255, 1)",
-        backdropFilter: "blur(0px)",
-        duration: 0.3,
-        ease: "power2.out",
-      });
-    }
+    gsap.to(headerRef.current, {
+      paddingTop: isScrolled ? "0.5rem" : "1rem",
+      paddingBottom: isScrolled ? "0.5rem" : "1rem",
+      boxShadow: isScrolled ? "0 4px 6px -1px rgb(0 0 0 / 0.1)" : "none",
+      backgroundColor: isScrolled
+        ? "rgba(255,255,255,0.95)"
+        : "rgba(255,255,255,1)",
+      backdropFilter: isScrolled ? "blur(8px)" : "blur(0px)",
+      duration: 0.3,
+      ease: "power2.out",
+    });
   }, [isScrolled]);
 
-  // --- HELPER: HOVER ANIMATIONS (stable callbacks) ---
+  /* =========================
+     PPDB HOVER
+  ========================= */
   const onEnterBtn = useCallback(() => {
     gsap.to(ppdbBtnRef.current, {
       scale: 1.1,
@@ -134,10 +124,14 @@ const Navbar = () => {
       ease: "elastic.out(1, 0.3)",
     });
   }, []);
+
   const onLeaveBtn = useCallback(() => {
     gsap.to(ppdbBtnRef.current, { scale: 1, duration: 0.2 });
   }, []);
 
+  /* =========================
+     NAV DATA
+  ========================= */
   const desktopLinks = useMemo(
     () =>
       navLinks.filter((item) => item.title !== "PPDB" && item.title !== "BKK"),
@@ -147,26 +141,26 @@ const Navbar = () => {
   return (
     <header
       ref={headerRef}
-      // Hapus conditional class py-2 / py-4 karena sudah dihandle GSAP
       className="fixed top-0 w-full z-[999] bg-white border-b border-transparent"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
         <div className="flex items-center justify-between gap-6">
-          {/* Logo Section */}
+          {/* LOGO */}
           <NavLink to="/" className="flex items-center gap-3 group">
             <div
               ref={logoRef}
-              className="w-10 h-10 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-primary group-hover:shadow-lg transition-shadow duration-300"
+              className="w-10 h-10 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-primary group-hover:shadow-lg transition-shadow"
             >
               <img
                 src={logo}
                 alt="SMK Dipo 1"
                 className="w-full h-full object-contain p-1"
+                loading="eager"
               />
             </div>
 
             <div className="flex flex-col">
-              <span className="text-lg lg:text-xl font-bold text-gray-800 leading-tight">
+              <span className="text-lg lg:text-xl font-bold text-gray-800">
                 SMK DIPO 1
               </span>
               <span className="text-xs text-gray-500 hidden lg:block">
@@ -175,24 +169,23 @@ const Navbar = () => {
             </div>
           </NavLink>
 
-          {/* Desktop Navigation */}
-          <nav ref={navLinksRef} className="hidden lg:flex items-center gap-1">
+          {/* DESKTOP NAV */}
+          <nav className="hidden lg:flex items-center gap-1">
             {desktopLinks.map((item, idx) => (
-              // Wrapper div untuk target animasi stagger
               <div key={idx} className="nav-item-anim">
                 {item.submenu ? (
                   <Dropdown item={item} isMobile={false} />
                 ) : (
                   <NavLink
                     to={item.path}
-                    className={({ isActive }) => `
-                            px-4 py-2 font-medium rounded-full transition-colors duration-200
-                            ${
-                              isActive
-                                ? "text-primary bg-orange-50"
-                                : "text-gray-600 hover:text-primary hover:bg-gray-50"
-                            }
-                        `}
+                    className={({ isActive }) =>
+                      `px-4 py-2 font-medium rounded-full transition-colors
+                       ${
+                         isActive
+                           ? "text-primary bg-orange-50"
+                           : "text-gray-600 hover:text-primary hover:bg-gray-50"
+                       }`
+                    }
                   >
                     {item.title}
                   </NavLink>
@@ -200,19 +193,15 @@ const Navbar = () => {
               </div>
             ))}
 
-            {/* --- TAMBAHAN LINK BKK --- */}
-            <div className="nav-item-anim">
-              <a
-                href="https://bkk-dipo.vercel.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-600 hover:text-primary hover:bg-gray-50 px-4 py-2 font-medium rounded-full transition-colors duration-200"
-              >
-                BKK
-              </a>
-            </div>
+            <a
+              href="https://bkk-dipo.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-item-anim px-4 py-2 font-medium text-gray-600 rounded-full hover:bg-gray-50"
+            >
+              BKK
+            </a>
 
-            {/* Tombol PPDB (Animated Ref) */}
             <a
               ref={ppdbBtnRef}
               onMouseEnter={onEnterBtn}
@@ -220,18 +209,18 @@ const Navbar = () => {
               href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-4 px-6 py-2 bg-primary text-white font-semibold rounded-full shadow-lg hover:shadow-orange-200"
+              className="ml-4 px-6 py-2 bg-primary text-white font-semibold rounded-full shadow-lg"
             >
               PPDB
             </a>
           </nav>
 
-          {/* Mobile Toggle */}
+          {/* MOBILE BUTTON */}
           <button
             ref={menuButtonRef}
             onClick={() => setIsMobileMenuOpen(true)}
-            className="lg:hidden p-2 text-gray-600 hover:text-primary transition"
-            aria-label="Open Menu"
+            className="lg:hidden p-2 text-gray-600 hover:text-primary"
+            aria-label="Open menu"
             aria-expanded={isMobileMenuOpen}
             aria-controls="mobile-menu"
           >
@@ -240,11 +229,16 @@ const Navbar = () => {
         </div>
       </div>
 
-      <MobileMenu
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-        returnFocusRef={menuButtonRef}
-      />
+      {/* 🔥 MOBILE MENU (LAZY) */}
+      <Suspense fallback={null}>
+        <MobileMenu
+          isOpen={isMobileMenuOpen}
+          onClose={() => {
+            setIsMobileMenuOpen(false);
+            menuButtonRef.current?.focus();
+          }}
+        />
+      </Suspense>
     </header>
   );
 };
