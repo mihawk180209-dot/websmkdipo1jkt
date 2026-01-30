@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import tkjfoto from "../../assets/tkjfoto.webp";
 import tkj from "../../assets/exp.avif";
 
 // Register Plugin
@@ -324,7 +325,7 @@ const TKJ = () => {
         <div className="absolute inset-0 z-0">
           <div className="w-full h-full">
             <img
-              src="https://unsplash.com/photos/a-close-up-of-a-network-with-wires-connected-to-it-dyUp7WPu5q4?utm_source=unsplash&utm_medium=referral&utm_content=creditShareLink"
+              src={tkjfoto}
               alt="Server Room"
               className="hero-bg-img w-full h-full object-cover opacity-0" // Start invisible for GSAP
             />
