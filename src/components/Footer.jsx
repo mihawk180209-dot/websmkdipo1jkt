@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { memo, useMemo } from "react";
 import {
   Instagram,
   Facebook,
@@ -10,8 +11,49 @@ import {
 } from "lucide-react";
 
 const Footer = () => {
+  const socialLinks = useMemo(
+    () => [
+      {
+        href: "https://www.instagram.com/smk_diponegoro1",
+        label: "Instagram",
+        icon: Instagram,
+        bg: "bg-gray-800 hover:bg-pink-600",
+      },
+      {
+        href: "https://www.facebook.com/smkdiponegoro1",
+        label: "Facebook",
+        icon: Facebook,
+        bg: "bg-gray-800 hover:bg-blue-600",
+      },
+      {
+        href: "https://www.youtube.com/@SMKDipo1",
+        label: "YouTube",
+        icon: Youtube,
+        bg: "bg-gray-800 hover:bg-red-600",
+      },
+    ],
+    [],
+  );
+
+  const quickLinks = useMemo(
+    () => [
+      { to: "/tentang/profil", label: "Profil Sekolah" },
+      { to: "/jurusan", label: "Program Keahlian" },
+      { to: "/artikel", label: "Berita & Artikel" },
+      {
+        href: "https://bkk-dipo.vercel.app/",
+        label: "Bursa Kerja (BKK)",
+        external: true,
+      },
+    ],
+    [],
+  );
+
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-20 pb-10 border-t border-gray-800">
+    <footer
+      className="bg-gray-900 text-gray-300 pt-20 pb-10 border-t border-gray-800"
+      role="contentinfo"
+    >
       <div className="container mx-auto px-4 lg:px-8">
         {/* GRID UTAMA */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 items-start">
@@ -27,92 +69,64 @@ const Footer = () => {
 
             {/* Social Media Icons */}
             <div className="flex gap-3">
-              <a
-                href="https://www.instagram.com/smk_diponegoro1"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-600 hover:text-white transition-all duration-300 group"
-              >
-                <Instagram
-                  size={20}
-                  className="group-hover:scale-110 transition-transform"
-                />
-              </a>
-              <a
-                href="https://www.facebook.com/smkdiponegoro1"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 group"
-              >
-                <Facebook
-                  size={20}
-                  className="group-hover:scale-110 transition-transform"
-                />
-              </a>
-              <a
-                href="https://www.youtube.com/@SMKDipo1"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-red-600 hover:text-white transition-all duration-300 group"
-              >
-                <Youtube
-                  size={20}
-                  className="group-hover:scale-110 transition-transform"
-                />
-              </a>
+              {socialLinks.map((s, i) => {
+                const Icon = s.icon;
+                return (
+                  <a
+                    key={i}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    title={s.label}
+                    className={`w-10 h-10 ${s.bg} rounded-lg flex items-center justify-center text-white transition-all duration-300 group`}
+                  >
+                    <Icon
+                      size={20}
+                      className="group-hover:scale-110 transition-transform"
+                    />
+                  </a>
+                );
+              })}
             </div>
           </div>
 
           {/* KOLOM 2: Quick Links */}
           <div>
             <h4 className="text-lg font-bold text-white mb-6">Tautan Cepat</h4>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <NavLink
-                  to="/tentang/profil"
-                  className="hover:text-primary transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-primary transition-colors"></span>
-                  Profil Sekolah
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/jurusan"
-                  className="hover:text-primary transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-primary transition-colors"></span>
-                  Program Keahlian
-                </NavLink>
-              </li>
-              <li>
-                <NavLink
-                  to="/artikel"
-                  className="hover:text-primary transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-primary transition-colors"></span>
-                  Berita & Artikel
-                </NavLink>
-              </li>
-              <li>
-                <a
-                  href="https://bkk-dipo.vercel.app/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-primary transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-primary transition-colors"></span>
-                  Bursa Kerja (BKK)
-                </a>
-              </li>
+            <ul className="space-y-3 text-sm" aria-label="Tautan Cepat">
+              {quickLinks.map((ql, idx) => (
+                <li key={idx}>
+                  {ql.external ? (
+                    <a
+                      href={ql.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary transition-colors flex items-center gap-2 group"
+                      title={ql.label}
+                    >
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-primary transition-colors"></span>
+                      {ql.label}
+                    </a>
+                  ) : (
+                    <NavLink
+                      to={ql.to}
+                      className="hover:text-primary transition-colors flex items-center gap-2 group"
+                    >
+                      <span className="w-1.5 h-1.5 bg-gray-600 rounded-full group-hover:bg-primary transition-colors"></span>
+                      {ql.label}
+                    </NavLink>
+                  )}
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* KOLOM 3: Contact Info */}
           <div>
             <h4 className="text-lg font-bold text-white mb-6">Hubungi Kami</h4>
-            <ul className="space-y-4 text-sm">
-              <li className="flex items-start gap-3">
+            <address className="space-y-4 text-sm not-italic">
+              <div className="flex items-start gap-3">
                 <MapPin
                   size={18}
                   className="text-primary mt-0.5 flex-shrink-0"
@@ -121,16 +135,26 @@ const Footer = () => {
                   Jl. Sunan Giri No. 5, RT.8/RW.15, Rawamangun, Kec. Pulo
                   Gadung, Jakarta Timur, Indonesia
                 </span>
-              </li>
-              <li className="flex items-center gap-3">
+              </div>
+              <div className="flex items-center gap-3">
                 <Phone size={18} className="text-primary flex-shrink-0" />
-                <span className="text-gray-400">(021) 4702446</span>
-              </li>
-              <li className="flex items-center gap-3">
+                <a
+                  href="tel:+62214702446"
+                  className="text-gray-400 hover:text-white"
+                >
+                  (021) 4702446
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
                 <Mail size={18} className="text-primary flex-shrink-0" />
-                <span className="text-gray-400">humas.smkdipo1@gmail.com</span>
-              </li>
-            </ul>
+                <a
+                  href="mailto:humas.smkdipo1@gmail.com"
+                  className="text-gray-400 hover:text-white"
+                >
+                  humas.smkdipo1@gmail.com
+                </a>
+              </div>
+            </address>
           </div>
 
           {/* KOLOM 4: CTA PPDB (Highlight) */}
@@ -178,4 +202,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default memo(Footer);

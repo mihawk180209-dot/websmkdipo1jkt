@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Target,
@@ -23,82 +23,61 @@ gsap.registerPlugin(ScrollTrigger);
 const Overview = () => {
   const comp = useRef(null);
 
-  // --- GSAP ANIMATION (SAFE MODE) ---
-  useLayoutEffect(() => {
-    // Delay 100ms agar DOM stabil
-    const timer = setTimeout(() => {
-      let ctx = gsap.context(() => {
+  // --- GSAP ANIMATION (deferred to idle to reduce main-thread blocking) ---
+  useEffect(() => {
+    let ctx;
+    const startAnim = () => {
+      ctx = gsap.context(() => {
         ScrollTrigger.refresh();
 
         // 1. Hero Elements
         gsap.fromTo(
           ".anim-hero",
           { y: 30, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power3.out",
-          },
+          { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" },
         );
 
         // 2. Intro Section (Left & Right)
         gsap.fromTo(
           ".anim-intro-left",
           { x: -30, autoAlpha: 0 },
-          {
-            x: 0,
-            autoAlpha: 1,
-            duration: 1,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: ".intro-section",
-              start: "top 80%",
-            },
-          },
+          { x: 0, autoAlpha: 1, duration: 1, ease: "power3.out", scrollTrigger: { trigger: ".intro-section", start: "top 80%" } },
         );
 
         gsap.fromTo(
           ".anim-intro-right",
           { x: 30, autoAlpha: 0 },
-          {
-            x: 0,
-            autoAlpha: 1,
-            duration: 1,
-            ease: "power3.out",
-            delay: 0.1,
-            scrollTrigger: {
-              trigger: ".intro-section",
-              start: "top 80%",
-            },
-          },
+          { x: 0, autoAlpha: 1, duration: 1, ease: "power3.out", delay: 0.1, scrollTrigger: { trigger: ".intro-section", start: "top 80%" } },
         );
 
         // 3. Grid Menu Cards (Staggered Batch)
         gsap.fromTo(
           ".anim-card-entry",
           { y: 40, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.6,
-            stagger: 0.1,
-            ease: "back.out(1.5)",
-            scrollTrigger: {
-              trigger: ".grid-container",
-              start: "top 85%",
-            },
-          },
+          { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.5)", scrollTrigger: { trigger: ".grid-container", start: "top 85%" } },
         );
       }, comp);
-    }, 100);
+    };
 
-    return () => clearTimeout(timer);
+    const ric = (typeof window !== "undefined" && (window.requestIdleCallback || null)) || null;
+    const handle = ric ? window.requestIdleCallback(startAnim) : setTimeout(startAnim, 120);
+
+    return () => {
+      try {
+        if (ric && window.cancelIdleCallback) window.cancelIdleCallback(handle);
+        else clearTimeout(handle);
+      } catch (e) {}
+      try {
+        if (ctx) ctx.revert();
+      } catch (e) {}
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (e) {}
+    };
   }, []);
 
   // --- INTERAKSI HOVER (GSAP) ---
-  const handleMouseEnter = (e) => {
+  const handleMouseEnter = useCallback((e) => {
     const card = e.currentTarget;
     const iconBox = card.querySelector(".anim-icon-box");
     const title = card.querySelector(".anim-title");
@@ -120,9 +99,9 @@ const Overview = () => {
     });
 
     gsap.to(title, { color: "#ea580c", duration: 0.3 });
-  };
+  }, []);
 
-  const handleMouseLeave = (e) => {
+  const handleMouseLeave = useCallback((e) => {
     const card = e.currentTarget;
     const iconBox = card.querySelector(".anim-icon-box");
     const title = card.querySelector(".anim-title");
@@ -144,24 +123,43 @@ const Overview = () => {
     });
 
     gsap.to(title, { color: "#334155", duration: 0.3 }); // slate-700
-  };
+  }, []);
 
-  // Data Menu
-  const exploreMenus = [
-    { title: "Sejarah", icon: <History size={28} />, path: "/tentang/sejarah" },
-    { title: "Guru & Staf", icon: <Users size={28} />, path: "/tentang/guru" },
-    {
-      title: "Fasilitas",
-      icon: <Building size={28} />,
-      path: "/tentang/fasilitas",
-    },
-    {
-      title: "Struktur Org",
-      icon: <FileText size={28} />,
-      path: "/tentang/struktur",
-    },
-    { title: "Seragam", icon: <Shirt size={28} />, path: "/tentang/seragam" },
-  ];
+  // Memoize static menu data to avoid re-creating on each render
+  const exploreMenus = useMemo(
+    () => [
+      { title: "Sejarah", icon: <History size={28} />, path: "/tentang/sejarah" },
+      { title: "Guru & Staf", icon: <Users size={28} />, path: "/tentang/guru" },
+      { title: "Fasilitas", icon: <Building size={28} />, path: "/tentang/fasilitas" },
+      { title: "Struktur Org", icon: <FileText size={28} />, path: "/tentang/struktur" },
+      { title: "Seragam", icon: <Shirt size={28} />, path: "/tentang/seragam" },
+    ],
+    [],
+  );
+
+  // Lightweight SEO metadata (DOM) without adding dependencies
+  useEffect(() => {
+    try {
+      document.title = "Tentang — SMK Diponegoro 1 Jakarta";
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "description");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute(
+        "content",
+        "Tentang SMK Diponegoro 1 Jakarta — visi, misi, fasilitas, dan profil sekolah.",
+      );
+
+      if (!document.querySelector('link[rel="canonical"]')) {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        link.setAttribute("href", window.location.href);
+        document.head.appendChild(link);
+      }
+    } catch (e) {}
+  }, []);
 
   return (
     <div

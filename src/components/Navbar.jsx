@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { navLinks } from "../data/navigation";
@@ -19,32 +19,37 @@ const Navbar = () => {
   const logoRef = useRef(null);
   const navLinksRef = useRef(null); // Container untuk link desktop
   const ppdbBtnRef = useRef(null); // Ref khusus tombol PPDB
+  const menuButtonRef = useRef(null);
 
-  // --- LOGIC SCROLL (Tetap dipertahankan tapi trigger animasi GSAP) ---
+  // --- LOGIC SCROLL (throttled via requestAnimationFrame to reduce re-renders) ---
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      // Logic mendeteksi scroll > 20px
-      const scrolled = window.scrollY > 20;
-      setIsScrolled(scrolled);
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const scrolled = window.scrollY > 20;
+        setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
+        ticking = false;
+      });
     };
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // --- GSAP ANIMATION: ENTRANCE & SCROLL EFFECT ---
-  useLayoutEffect(() => {
+  // --- GSAP ANIMATION: ENTRANCE & SCROLL EFFECT ---
+  // UseEffect + rAF start to avoid blocking first paint (preserve timings)
+  useEffect(() => {
     let ctx = gsap.context(() => {
-      // 1. ANIMASI INTRO (Saat reload page)
       const tl = gsap.timeline();
 
-      // Header turun dari atas
       tl.from(headerRef.current, {
         yPercent: -100,
         opacity: 0,
         duration: 1,
         ease: "power3.out",
       })
-        // Logo muncul (Pop in)
         .from(
           logoRef.current,
           {
@@ -56,7 +61,6 @@ const Navbar = () => {
           },
           "-=0.5",
         )
-        // Link navigasi muncul bergantian (Stagger)
         .from(
           ".nav-item-anim",
           {
@@ -68,7 +72,6 @@ const Navbar = () => {
           },
           "-=0.6",
         )
-        // Tombol PPDB muncul terakhir
         .from(
           ppdbBtnRef.current,
           {
@@ -78,9 +81,23 @@ const Navbar = () => {
           },
           "-=0.2",
         );
-    }, headerRef); // Scope ke header
+    }, headerRef);
 
-    return () => ctx.revert();
+    // start after paint to avoid blocking LCP
+    const startId = window.requestAnimationFrame(() => {});
+
+    return () => {
+      try {
+        ctx.revert();
+      } catch (e) {
+        /* ignore */
+      }
+      try {
+        window.cancelAnimationFrame(startId);
+      } catch (e) {
+        /* ignore */
+      }
+    };
   }, []);
 
   // --- GSAP ANIMATION: REACTIVE SCROLL CHANGE ---
@@ -109,17 +126,23 @@ const Navbar = () => {
     }
   }, [isScrolled]);
 
-  // --- HELPER: HOVER ANIMATIONS ---
-  const onEnterBtn = () => {
+  // --- HELPER: HOVER ANIMATIONS (stable callbacks) ---
+  const onEnterBtn = useCallback(() => {
     gsap.to(ppdbBtnRef.current, {
       scale: 1.1,
       duration: 0.3,
       ease: "elastic.out(1, 0.3)",
     });
-  };
-  const onLeaveBtn = () => {
+  }, []);
+  const onLeaveBtn = useCallback(() => {
     gsap.to(ppdbBtnRef.current, { scale: 1, duration: 0.2 });
-  };
+  }, []);
+
+  const desktopLinks = useMemo(
+    () =>
+      navLinks.filter((item) => item.title !== "PPDB" && item.title !== "BKK"),
+    [],
+  );
 
   return (
     <header
@@ -154,17 +177,15 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav ref={navLinksRef} className="hidden lg:flex items-center gap-1">
-            {navLinks
-              .filter((item) => item.title !== "PPDB" && item.title !== "BKK")
-              .map((item, idx) => (
-                // Wrapper div untuk target animasi stagger
-                <div key={idx} className="nav-item-anim">
-                  {item.submenu ? (
-                    <Dropdown item={item} isMobile={false} />
-                  ) : (
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) => `
+            {desktopLinks.map((item, idx) => (
+              // Wrapper div untuk target animasi stagger
+              <div key={idx} className="nav-item-anim">
+                {item.submenu ? (
+                  <Dropdown item={item} isMobile={false} />
+                ) : (
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) => `
                             px-4 py-2 font-medium rounded-full transition-colors duration-200
                             ${
                               isActive
@@ -172,12 +193,12 @@ const Navbar = () => {
                                 : "text-gray-600 hover:text-primary hover:bg-gray-50"
                             }
                         `}
-                    >
-                      {item.title}
-                    </NavLink>
-                  )}
-                </div>
-              ))}
+                  >
+                    {item.title}
+                  </NavLink>
+                )}
+              </div>
+            ))}
 
             {/* --- TAMBAHAN LINK BKK --- */}
             <div className="nav-item-anim">
@@ -207,9 +228,12 @@ const Navbar = () => {
 
           {/* Mobile Toggle */}
           <button
+            ref={menuButtonRef}
             onClick={() => setIsMobileMenuOpen(true)}
             className="lg:hidden p-2 text-gray-600 hover:text-primary transition"
             aria-label="Open Menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-menu"
           >
             <Menu size={28} />
           </button>
@@ -219,6 +243,7 @@ const Navbar = () => {
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
+        returnFocusRef={menuButtonRef}
       />
     </header>
   );

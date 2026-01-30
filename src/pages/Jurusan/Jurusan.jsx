@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import {
   Monitor,
@@ -25,26 +25,51 @@ gsap.registerPlugin(ScrollTrigger);
 
 const Jurusan = () => {
   const comp = useRef(null);
+  const idleCtxRef = useRef(null);
+  const idleHandleRef = useRef(null);
 
-  // --- GSAP ANIMATION (SAFE MODE / ANTI-GHOSTING) ---
-  useLayoutEffect(() => {
-    // Delay 100ms agar DOM stabil
+  // Memoize small static features list to avoid re-creating on each render
+  const features = useMemo(
+    () => [
+      {
+        icon: <Briefcase size={32} />,
+        title: "Siap Kerja",
+        desc: "Kurikulum Link & Match dengan industri memastikan lulusan memiliki skill yang dibutuhkan pasar kerja.",
+        color: "bg-green-50 text-green-600 border-green-100",
+      },
+      {
+        icon: <Monitor size={32} />,
+        title: "Fasilitas Lengkap",
+        desc: "Laboratorium praktik berstandar industri dengan spesifikasi PC dan perangkat jaringan terbaru.",
+        color: "bg-blue-50 text-blue-600 border-blue-100",
+      },
+      {
+        icon: <CheckCircle2 size={32} />,
+        title: "Sertifikasi BNSP",
+        desc: "Lulusan dibekali sertifikat kompetensi nasional yang diakui sebagai bukti keahlian profesional.",
+        color: "bg-orange-50 text-orange-600 border-orange-100",
+      },
+    ],
+    [],
+  );
+
+  // GSAP: immediate reveals + deferred repeating tweens scheduled to idle
+  useEffect(() => {
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 200);
+
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
+
     const timer = setTimeout(() => {
-      let ctx = gsap.context(() => {
+      const ctx = gsap.context(() => {
         ScrollTrigger.refresh();
 
-        // 1. HEADER ANIMATION
-        gsap.to(".header-blob", {
-          scale: 1.2,
-          rotation: 15,
-          x: 20,
-          y: 20,
-          duration: 8,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-
+        // Header reveal (paint-critical)
         gsap.fromTo(
           ".anim-header",
           { y: 30, autoAlpha: 0 },
@@ -57,7 +82,7 @@ const Jurusan = () => {
           },
         );
 
-        // 2. JURUSAN CARDS (Batch Trigger)
+        // Jurusan cards (batch reveals)
         if (document.querySelector(".jurusan-grid")) {
           gsap.fromTo(
             ".jurusan-card",
@@ -70,50 +95,13 @@ const Jurusan = () => {
               ease: "back.out(1.2)",
               scrollTrigger: {
                 trigger: ".jurusan-grid",
-                start: "top 85%", // Trigger pas masuk layar
+                start: "top 85%",
               },
             },
           );
         }
 
-        // 3. FLOATING ICONS (Looping)
-        // Monitor & CPU (TKJ)
-        gsap.to(".float-icon-tkj-1", {
-          y: -15,
-          rotation: 5,
-          duration: 3,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-        gsap.to(".float-icon-tkj-2", {
-          y: -10,
-          duration: 4,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 1,
-        });
-
-        // Palette & PenTool (DKV)
-        gsap.to(".float-icon-dkv-1", {
-          y: -15,
-          rotation: -5,
-          duration: 3.5,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-        gsap.to(".float-icon-dkv-2", {
-          y: -10,
-          duration: 4.5,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-          delay: 0.5,
-        });
-
-        // 4. FEATURES GRID
+        // Features grid reveals
         gsap.fromTo(
           ".feature-card",
           { y: 40, autoAlpha: 0 },
@@ -130,7 +118,7 @@ const Jurusan = () => {
           },
         );
 
-        // 5. CTA SECTION
+        // CTA reveal
         gsap.fromTo(
           ".anim-cta",
           { y: 50, autoAlpha: 0 },
@@ -146,9 +134,73 @@ const Jurusan = () => {
           },
         );
       }, comp);
-    }, 100); // 100ms delay
 
-    return () => clearTimeout(timer);
+      // Defer repeating/looping tweens (floating icons & header blob) to idle
+      idleHandleRef.current = rIC(
+        () => {
+          idleCtxRef.current = gsap.context(() => {
+            gsap.to(".header-blob", {
+              scale: 1.2,
+              rotation: 15,
+              x: 20,
+              y: 20,
+              duration: 8,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+            });
+
+            // Floating icons (TKJ)
+            gsap.to(".float-icon-tkj-1", {
+              y: -15,
+              rotation: 5,
+              duration: 3,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+            });
+            gsap.to(".float-icon-tkj-2", {
+              y: -10,
+              duration: 4,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: 1,
+            });
+
+            // Floating icons (DKV)
+            gsap.to(".float-icon-dkv-1", {
+              y: -15,
+              rotation: -5,
+              duration: 3.5,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+            });
+            gsap.to(".float-icon-dkv-2", {
+              y: -10,
+              duration: 4.5,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: 0.5,
+            });
+          }, comp);
+        },
+        { timeout: 1200 },
+      );
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      try {
+        if (idleCtxRef.current) idleCtxRef.current.revert();
+        if (idleHandleRef.current) cIC(idleHandleRef.current);
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (err) {
+        /* ignore */
+      }
+    };
   }, []);
 
   return (

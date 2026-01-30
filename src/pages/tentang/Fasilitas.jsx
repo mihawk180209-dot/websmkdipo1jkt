@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   Wifi,
   Monitor,
@@ -10,6 +16,7 @@ import {
   Sparkles,
   Layers,
   Info,
+  Projector,
 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
@@ -24,6 +31,8 @@ const Fasilitas = () => {
   const comp = useRef(null);
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const idleCtxRef = useRef(null);
+  const idleHandleRef = useRef(null);
 
   // 1. FETCH DATA
   useEffect(() => {
@@ -44,29 +53,27 @@ const Fasilitas = () => {
     setLoading(false);
   };
 
-  // 2. GSAP ANIMATION: HEADER & STATIC UI (Jalan Langsung, Gak Nunggu Data)
-  useLayoutEffect(() => {
-    let ctx = gsap.context(() => {
-      // Background Blob
-      gsap.to(".header-blob", {
-        scale: 1.2,
-        rotation: 15,
-        x: 20,
-        y: 20,
-        duration: 8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+  // 2. GSAP ANIMATION: HEADER & STATIC UI (Immediate reveals; idle long-running tweens)
+  useEffect(() => {
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 200);
 
-      // Header Text (Pakai fromTo biar pasti)
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
+
+    const ctx = gsap.context(() => {
+      // Header Text (paint-critical)
       gsap.fromTo(
         ".anim-header",
         { y: 30, autoAlpha: 0 },
         { y: 0, autoAlpha: 1, duration: 1, stagger: 0.1, ease: "power3.out" },
       );
 
-      // Feature Icons
+      // Feature Icons (ScrollTrigger reveals)
       gsap.fromTo(
         ".feature-item",
         { scale: 0.8, autoAlpha: 0 },
@@ -84,19 +91,50 @@ const Fasilitas = () => {
       );
     }, comp);
 
-    return () => ctx.revert();
-  }, []); // Dependency kosong = Jalan sekali pas mount
+    // Defer continuous blob animation to idle
+    idleHandleRef.current = rIC(
+      () => {
+        idleCtxRef.current = gsap.context(() => {
+          gsap.to(".header-blob", {
+            scale: 1.2,
+            rotation: 15,
+            x: 20,
+            y: 20,
+            duration: 8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+        }, comp);
+      },
+      { timeout: 1200 },
+    );
+
+    return () => {
+      ctx.revert();
+      if (idleCtxRef.current) idleCtxRef.current.revert();
+      if (idleHandleRef.current) cIC(idleHandleRef.current);
+    };
+  }, []); // run once on mount
 
   // 3. GSAP ANIMATION: DYNAMIC CARDS (Jalan Setelah Data Ready)
-  useLayoutEffect(() => {
-    if (loading) return; // Skip kalau masih loading
+  useEffect(() => {
+    if (loading) return;
 
-    // Timeout dikit buat mastiin layout udah render sempurna
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 200);
+
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
+
     const timer = setTimeout(() => {
-      ScrollTrigger.refresh(); // Refresh trigger layout baru
+      ScrollTrigger.refresh();
 
-      let ctx = gsap.context(() => {
-        // Gallery Grid
+      const ctx = gsap.context(() => {
         if (document.querySelector(".gallery-grid")) {
           gsap.fromTo(
             ".anim-card",
@@ -115,7 +153,6 @@ const Fasilitas = () => {
           );
         }
 
-        // Info Section
         gsap.fromTo(
           ".anim-info",
           { scale: 0.95, autoAlpha: 0 },
@@ -130,22 +167,38 @@ const Fasilitas = () => {
             },
           },
         );
-
-        // BG Icon Spin
-        gsap.to(".bg-icon-spin", {
-          rotation: 360,
-          duration: 30,
-          repeat: -1,
-          ease: "linear",
-        });
       }, comp);
+
+      // Defer long-running bg icon spin to idle
+      idleHandleRef.current = rIC(
+        () => {
+          idleCtxRef.current = gsap.context(() => {
+            gsap.to(".bg-icon-spin", {
+              rotation: 360,
+              duration: 30,
+              repeat: -1,
+              ease: "linear",
+            });
+          }, comp);
+        },
+        { timeout: 1500 },
+      );
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      try {
+        if (idleCtxRef.current) idleCtxRef.current.revert();
+        if (idleHandleRef.current) cIC(idleHandleRef.current);
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (err) {
+        /* ignore */
+      }
+    };
   }, [loading, facilities]); // Jalan ulang kalau data berubah
 
   // --- INTERACTION HOVER ---
-  const handleMouseEnter = (e) => {
+  const handleMouseEnter = useCallback((e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
     const title = card.querySelector(".anim-title");
@@ -160,9 +213,9 @@ const Fasilitas = () => {
 
     gsap.to(img, { scale: 1.1, duration: 0.5 });
     gsap.to(title, { color: "#ea580c", duration: 0.3 });
-  };
+  }, []);
 
-  const handleMouseLeave = (e) => {
+  const handleMouseLeave = useCallback((e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
     const title = card.querySelector(".anim-title");
@@ -177,7 +230,84 @@ const Fasilitas = () => {
 
     gsap.to(img, { scale: 1, duration: 0.5 });
     gsap.to(title, { color: "#1f2937", duration: 0.3 });
-  };
+  }, []);
+
+  // Memoize rendered grid to avoid re-rendering unless data/handlers change
+  const renderedGrid = useMemo(() => {
+    if (loading) return null;
+
+    return (
+      <div className="gallery-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {facilities.map((item) => (
+          <div
+            key={item.id}
+            className="anim-card bg-white rounded-3xl border border-slate-100 overflow-hidden flex flex-col h-full cursor-default opacity-0"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="relative h-64 overflow-hidden bg-slate-100">
+              <img
+                src={item.image_url}
+                alt={item.title}
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
+                className="anim-img w-full h-full object-cover"
+              />
+
+              <div className="absolute top-4 left-4 z-10">
+                <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-orange-600 text-xs font-bold rounded-lg shadow-sm uppercase tracking-wide flex items-center gap-2">
+                  <Layers size={12} /> {item.category}
+                </span>
+              </div>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 pointer-events-none"></div>
+            </div>
+
+            <div className="p-8 flex flex-col flex-grow relative">
+              <h3 className="anim-title text-xl font-bold text-gray-800 mb-3 transition-colors">
+                {item.title}
+              </h3>
+              <p className="text-slate-500 text-sm leading-relaxed mb-4 flex-grow line-clamp-3">
+                {item.description}
+              </p>
+
+              <div className="pt-4 border-t border-slate-50 flex items-center gap-2 text-xs text-slate-400 font-medium">
+                <Info size={14} /> Fasilitas Penunjang KBM
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }, [facilities, loading, handleMouseEnter, handleMouseLeave]);
+
+  // Lightweight SEO metadata injection
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = "Fasilitas Sekolah — SMK Diponegoro 1 Jakarta";
+
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content =
+      "Sarana dan prasarana modern di SMK Diponegoro 1 Jakarta untuk mendukung kenyamanan dan kualitas pembelajaran.";
+
+    const existing = document.querySelector('link[rel="canonical"]');
+    if (!existing) {
+      const link = document.createElement("link");
+      link.rel = "canonical";
+      link.href = window.location.href;
+      document.head.appendChild(link);
+    }
+
+    return () => {
+      document.title = prevTitle;
+    };
+  }, []);
 
   return (
     <div
@@ -227,7 +357,7 @@ const Fasilitas = () => {
                 <Monitor size={24} />
               </div>
               <span className="font-semibold text-sm md:text-base">
-                Full AC Lab
+                Full AC Classroom
               </span>
             </div>
             {/* Feature 3 */}
@@ -242,10 +372,10 @@ const Fasilitas = () => {
             {/* Feature 4 */}
             <div className="feature-item flex flex-col items-center gap-3 group px-2 opacity-0">
               <div className="p-3 bg-orange-500 rounded-xl group-hover:bg-white group-hover:text-orange-600 transition-colors duration-300 shadow-sm">
-                <Zap size={24} />
+                <Projector size={24} />
               </div>
               <span className="font-semibold text-sm md:text-base">
-                Genset Ready
+                Full Led Projector
               </span>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import { ArrowLeft, Calendar, Tag, Clock } from "lucide-react";
@@ -7,9 +7,15 @@ const DetailArtikel = () => {
   const { id } = useParams();
   const [article, setArticle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const mounted = useRef(true);
 
   useEffect(() => {
+    mounted.current = true;
+    setLoading(true);
     fetchSingleArticle();
+    return () => {
+      mounted.current = false;
+    };
   }, [id]);
 
   const fetchSingleArticle = async () => {
@@ -22,9 +28,9 @@ const DetailArtikel = () => {
     if (error) {
       console.log(error);
     } else {
-      setArticle(data);
+      if (mounted.current) setArticle(data);
     }
-    setLoading(false);
+    if (mounted.current) setLoading(false);
   };
 
   if (loading)
@@ -45,6 +51,52 @@ const DetailArtikel = () => {
         </Link>
       </div>
     );
+
+  // Memoize formatted date and paragraphs to avoid recomputation on unrelated renders
+  const formattedDate = useMemo(() => {
+    try {
+      return new Date(article.created_at).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch (e) {
+      return "";
+    }
+  }, [article.created_at]);
+
+  const paragraphs = useMemo(() => {
+    return article.content
+      ? article.content.split("\n").filter((p) => p.trim() !== "")
+      : [];
+  }, [article.content]);
+
+  // Lightweight metadata injection for SEO (no extra deps)
+  useEffect(() => {
+    try {
+      if (typeof document !== "undefined" && article) {
+        document.title = `${article.title} — SMK Diponegoro 1`;
+        const md = document.querySelector('meta[name="description"]');
+        const desc = (paragraphs[0] || "").slice(0, 155);
+        if (md) md.setAttribute("content", desc);
+        else {
+          const m = document.createElement("meta");
+          m.name = "description";
+          m.content = desc;
+          document.head.appendChild(m);
+        }
+        const canon = document.querySelector('link[rel="canonical"]');
+        if (!canon) {
+          const c = document.createElement("link");
+          c.rel = "canonical";
+          c.href = window.location.href;
+          document.head.appendChild(c);
+        }
+      }
+    } catch (err) {
+      /* ignore DOM errors */
+    }
+  }, [article, paragraphs]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -77,13 +129,7 @@ const DetailArtikel = () => {
           <div className="flex items-center justify-center text-gray-500 text-sm gap-6 border-y border-gray-100 py-4 max-w-lg mx-auto">
             <div className="flex items-center gap-2">
               <Calendar size={16} />
-              <span>
-                {new Date(article.created_at).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </span>
+              <span>{formattedDate}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock size={16} />
@@ -99,22 +145,26 @@ const DetailArtikel = () => {
               src={article.image_url}
               alt={article.title}
               className="w-full h-auto object-cover max-h-[450px]"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
             />
           </div>
         )}
 
         {/* Content Body */}
-        <div className="prose prose-lg prose-orange mx-auto text-gray-700 leading-loose">
+        <main
+          className="prose prose-lg prose-orange mx-auto text-gray-700 leading-loose"
+          role="main"
+          aria-label={article.title}
+        >
           {/* Menggunakan white-space-pre-wrap untuk menjaga paragraf */}
-          {article.content.split("\n").map(
-            (paragraph, idx) =>
-              paragraph.trim() !== "" && (
-                <p key={idx} className="mb-6 text-lg">
-                  {paragraph}
-                </p>
-              ),
-          )}
-        </div>
+          {paragraphs.map((paragraph, idx) => (
+            <p key={idx} className="mb-6 text-lg">
+              {paragraph}
+            </p>
+          ))}
+        </main>
       </article>
 
       {/* Footer Read More */}

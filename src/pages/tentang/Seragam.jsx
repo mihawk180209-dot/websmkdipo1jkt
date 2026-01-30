@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { Shirt, Clock, Info, Loader2, Sparkles } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 
@@ -13,10 +19,20 @@ const Seragam = () => {
   const comp = useRef(null);
   const [uniformData, setUniformData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const idleCtxRef = useRef(null);
+  const idleHandleRef = useRef(null);
 
   // 1. FETCH DATA DARI SUPABASE
   useEffect(() => {
-    fetchUniforms();
+    let mounted = true;
+    const run = async () => {
+      await fetchUniforms();
+      if (!mounted) return;
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const fetchUniforms = async () => {
@@ -33,96 +49,113 @@ const Seragam = () => {
     setLoading(false);
   };
 
-  // 2. GSAP ANIMATION (ANTI-GHOSTING / SAFE MODE)
-  useLayoutEffect(() => {
-    // Tunggu loading kelar
+  // 2. GSAP ANIMATION (defer long-running tweens to idle, immediate reveals preserved)
+  useEffect(() => {
     if (loading) return;
 
-    // Delay 100ms biar DOM stabil sebelum animasi jalan
-    const timer = setTimeout(() => {
-      let ctx = gsap.context(() => {
-        // Refresh posisi trigger biar akurat
-        ScrollTrigger.refresh();
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 200);
 
-        // A. HEADER ANIMATION (Pakai fromTo biar pasti muncul)
-        const tlHeader = gsap.timeline();
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
 
-        // Blob floating
-        gsap.to(".header-blob", {
-          scale: 1.2,
-          rotation: 15,
-          x: 20,
-          y: 20,
-          duration: 8,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
+    // Immediate, paint-critical reveals and ScrollTrigger setup
+    const ctx = gsap.context(() => {
+      ScrollTrigger.refresh();
 
-        tlHeader.fromTo(
-          ".anim-header",
-          { y: 40, autoAlpha: 0 },
+      const tlHeader = gsap.timeline();
+
+      tlHeader.fromTo(
+        ".anim-header",
+        { y: 40, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 1,
+          stagger: 0.15,
+          ease: "power3.out",
+        },
+      );
+
+      if (document.querySelector(".gallery-section")) {
+        gsap.fromTo(
+          ".anim-card",
+          { y: 60, autoAlpha: 0 },
           {
             y: 0,
             autoAlpha: 1,
-            duration: 1,
-            stagger: 0.15,
-            ease: "power3.out",
-          },
-        );
-
-        // B. GRID ITEMS ANIMATION (Batch Trigger)
-        // Cek dulu elemennya ada ga
-        if (document.querySelector(".gallery-section")) {
-          gsap.fromTo(
-            ".anim-card",
-            { y: 60, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              stagger: 0.15,
-              ease: "back.out(1.2)",
-              scrollTrigger: {
-                trigger: ".gallery-section", // Trigger containernya
-                start: "top 85%", // Muncul pas masuk layar dikit
-              },
-            },
-          );
-        }
-
-        // C. NOTE SECTION
-        gsap.fromTo(
-          ".anim-note",
-          { scale: 0.95, autoAlpha: 0 },
-          {
-            scale: 1,
-            autoAlpha: 1,
             duration: 0.8,
-            ease: "power2.out",
+            stagger: 0.15,
+            ease: "back.out(1.2)",
             scrollTrigger: {
-              trigger: ".note-section",
-              start: "top 90%",
+              trigger: ".gallery-section",
+              start: "top 85%",
             },
           },
         );
+      }
 
-        // D. ICON PULSE
-        gsap.to(".info-icon-pulse", {
-          scale: 1.1,
-          duration: 1,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-      }, comp);
-    }, 100); // Timeout 100ms
+      gsap.fromTo(
+        ".anim-note",
+        { scale: 0.95, autoAlpha: 0 },
+        {
+          scale: 1,
+          autoAlpha: 1,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: ".note-section",
+            start: "top 90%",
+          },
+        },
+      );
+    }, comp);
 
-    return () => clearTimeout(timer);
+    // Defer long-running, repeating tweens (floating blobs, icon pulses) to idle
+    idleHandleRef.current = rIC(
+      () => {
+        idleCtxRef.current = gsap.context(() => {
+          gsap.to(".header-blob", {
+            scale: 1.2,
+            rotation: 15,
+            x: 20,
+            y: 20,
+            duration: 8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+
+          gsap.to(".info-icon-pulse", {
+            scale: 1.1,
+            duration: 1,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+        }, comp);
+      },
+      { timeout: 1500 },
+    );
+
+    return () => {
+      ctx.revert();
+      if (idleCtxRef.current) idleCtxRef.current.revert();
+      if (idleHandleRef.current) cIC(idleHandleRef.current);
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (err) {
+        /* ignore */
+      }
+    };
   }, [loading, uniformData]);
 
   // --- INTERAKSI HOVER ---
-  const handleMouseEnter = (e) => {
+  const handleMouseEnter = useCallback((e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
     const title = card.querySelector(".anim-title");
@@ -146,9 +179,9 @@ const Seragam = () => {
       color: "#fff",
       duration: 0.3,
     });
-  };
+  }, []);
 
-  const handleMouseLeave = (e) => {
+  const handleMouseLeave = useCallback((e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
     const title = card.querySelector(".anim-title");
@@ -171,7 +204,92 @@ const Seragam = () => {
       color: "#ea580c",
       duration: 0.3,
     });
-  };
+  }, []);
+
+  // Memoize rendered grid to avoid unnecessary re-renders
+  const renderedGrid = useMemo(() => {
+    if (loading) return null;
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {uniformData.map((item) => (
+          <div
+            key={item.id}
+            className="anim-card bg-white rounded-3xl border border-slate-100 overflow-hidden flex flex-col h-full cursor-default opacity-0"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="relative h-72 overflow-hidden bg-slate-100">
+              <div className="absolute top-4 left-4 z-10">
+                <span className="anim-badge flex items-center gap-2 bg-orange-100 backdrop-blur-sm px-4 py-2 rounded-xl text-orange-600 font-bold text-xs transition-colors duration-300">
+                  <Clock size={14} /> {item.day}
+                </span>
+              </div>
+
+              <img
+                src={item.image_url}
+                alt={item.title}
+                loading="lazy"
+                decoding="async"
+                fetchpriority="low"
+                className="anim-img w-full h-full object-cover"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 pointer-events-none"></div>
+            </div>
+
+            <div className="p-8 flex flex-col flex-grow">
+              <div className="flex items-start justify-between mb-4">
+                <h3 className="anim-title text-xl font-bold text-slate-900 transition-colors duration-300">
+                  {item.title}
+                </h3>
+                <Shirt
+                  size={24}
+                  className="anim-icon text-slate-300 transition-colors duration-300"
+                />
+              </div>
+
+              <p className="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">
+                {item.description}
+              </p>
+
+              <div className="pt-6 border-t border-slate-50 flex items-center gap-2 text-xs text-slate-400 font-medium">
+                <Info size={14} />
+                <span>Pastikan atribut lengkap</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }, [uniformData, loading, handleMouseEnter, handleMouseLeave]);
+
+  // Lightweight SEO metadata injection (no extra deps)
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = "Seragam Sekolah — SMK Diponegoro 1 Jakarta";
+
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content =
+      "Ketentuan penggunaan seragam di SMK Diponegoro 1 Jakarta untuk menanamkan kedisiplinan dan kerapian siswa.";
+
+    const existing = document.querySelector('link[rel="canonical"]');
+    if (!existing) {
+      const link = document.createElement("link");
+      link.rel = "canonical";
+      link.href = window.location.href;
+      document.head.appendChild(link);
+    }
+
+    return () => {
+      document.title = prevTitle;
+    };
+  }, []);
 
   return (
     <div

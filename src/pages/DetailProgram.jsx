@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
 import {
@@ -18,6 +24,8 @@ const DetailProgram = () => {
 
   // State untuk status copy link
   const [isCopied, setIsCopied] = useState(false);
+  const mounted = useRef(true);
+  const copyTimeout = useRef(null);
 
   useEffect(() => {
     const getDetail = async () => {
@@ -29,35 +37,42 @@ const DetailProgram = () => {
           .single();
 
         if (error) throw error;
-        setProgram(data);
+        if (mounted.current) setProgram(data);
       } catch (error) {
         console.error("Error:", error);
       } finally {
-        setLoading(false);
+        if (mounted.current) setLoading(false);
       }
     };
 
     getDetail();
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      if (copyTimeout.current) clearTimeout(copyTimeout.current);
+    };
   }, [id]);
 
   // --- FUNGSI SHARE LINK ---
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     try {
-      // 1. Copy URL browser saat ini
       await navigator.clipboard.writeText(window.location.href);
-
-      // 2. Ubah status jadi 'copied'
+      if (!mounted.current) return;
       setIsCopied(true);
-
-      // 3. Balikin status setelah 2 detik
-      setTimeout(() => {
-        setIsCopied(false);
+      if (copyTimeout.current) clearTimeout(copyTimeout.current);
+      copyTimeout.current = setTimeout(() => {
+        if (mounted.current) setIsCopied(false);
       }, 2000);
     } catch (err) {
       console.error("Gagal copy link:", err);
-      alert("Gagal menyalin link. Browser tidak support.");
+      try {
+        // fallback: prompt with URL
+        window.prompt("Copy link:", window.location.href);
+      } catch (e) {
+        /* ignore */
+      }
     }
-  };
+  }, []);
 
   if (loading)
     return (
@@ -82,6 +97,48 @@ const DetailProgram = () => {
       </div>
     );
 
+  // Memoized values
+  const formattedDate = useMemo(() => {
+    try {
+      return new Date(program.created_at).toLocaleDateString("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch (e) {
+      return "";
+    }
+  }, [program.created_at]);
+
+  const benefits = useMemo(() => program.benefits || [], [program.benefits]);
+
+  // Lightweight metadata injection
+  useEffect(() => {
+    try {
+      if (typeof document !== "undefined" && program) {
+        document.title = `${program.title} — Program Unggulan | SMK Diponegoro 1`;
+        const md = document.querySelector('meta[name="description"]');
+        const desc = (program.content || "").slice(0, 155);
+        if (md) md.setAttribute("content", desc);
+        else {
+          const m = document.createElement("meta");
+          m.name = "description";
+          m.content = desc;
+          document.head.appendChild(m);
+        }
+        const canon = document.querySelector('link[rel="canonical"]');
+        if (!canon) {
+          const c = document.createElement("link");
+          c.rel = "canonical";
+          c.href = window.location.href;
+          document.head.appendChild(c);
+        }
+      }
+    } catch (err) {
+      /* ignore */
+    }
+  }, [program]);
+
   return (
     <div className="bg-white min-h-screen pt-24 pb-20">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -99,11 +156,7 @@ const DetailProgram = () => {
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-6 text-slate-500 text-sm md:text-base border-b border-slate-100 pb-8 mb-8">
             <span className="flex items-center gap-2">
               <Calendar size={18} className="text-orange-500" />
-              {new Date(program.created_at).toLocaleDateString("id-ID", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {formattedDate}
             </span>
             <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
             <span className="flex items-center gap-2">
@@ -120,6 +173,9 @@ const DetailProgram = () => {
               src={program.image_url}
               alt={program.title}
               className="w-full h-auto max-h-[500px] object-contain mx-auto"
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
             />
           </div>
         </div>
@@ -165,8 +221,8 @@ const DetailProgram = () => {
 
                 {/* LOGIC RENDER BENEFIT */}
                 <ul className="space-y-4">
-                  {program.benefits && program.benefits.length > 0 ? (
-                    program.benefits.map((benefit, idx) => (
+                  {benefits && benefits.length > 0 ? (
+                    benefits.map((benefit, idx) => (
                       <li key={idx} className="flex items-start gap-3">
                         <CheckCircle2
                           size={20}

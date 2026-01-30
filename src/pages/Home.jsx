@@ -14,7 +14,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 
 // GSAP IMPORTS
@@ -35,25 +35,18 @@ gsap.registerPlugin(ScrollTrigger);
 const Home = () => {
   const container = useRef();
 
+  // Defer heavier/long-running tweens (infinite loops) to idle time to reduce
+  // main-thread blocking during initial paint (improves LCP/INP on low-end devices).
   useGSAP(
     () => {
-      // --- 1. HERO SECTION ANIMATIONS (Fix Ghosting pakai fromTo) --- //
       const tlHero = gsap.timeline();
 
-      // Badge, Title, Desc, Buttons
       tlHero
         .fromTo(
           ".hero-element",
-          { y: 60, opacity: 0 }, // Start state
-          {
-            y: 0,
-            opacity: 1,
-            duration: 1,
-            stagger: 0.15,
-            ease: "power3.out",
-          }, // End state
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 1, stagger: 0.15, ease: "power3.out" },
         )
-        // Logo Entrance
         .fromTo(
           ".hero-logo",
           { scale: 0.5, opacity: 0, rotation: -10 },
@@ -67,35 +60,7 @@ const Home = () => {
           "-=0.8",
         );
 
-      // Background Blobs (Infinite Floating - Aman pakai .to)
-      gsap.to(".blob-orange", {
-        scale: 1.1,
-        opacity: 0.5,
-        duration: 8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".blob-green", {
-        scale: 1.2,
-        opacity: 0.5,
-        duration: 10,
-        repeat: -1,
-        yoyo: true,
-        delay: 1,
-        ease: "sine.inOut",
-      });
-
-      // Logo Floating
-      gsap.to(".hero-logo-img", {
-        y: -15,
-        duration: 2.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-
-      // --- 2. SAMBUTAN KEPSEK (ScrollTrigger Fix) --- //
+      // Scroll-based reveals (kept immediate, but lightweight)
       gsap.fromTo(
         ".kepsek-image-wrapper",
         { x: -100, opacity: 0 },
@@ -104,10 +69,7 @@ const Home = () => {
           opacity: 1,
           duration: 1.2,
           ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".kepsek-section",
-            start: "top 75%",
-          },
+          scrollTrigger: { trigger: ".kepsek-section", start: "top 75%" },
         },
       );
 
@@ -120,10 +82,7 @@ const Home = () => {
           duration: 1.2,
           ease: "power3.out",
           delay: 0.2,
-          scrollTrigger: {
-            trigger: ".kepsek-section",
-            start: "top 75%",
-          },
+          scrollTrigger: { trigger: ".kepsek-section", start: "top 75%" },
         },
       );
 
@@ -137,7 +96,6 @@ const Home = () => {
         },
       );
 
-      // --- 3. STATS SECTION (ScrollTrigger Fix) --- //
       gsap.fromTo(
         ".stat-card",
         { y: 60, scale: 0.8, opacity: 0 },
@@ -148,14 +106,10 @@ const Home = () => {
           duration: 0.8,
           stagger: 0.1,
           ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: ".stats-container",
-            start: "top 85%",
-          },
+          scrollTrigger: { trigger: ".stats-container", start: "top 85%" },
         },
       );
 
-      // --- 4. JURUSAN SECTION (ScrollTrigger Fix) --- //
       gsap.fromTo(
         ".jurusan-header",
         { y: 30, opacity: 0 },
@@ -178,7 +132,6 @@ const Home = () => {
         },
       );
 
-      // Animation Kartu Jurusan (Slide Up)
       gsap.fromTo(
         ".jurusan-card",
         { y: 100, opacity: 0 },
@@ -195,42 +148,86 @@ const Home = () => {
         },
       );
 
-      // --- 5. FLOATING ICONS (JURUSAN BACKGROUND) --- //
-      // Monitor & CPU (TKJ)
-      gsap.to(".float-icon-tkj-1", {
-        y: -15,
-        rotation: 5,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".float-icon-tkj-2", {
-        y: -10,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: 1,
-      });
+      // Defer infinite tweens to idle time so they don't block initial rendering
+      const startIdleTweens = () => {
+        try {
+          gsap.to(".blob-orange", {
+            scale: 1.1,
+            opacity: 0.5,
+            duration: 8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+          gsap.to(".blob-green", {
+            scale: 1.2,
+            opacity: 0.5,
+            duration: 10,
+            repeat: -1,
+            yoyo: true,
+            delay: 1,
+            ease: "sine.inOut",
+          });
+          gsap.to(".hero-logo-img", {
+            y: -15,
+            duration: 2.5,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
 
-      // Palette & PenTool (DKV)
-      gsap.to(".float-icon-dkv-1", {
-        y: -15,
-        rotation: -5,
-        duration: 3.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-      gsap.to(".float-icon-dkv-2", {
-        y: -10,
-        duration: 4.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: 0.5,
-      });
+          gsap.to(".float-icon-tkj-1", {
+            y: -15,
+            rotation: 5,
+            duration: 3,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+          gsap.to(".float-icon-tkj-2", {
+            y: -10,
+            duration: 4,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: 1,
+          });
+
+          gsap.to(".float-icon-dkv-1", {
+            y: -15,
+            rotation: -5,
+            duration: 3.5,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+          gsap.to(".float-icon-dkv-2", {
+            y: -10,
+            duration: 4.5,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: 0.5,
+          });
+        } catch (e) {
+          // defensive: older browsers may throw
+        }
+      };
+
+      if (typeof window !== "undefined") {
+        const ric =
+          window.requestIdleCallback ||
+          function (cb) {
+            return setTimeout(cb, 500);
+          };
+        const idleId = ric(startIdleTweens);
+        return () => {
+          try {
+            if (window.cancelIdleCallback) window.cancelIdleCallback(idleId);
+            else clearTimeout(idleId);
+          } catch (e) {}
+        };
+      }
     },
     { scope: container },
   );
@@ -259,11 +256,51 @@ const Home = () => {
     gsap.to(e.currentTarget, { y: 0, scale: 1, duration: 0.2 });
   });
 
+  // Kepsek hover handlers (stabilized to avoid inline function recreation)
+  const onKepsekHover = contextSafe((e) => {
+    gsap.to(e.currentTarget, { x: 5, duration: 0.3 });
+  });
+  const onKepsekLeave = contextSafe((e) => {
+    gsap.to(e.currentTarget, { x: 0, duration: 0.3 });
+  });
+
   const [homeArticles, setHomeArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
 
   useEffect(() => {
     fetchHomeArticles();
+  }, []);
+
+  // Set basic SEO metadata for the Home page (safe DOM API, no external dep)
+  useEffect(() => {
+    try {
+      document.title = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "description");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute(
+        "content",
+        "SMK Diponegoro 1 Jakarta — Pendidikan vokasi unggul, berkarakter, dan siap bersaing di industri.",
+      );
+
+      // canonical (if not present)
+      if (!document.querySelector('link[rel="canonical"]')) {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        link.setAttribute("href", window.location.href);
+        document.head.appendChild(link);
+      }
+    } catch (e) {}
+
+    return () => {
+      // Cleanup GSAP ScrollTriggers on unmount to avoid leaks
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (e) {}
+    };
   }, []);
 
   const fetchHomeArticles = async () => {
@@ -276,6 +313,33 @@ const Home = () => {
     if (!error) setHomeArticles(data || []);
     setLoadingArticles(false);
   };
+
+  // Memoize static lists to avoid recreating on each render
+  const stats = useMemo(
+    () => [
+      {
+        icon: <Users size={28} className="text-primary" />,
+        count: "150+",
+        label: "Siswa Aktif",
+      },
+      {
+        icon: <BookOpen size={28} className="text-primary" />,
+        count: "20+",
+        label: "Guru Kompeten",
+      },
+      {
+        icon: <Trophy size={28} className="text-primary" />,
+        count: "10+",
+        label: "Ekstrakurikuler",
+      },
+      {
+        icon: <Users size={28} className="text-primary" />,
+        count: "99%",
+        label: "Lulusan Bekerja",
+      },
+    ],
+    [],
+  );
 
   return (
     <div ref={container} className="w-full font-sans">
@@ -333,6 +397,9 @@ const Home = () => {
                   src={logo}
                   alt="Logo SMK Dipo 1"
                   className="hero-logo-img w-full h-full object-contain"
+                  loading="eager"
+                  decoding="async"
+                  fetchpriority="high"
                 />
               </div>
             </div>
@@ -359,6 +426,8 @@ const Home = () => {
                     src={fotokepsek}
                     alt="Kepala Sekolah SMK Dipo 1"
                     className="w-full h-[400px] lg:h-[500px] object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80"></div>
                 </div>
@@ -392,12 +461,8 @@ const Home = () => {
 
                 <div
                   className="relative bg-gray-50 p-8 rounded-2xl border-l-4 border-primary shadow-sm cursor-default"
-                  onMouseEnter={(e) =>
-                    gsap.to(e.currentTarget, { x: 5, duration: 0.3 })
-                  }
-                  onMouseLeave={(e) =>
-                    gsap.to(e.currentTarget, { x: 0, duration: 0.3 })
-                  }
+                  onMouseEnter={onKepsekHover}
+                  onMouseLeave={onKepsekLeave}
                 >
                   <Quote
                     size={40}
@@ -431,28 +496,7 @@ const Home = () => {
       {/* ==================== STATS SECTION ==================== */}
       <section className="py-12 bg-white border-y border-gray-100">
         <div className="stats-container container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {[
-            {
-              icon: <Users size={28} className="text-primary" />,
-              count: "150+",
-              label: "Siswa Aktif",
-            },
-            {
-              icon: <BookOpen size={28} className="text-primary" />,
-              count: "20+",
-              label: "Guru Kompeten",
-            },
-            {
-              icon: <Trophy size={28} className="text-primary" />,
-              count: "10+",
-              label: "Ekstrakurikuler",
-            },
-            {
-              icon: <Users size={28} className="text-primary" />,
-              count: "99%",
-              label: "Lulusan Bekerja",
-            },
-          ].map((stat, idx) => (
+          {stats.map((stat, idx) => (
             <div
               key={idx}
               className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
@@ -533,6 +577,8 @@ const Home = () => {
                       src={tkjCustomIcon}
                       alt="Logo TKJ"
                       className="w-16 h-16 object-contain drop-shadow-md"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
 
@@ -620,6 +666,8 @@ const Home = () => {
                       src={dkvCustomIcon}
                       alt="Logo DKV"
                       className="w-16 h-16 object-contain drop-shadow-md"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
 
@@ -731,6 +779,8 @@ const Home = () => {
                             src={item.image_url}
                             alt={item.title}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                            decoding="async"
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full bg-slate-50 text-slate-400">

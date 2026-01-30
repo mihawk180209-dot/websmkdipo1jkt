@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import {
   Building2,
   Award,
@@ -24,120 +24,155 @@ gsap.registerPlugin(ScrollTrigger);
 const Profil = () => {
   const comp = useRef(null);
 
-  useLayoutEffect(() => {
-    let ctx = gsap.context(() => {
-      // 1. HERO ANIMATION (Parallax Effect)
-      const tlHero = gsap.timeline();
+  useEffect(() => {
+    let ctx;
+    const start = () => {
+      ctx = gsap.context(() => {
+        // 1. HERO ANIMATION (Parallax Effect)
+        const tlHero = gsap.timeline();
 
-      // Gambar background zoom in pelan
-      tlHero.fromTo(
-        ".hero-bg-img",
-        { scale: 1.1, autoAlpha: 0 },
-        { scale: 1, autoAlpha: 0.4, duration: 2, ease: "power2.out" },
-      );
-
-      // Teks Hero muncul setelah gambar
-      tlHero
-        .fromTo(
-          ".hero-badge",
-          { y: -20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "back.out(1.7)" },
-          "-=1.5",
-        )
-        .fromTo(
-          ".hero-title",
-          { y: 30, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
-          "-=1.2",
-        )
-        .fromTo(
-          ".hero-desc",
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
-          "-=1",
+        // Gambar background zoom in pelan
+        tlHero.fromTo(
+          ".hero-bg-img",
+          { scale: 1.1, autoAlpha: 0 },
+          { scale: 1, autoAlpha: 0.4, duration: 2, ease: "power2.out" },
         );
 
-      // 2. QUICK STATS CARDS (Staggered)
-      gsap.fromTo(
-        ".stat-card",
-        { y: 50, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: ".stats-container",
-            start: "top 85%",
-          },
-        },
-      );
+        // Teks Hero muncul setelah gambar
+        tlHero
+          .fromTo(
+            ".hero-badge",
+            { y: -20, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.8, ease: "back.out(1.7)" },
+            "-=1.5",
+          )
+          .fromTo(
+            ".hero-title",
+            { y: 30, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
+            "-=1.2",
+          )
+          .fromTo(
+            ".hero-desc",
+            { y: 20, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
+            "-=1",
+          );
 
-      // 3. TABLE ROWS ANIMATION
-      gsap.fromTo(
-        ".table-row",
-        { x: -20, autoAlpha: 0 },
-        {
-          x: 0,
-          autoAlpha: 1,
-          duration: 0.5,
-          stagger: 0.05,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".identity-table",
-            start: "top 80%",
+        // 2. QUICK STATS CARDS (Staggered)
+        gsap.fromTo(
+          ".stat-card",
+          { y: 50, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "back.out(1.2)",
+            scrollTrigger: { trigger: ".stats-container", start: "top 85%" },
           },
-        },
-      );
+        );
 
-      // 4. MAPS ANIMATION
-      gsap.fromTo(
-        ".maps-container",
-        { scale: 0.95, autoAlpha: 0 },
-        {
-          scale: 1,
-          autoAlpha: 1,
-          duration: 0.8,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".maps-container",
-            start: "top 85%",
+        // 3. TABLE ROWS ANIMATION
+        gsap.fromTo(
+          ".table-row",
+          { x: -20, autoAlpha: 0 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: "power2.out",
+            scrollTrigger: { trigger: ".identity-table", start: "top 80%" },
           },
-        },
-      );
+        );
 
-      // 5. SIDEBAR (Contact & Visi)
-      gsap.fromTo(
-        ".sidebar-item",
-        { x: 30, autoAlpha: 0 },
-        {
-          x: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".sidebar-container",
-            start: "top 80%",
+        // 4. MAPS ANIMATION
+        gsap.fromTo(
+          ".maps-container",
+          { scale: 0.95, autoAlpha: 0 },
+          {
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: { trigger: ".maps-container", start: "top 85%" },
           },
-        },
-      );
-    }, comp);
+        );
 
-    return () => ctx.revert();
+        // 5. SIDEBAR (Contact & Visi)
+        gsap.fromTo(
+          ".sidebar-item",
+          { x: 30, autoAlpha: 0 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: { trigger: ".sidebar-container", start: "top 80%" },
+          },
+        );
+      }, comp);
+    };
+
+    const ric =
+      (typeof window !== "undefined" && (window.requestIdleCallback || null)) ||
+      null;
+    const handle = ric
+      ? window.requestIdleCallback(start)
+      : setTimeout(start, 120);
+
+    return () => {
+      try {
+        if (ric && window.cancelIdleCallback) window.cancelIdleCallback(handle);
+        else clearTimeout(handle);
+      } catch (e) {}
+      try {
+        if (ctx) ctx.revert();
+      } catch (e) {}
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (e) {}
+    };
   }, []);
 
-  // Data Identitas Sekolah
-  const schoolIdentity = [
-    { label: "Nama Sekolah", value: "SMK Diponegoro 1 Jakarta" },
-    { label: "NPSN", value: "20103701" },
-    { label: "Status Sekolah", value: "Swasta" },
-    { label: "Akreditasi", value: "A (Unggul)" },
-    { label: "Tahun Berdiri", value: "1969" },
-    { label: "SK Operasional", value: "012/SME/Sw/1969" },
-    { label: "Luas Tanah", value: "2.942 m²" },
-  ];
+  // Memoized static data to avoid re-creation
+  const schoolIdentity = useMemo(
+    () => [
+      { label: "Nama Sekolah", value: "SMK Diponegoro 1 Jakarta" },
+      { label: "NPSN", value: "20103701" },
+      { label: "Status Sekolah", value: "Swasta" },
+      { label: "Akreditasi", value: "A (Unggul)" },
+      { label: "Tahun Berdiri", value: "1969" },
+      { label: "SK Operasional", value: "012/SME/Sw/1969" },
+      { label: "Luas Tanah", value: "2.942 m²" },
+    ],
+    [],
+  );
+
+  // Lightweight SEO metadata
+  useEffect(() => {
+    try {
+      document.title = "Profil — SMK Diponegoro 1 Jakarta";
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "description");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute(
+        "content",
+        "Profil SMK Diponegoro 1 Jakarta — identitas, legalitas, lokasi, dan kontak.",
+      );
+      if (!document.querySelector('link[rel="canonical"]')) {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        link.setAttribute("href", window.location.href);
+        document.head.appendChild(link);
+      }
+    } catch (e) {}
+  }, []);
 
   return (
     <div
@@ -153,6 +188,9 @@ const Profil = () => {
               src={gedungSekolah}
               alt="Gedung Sekolah"
               className="hero-bg-img w-full h-full object-cover opacity-0" // Mulai opacity 0 biar dihandle GSAP
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent"></div>

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Target,
   Flag,
@@ -18,111 +18,126 @@ gsap.registerPlugin(ScrollTrigger);
 const VisiMisi = () => {
   const comp = useRef(null);
 
-  const missions = [
-    "Membekali murid dengan keterampilan praktis dan pemikiran inovatif untuk menciptakan karya dan solusi yang berdampak di bidang desain visual maupun teknologi informasi.",
-    "Membangun karakter profesional yang adaptif, kolaboratif, dan beretika, agar lulusan mampu bersaing dan bekerja secara kompeten di berbagai lingkungan kerja.",
-    "Menanamkan nilai-nilai Pancasila, kebhinekaan, dan tanggung jawab sosial dalam setiap proses pembelejaran dan hasil karya murid.",
-    "Mendorong semangat berkarya dan berwirausaha berbasis teknologi dan budaya lokal, agar murid dapat menjadi pelaku perubahan yang relevan dengan perkembangan zaman dan kebutuhan masyarakat.",
-  ];
+  const missions = useMemo(
+    () => [
+      "Membekali murid dengan keterampilan praktis dan pemikiran inovatif untuk menciptakan karya dan solusi yang berdampak di bidang desain visual maupun teknologi informasi.",
+      "Membangun karakter profesional yang adaptif, kolaboratif, dan beretika, agar lulusan mampu bersaing dan bekerja secara kompeten di berbagai lingkungan kerja.",
+      "Menanamkan nilai-nilai Pancasila, kebhinekaan, dan tanggung jawab sosial dalam setiap proses pembelejaran dan hasil karya murid.",
+      "Mendorong semangat berkarya dan berwirausaha berbasis teknologi dan budaya lokal, agar murid dapat menjadi pelaku perubahan yang relevan dengan perkembangan zaman dan kebutuhan masyarakat.",
+    ],
+    [],
+  );
 
-  const values = [
-    {
-      icon: <Users size={32} />,
-      title: "Profesionalisme",
-      desc: "Melambangkan sikap kerja yang tangguh, bertanggung jawab, siap industri, dan menjunjung etika tinggi.",
-    },
-    {
-      icon: <Lightbulb size={32} />,
-      title: "Inovatif",
-      desc: "Menggambarkan semangat berkarya, beripikir kreatif, dan menciptakan solusi baru di bidang desain maupun teknologi.",
-    },
-    {
-      icon: <Globe size={32} />,
-      title: "Kolaborasi",
-      desc: "Mampu bekerja sama lintas bidang dan latar belakang dengan semangat saling menghargai, untuk menghasilkan karya dan solusi yang lebih kuat.",
-    },
-    {
-      icon: <Heart size={32} />,
-      title: "Berkarakter",
-      desc: "Mewakili nilai-nilai kebhinekaan, Pancasila, empati sosial, dan tanggung jawab sebagai warga negara yang baik.",
-    },
-  ];
+  const values = useMemo(
+    () => [
+      {
+        icon: <Users size={32} />,
+        title: "Profesionalisme",
+        desc: "Melambangkan sikap kerja yang tangguh, bertanggung jawab, siap industri, dan menjunjung etika tinggi.",
+      },
+      {
+        icon: <Lightbulb size={32} />,
+        title: "Inovatif",
+        desc: "Menggambarkan semangat berkarya, beripikir kreatif, dan menciptakan solusi baru di bidang desain maupun teknologi.",
+      },
+      {
+        icon: <Globe size={32} />,
+        title: "Kolaborasi",
+        desc: "Mampu bekerja sama lintas bidang dan latar belakang dengan semangat saling menghargai, untuk menghasilkan karya dan solusi yang lebih kuat.",
+      },
+      {
+        icon: <Heart size={32} />,
+        title: "Berkarakter",
+        desc: "Mewakili nilai-nilai kebhinekaan, Pancasila, empati sosial, dan tanggung jawab sebagai warga negara yang baik.",
+      },
+    ],
+    [],
+  );
 
   // --- GSAP ANIMATION SETUP (SAFE MODE) ---
-  useLayoutEffect(() => {
-    let ctx = gsap.context((self) => {
-      // Refresh biar aman
-      ScrollTrigger.refresh();
+  useEffect(() => {
+    let ctx;
+    const start = () => {
+      ctx = gsap.context((self) => {
+        // Refresh biar aman
+        ScrollTrigger.refresh();
 
-      // 1. Header Animation (Simple Fade)
-      gsap.from(".anim-header", {
-        y: 30,
-        opacity: 0, // Pakai opacity biasa, bukan autoAlpha
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
-      });
-
-      // 2. Visi Card (Trigger Per Element)
-      gsap.from(".anim-visi", {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: "back.out(1.2)",
-        scrollTrigger: {
-          trigger: ".anim-visi", // Trigger element itu sendiri
-          start: "top 95%", // Langsung muncul pas nyentuh bawah layar
-        },
-      });
-
-      // 3. Misi Section (Judul Kiri)
-      gsap.from(".anim-misi-title", {
-        x: -30,
-        opacity: 0,
-        duration: 0.6,
-        scrollTrigger: {
-          trigger: ".anim-misi-title",
-          start: "top 90%",
-        },
-      });
-
-      // 4. Misi Cards (Looping biar trigger satu-satu - LEBIH AMAN)
-      const misiCards = self.selector(".anim-misi-card");
-      misiCards.forEach((card, i) => {
-        gsap.from(card, {
-          x: 30,
+        // 1. Header Animation (Simple Fade)
+        gsap.from(".anim-header", {
+          y: 30,
           opacity: 0,
-          duration: 0.6,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: card, // Trigger masing-masing kartu
-            start: "top 95%", // Muncul pas masuk layar
-          },
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power3.out",
         });
-      });
 
-      // 5. Values Cards (Looping juga)
-      const valueCards = self.selector(".anim-value-card");
-      valueCards.forEach((card, i) => {
-        gsap.from(card, {
+        // 2. Visi Card (Trigger Per Element)
+        gsap.from(".anim-visi", {
           y: 40,
           opacity: 0,
-          duration: 0.6,
-          delay: i * 0.1, // Kasih delay dikit biar urutan
+          duration: 0.8,
           ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: ".values-section", // Trigger section parent aja biar barengan
-            start: "top 90%",
-          },
+          scrollTrigger: { trigger: ".anim-visi", start: "top 95%" },
         });
-      });
-    }, comp);
 
-    return () => ctx.revert();
+        // 3. Misi Section (Judul Kiri)
+        gsap.from(".anim-misi-title", {
+          x: -30,
+          opacity: 0,
+          duration: 0.6,
+          scrollTrigger: { trigger: ".anim-misi-title", start: "top 90%" },
+        });
+
+        // 4. Misi Cards (Looping biar trigger satu-satu - LEBIH AMAN)
+        const misiCards = self.selector(".anim-misi-card");
+        misiCards.forEach((card, i) => {
+          gsap.from(card, {
+            x: 30,
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.out",
+            scrollTrigger: { trigger: card, start: "top 95%" },
+          });
+        });
+
+        // 5. Values Cards (Looping juga)
+        const valueCards = self.selector(".anim-value-card");
+        valueCards.forEach((card, i) => {
+          gsap.from(card, {
+            y: 40,
+            opacity: 0,
+            duration: 0.6,
+            delay: i * 0.1,
+            ease: "back.out(1.2)",
+            scrollTrigger: { trigger: ".values-section", start: "top 90%" },
+          });
+        });
+      }, comp);
+    };
+
+    const ric =
+      (typeof window !== "undefined" && (window.requestIdleCallback || null)) ||
+      null;
+    const handle = ric
+      ? window.requestIdleCallback(start)
+      : setTimeout(start, 120);
+
+    return () => {
+      try {
+        if (ric && window.cancelIdleCallback) window.cancelIdleCallback(handle);
+        else clearTimeout(handle);
+      } catch (e) {}
+      try {
+        if (ctx) ctx.revert();
+      } catch (e) {}
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (e) {}
+    };
   }, []);
 
   // Helper Hover
-  const handleMisiEnter = (e) => {
+  const handleMisiEnter = useCallback((e) => {
     gsap.to(e.currentTarget, {
       x: -5,
       borderColor: "#f97316",
@@ -134,9 +149,9 @@ const VisiMisi = () => {
       scale: 1.1,
       duration: 0.2,
     });
-  };
+  }, []);
 
-  const handleMisiLeave = (e) => {
+  const handleMisiLeave = useCallback((e) => {
     gsap.to(e.currentTarget, {
       x: 0,
       borderColor: "#e2e8f0",
@@ -148,7 +163,30 @@ const VisiMisi = () => {
       scale: 1,
       duration: 0.2,
     });
-  };
+  }, []);
+
+  // Lightweight SEO metadata (DOM-only)
+  useEffect(() => {
+    try {
+      document.title = "Visi & Misi — SMK Diponegoro 1 Jakarta";
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "description");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute(
+        "content",
+        "Visi dan Misi SMK Diponegoro 1 Jakarta — arah, tujuan, dan nilai pendidikan vokasi yang kami pegang.",
+      );
+      if (!document.querySelector('link[rel="canonical"]')) {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        link.setAttribute("href", window.location.href);
+        document.head.appendChild(link);
+      }
+    } catch (e) {}
+  }, []);
 
   return (
     <div ref={comp} className="min-h-screen bg-[#F8FAFC] overflow-x-hidden">

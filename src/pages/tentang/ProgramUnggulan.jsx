@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { ArrowRight, Calendar, Loader2, Sparkles, Layers } from "lucide-react";
@@ -36,66 +36,73 @@ const ProgramUnggulan = () => {
     }
   };
 
-  // 2. GSAP ANIMATION (SAFE MODE / ANTI-GHOSTING)
-  useLayoutEffect(() => {
-    if (loading) return; // Tunggu data ready
-
-    // Delay 100ms agar DOM stabil
-    const timer = setTimeout(() => {
-      let ctx = gsap.context(() => {
+  // 2. GSAP ANIMATION (deferred to idle to reduce main-thread blocking)
+  useEffect(() => {
+    if (loading) return;
+    let ctx;
+    const start = () => {
+      ctx = gsap.context(() => {
         ScrollTrigger.refresh();
 
         // A. Background Blob
-        gsap.to(".header-blob", {
-          scale: 1.2,
-          rotation: 15,
-          x: 20,
-          y: 20,
-          duration: 8,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
+        gsap.to(".header-blob", { scale: 1.2, rotation: 15, x: 20, y: 20, duration: 8, repeat: -1, yoyo: true, ease: "sine.inOut" });
 
         // B. Header Animation (Judul, Badge, Deskripsi)
-        gsap.fromTo(
-          ".anim-header",
-          { y: 30, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power3.out",
-          },
-        );
+        gsap.fromTo(".anim-header", { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.1, ease: "power3.out" });
 
         // C. Kartu Muncul (Staggered Batch)
         if (document.querySelector(".cards-grid")) {
           gsap.fromTo(
             ".anim-card",
             { y: 50, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.6,
-              stagger: 0.1, // Jeda antar kartu
-              ease: "back.out(1.2)", // Efek membal sedikit
-              scrollTrigger: {
-                trigger: ".cards-grid",
-                start: "top 85%", // Trigger pas masuk layar
-              },
-            },
+            { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.2)", scrollTrigger: { trigger: ".cards-grid", start: "top 85%" } },
           );
         }
       }, containerRef);
-    }, 100);
+    };
 
-    return () => clearTimeout(timer);
+    const ric = (typeof window !== "undefined" && (window.requestIdleCallback || null)) || null;
+    const handle = ric ? window.requestIdleCallback(start) : setTimeout(start, 120);
+
+    return () => {
+      try {
+        if (ric && window.cancelIdleCallback) window.cancelIdleCallback(handle);
+        else clearTimeout(handle);
+      } catch (e) {}
+      try {
+        if (ctx) ctx.revert();
+      } catch (e) {}
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (e) {}
+    };
   }, [loading]);
 
+  // Lightweight SEO metadata (DOM-only)
+  useEffect(() => {
+    try {
+      document.title = "Program Unggulan — SMK Diponegoro 1 Jakarta";
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "description");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute(
+        "content",
+        "Program Unggulan SMK Diponegoro 1 Jakarta — kurikulum berbasis industri dan kompetensi keahlian.",
+      );
+      if (!document.querySelector('link[rel="canonical"]')) {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        link.setAttribute("href", window.location.href);
+        document.head.appendChild(link);
+      }
+    } catch (e) {}
+  }, []);
+
   // --- INTERAKSI HOVER (GSAP) ---
-  const handleMouseEnter = (e) => {
+  const handleMouseEnter = useCallback((e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
     const overlay = card.querySelector(".anim-overlay");
@@ -145,9 +152,9 @@ const ProgramUnggulan = () => {
       duration: 0.3,
       ease: "back.out(2)",
     });
-  };
+  }, []);
 
-  const handleMouseLeave = (e) => {
+  const handleMouseLeave = useCallback((e) => {
     const card = e.currentTarget;
     const img = card.querySelector(".anim-img");
     const overlay = card.querySelector(".anim-overlay");
@@ -173,10 +180,10 @@ const ProgramUnggulan = () => {
       duration: 0.3,
     });
     gsap.to(arrow, { x: 0, duration: 0.3 });
-  };
+  }, []);
 
   return (
-    <section ref={containerRef} className="min-h-screen bg-[#F8FAFC] pb-24">
+    <section ref={containerRef} role="main" className="min-h-screen bg-[#F8FAFC] pb-24">
       {/* Header Section (Unified Theme) */}
       <div className="relative py-20 lg:py-24 overflow-hidden bg-white border-b border-slate-100 mb-16">
         <div className="header-blob absolute top-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-50 translate-x-1/3 -translate-y-1/3"></div>
@@ -202,6 +209,11 @@ const ProgramUnggulan = () => {
       </div>
 
       <div className="container mx-auto px-4 lg:px-8">
+        {/* Lightweight SEO metadata for this route */}
+        {/* Using DOM API to avoid adding dependencies */}
+        {typeof window !== "undefined" && (
+          <meta key="pu-meta" />
+        )}
         {/* Loading State */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-slate-400">
@@ -224,6 +236,8 @@ const ProgramUnggulan = () => {
                     src={program.image_url || "https://placehold.co/600x400"}
                     alt={program.title}
                     className="anim-img w-full h-full object-cover"
+                    loading="lazy"
+                    decoding="async"
                   />
                   {/* Overlay Gradient */}
                   <div className="anim-overlay absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity" />

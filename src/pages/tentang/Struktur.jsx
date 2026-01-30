@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Users, Sparkles, ChevronDown } from "lucide-react";
 import gsap from "gsap";
@@ -84,7 +84,7 @@ const structData = {
 };
 
 // --- KOMPONEN KARTU ---
-const OrgCard = ({ data, isMain = false }) => (
+const OrgCard = React.memo(({ data, isMain = false }) => (
   <div
     className={`anim-card flex flex-col items-center bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 p-6 relative z-10 transition-all duration-300 hover:-translate-y-2 hover:shadow-orange-500/10 hover:border-orange-200 w-full max-w-[260px] md:w-72 mx-auto cursor-default group opacity-0 ${
       isMain
@@ -98,6 +98,9 @@ const OrgCard = ({ data, isMain = false }) => (
         src={data.img}
         alt={data.name}
         className="w-full h-full rounded-full object-cover shadow-sm"
+        loading={isMain ? "eager" : "lazy"}
+        decoding="async"
+        fetchpriority={isMain ? "high" : "low"}
       />
     </div>
 
@@ -118,7 +121,7 @@ const OrgCard = ({ data, isMain = false }) => (
       </div>
     )}
   </div>
-);
+));
 
 // --- KOMPONEN GARIS VERTIKAL ---
 const VLine = ({ height = "h-8 md:h-12", className = "" }) => (
@@ -129,15 +132,26 @@ const VLine = ({ height = "h-8 md:h-12", className = "" }) => (
 
 const Struktur = () => {
   const comp = useRef(null);
+  const idleCtxRef = useRef(null);
+  const idleHandleRef = useRef(null);
 
-  // --- GSAP ANIMATION (FIXED VERSION) ---
-  useLayoutEffect(() => {
-    // Delay 100ms agar layout stabil dulu
+  // GSAP Animations: immediate reveals on mount, deferred long-running work scheduled to idle
+  useEffect(() => {
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 200);
+
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
+
     const timer = setTimeout(() => {
-      let ctx = gsap.context(() => {
+      const ctx = gsap.context(() => {
         ScrollTrigger.refresh();
 
-        // 1. Header Animation
+        // Header reveal
         gsap.fromTo(
           ".anim-header",
           { y: 30, autoAlpha: 0 },
@@ -150,8 +164,7 @@ const Struktur = () => {
           },
         );
 
-        // 2. Connector Lines (Gunakan autoAlpha biar aman)
-        // Kita pakai simple fade in aja biar ga ngerusak posisi layout absolute
+        // Connector lines and cards (ScrollTrigger reveals)
         gsap.fromTo(
           ".anim-line, .anim-connector",
           { autoAlpha: 0 },
@@ -161,13 +174,11 @@ const Struktur = () => {
             ease: "power2.out",
             scrollTrigger: {
               trigger: ".chart-container",
-              start: "top 90%", // Muncul lebih awal
+              start: "top 90%",
             },
           },
         );
 
-        // 3. Cards Pop-up (BATCH TRIGGER)
-        // Trigger container-nya, bukan card satu-satu, biar muncul barengan & rapi
         gsap.fromTo(
           ".anim-card",
           { y: 50, autoAlpha: 0 },
@@ -175,16 +186,15 @@ const Struktur = () => {
             y: 0,
             autoAlpha: 1,
             duration: 0.6,
-            stagger: 0.1, // Berurutan dari atas ke bawah
+            stagger: 0.1,
             ease: "back.out(1.5)",
             scrollTrigger: {
               trigger: ".chart-container",
-              start: "top 90%", // Trigger pas chart nongol 10% di layar
+              start: "top 90%",
             },
           },
         );
 
-        // 4. Footer CTA
         gsap.fromTo(
           ".anim-footer",
           { y: 40, autoAlpha: 0 },
@@ -200,9 +210,100 @@ const Struktur = () => {
           },
         );
       }, comp);
+
+      // Schedule any long-running or repeating tweens (none heavy here but keep pattern)
+      idleHandleRef.current = rIC(
+        () => {
+          idleCtxRef.current = gsap.context(() => {
+            // no-op placeholder for possible deferred tweens; keeps consistent pattern
+          }, comp);
+        },
+        { timeout: 1200 },
+      );
+
+      // Cleanup for ctx will be handled in outer return
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      try {
+        if (idleCtxRef.current) idleCtxRef.current.revert();
+        if (idleHandleRef.current) cIC(idleHandleRef.current);
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (err) {
+        /* ignore */
+      }
+    };
+  }, []);
+
+  // Memoize rendered groups so React doesn't re-create the lists unnecessarily
+  const renderedWaka = useMemo(
+    () =>
+      structData.waka.map((person, idx) => (
+        <div key={idx} className="flex flex-col items-center relative w-full">
+          <div className="anim-line hidden md:block h-8 w-0.5 bg-slate-300 absolute -top-8"></div>
+          {idx > 0 && (
+            <div className="anim-line md:hidden h-8 w-0.5 bg-slate-300 -mt-8 mb-0 mx-auto"></div>
+          )}
+
+          <OrgCard data={person} />
+        </div>
+      )),
+    [],
+  );
+
+  const renderedKaprog = useMemo(
+    () =>
+      structData.kaprog.map((person, idx) => (
+        <div key={idx} className="flex flex-col items-center relative w-full">
+          <div className="anim-line hidden md:block h-16 w-0.5 bg-slate-300 absolute -top-16"></div>
+          {idx > 0 && (
+            <div className="anim-line md:hidden h-8 w-0.5 bg-slate-300 -mt-8 mb-0 mx-auto"></div>
+          )}
+
+          <OrgCard data={person} />
+        </div>
+      )),
+    [],
+  );
+
+  const renderedPembina = useMemo(
+    () =>
+      structData.pembina.map((person, idx) => (
+        <div key={idx} className="flex flex-col items-center relative w-full">
+          <div className="anim-line hidden md:block h-16 w-0.5 bg-slate-300 absolute -top-16"></div>
+
+          <OrgCard data={person} />
+        </div>
+      )),
+    [],
+  );
+
+  // Lightweight SEO metadata injection
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = "Struktur Organisasi — SMK Diponegoro 1 Jakarta";
+
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content =
+      "Bagan fungsional dan hierarki kepemimpinan di SMK Diponegoro 1 Jakarta.";
+
+    const existing = document.querySelector('link[rel="canonical"]');
+    if (!existing) {
+      const link = document.createElement("link");
+      link.rel = "canonical";
+      link.href = window.location.href;
+      document.head.appendChild(link);
+    }
+
+    return () => {
+      document.title = prevTitle;
+    };
   }, []);
 
   return (

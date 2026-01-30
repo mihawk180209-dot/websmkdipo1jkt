@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import {
   Server,
   Shield,
@@ -22,185 +22,295 @@ gsap.registerPlugin(ScrollTrigger);
 
 const TKJ = () => {
   const comp = useRef(null);
+  const idleCtxRef = useRef(null);
+  const idleHandleRef = useRef(null);
 
-  useLayoutEffect(() => {
-    let ctx = gsap.context(() => {
-      // 1. HERO ANIMATION
-      const tlHero = gsap.timeline();
+  const techIcons = useMemo(
+    () => [
+      { icon: <Server size={20} />, label: "Server Admin" },
+      { icon: <Wifi size={20} />, label: "Fiber Optic" },
+      { icon: <Shield size={20} />, label: "Cyber Security" },
+      { icon: <Cpu size={20} />, label: "IoT System" },
+    ],
+    [],
+  );
 
-      // Background Image Zoom Out Effect
-      tlHero.fromTo(
-        ".hero-bg-img",
-        { scale: 1.1, autoAlpha: 0 },
-        { scale: 1, autoAlpha: 0.2, duration: 2, ease: "power2.out" },
-      );
+  const jobs = useMemo(
+    () => [
+      {
+        title: "Network Engineer",
+        desc: "Merancang dan mengelola jaringan komputer perusahaan.",
+      },
+      {
+        title: "System Administrator",
+        desc: "Mengelola server, user, dan keamanan sistem.",
+      },
+      {
+        title: "IT Support / Helpdesk",
+        desc: "Menangani troubleshooting hardware dan software user.",
+      },
+      {
+        title: "CCTV & Security Tech",
+        desc: "Instalasi dan maintenance sistem keamanan digital.",
+      },
+      {
+        title: "Fiber Optic Technician",
+        desc: "Instalasi jaringan kabel fiber optik untuk ISP.",
+      },
+      {
+        title: "IT Entrepreneur",
+        desc: "Membuka jasa servis komputer, RT/RW Net, atau Web Hosting.",
+      },
+    ],
+    [],
+  );
 
-      // Hero Content Entrance
-      tlHero
-        .fromTo(
-          ".hero-pill",
-          { y: -20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "back.out(1.7)" },
-          "-=1.5",
-        )
-        .fromTo(
-          ".hero-title",
-          { y: 30, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
-          "-=1.2",
-        )
-        .fromTo(
-          ".hero-desc",
-          { y: 20, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
-          "-=1",
+  useEffect(() => {
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 200);
+
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
+
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
+        // 1. HERO ANIMATION (paint-critical reveals)
+        const tlHero = gsap.timeline();
+
+        tlHero.fromTo(
+          ".hero-bg-img",
+          { scale: 1.1, autoAlpha: 0 },
+          { scale: 1, autoAlpha: 0.2, duration: 2, ease: "power2.out" },
         );
 
-      // 2. OVERVIEW SECTION
-      // Image Slide In
-      gsap.fromTo(
-        ".overview-img",
-        { x: -50, autoAlpha: 0 },
-        {
-          x: 0,
-          autoAlpha: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".overview-section",
-            start: "top 80%",
-          },
-        },
-      );
-      // Floating Badge Pop Up
-      gsap.fromTo(
-        ".floating-badge",
-        { scale: 0, autoAlpha: 0 },
-        {
-          scale: 1,
-          autoAlpha: 1,
-          duration: 0.6,
-          delay: 0.5,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: ".overview-section",
-            start: "top 80%",
-          },
-        },
-      );
-      // Text Slide In
-      gsap.fromTo(
-        ".overview-text",
-        { x: 50, autoAlpha: 0 },
-        {
-          x: 0,
-          autoAlpha: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".overview-section",
-            start: "top 80%",
-          },
-        },
-      );
-      // Staggered Icons
-      gsap.fromTo(
-        ".tech-icon",
-        { scale: 0.8, autoAlpha: 0 },
-        {
-          scale: 1,
-          autoAlpha: 1,
-          duration: 0.5,
-          stagger: 0.1,
-          ease: "back.out(1.5)",
-          scrollTrigger: {
-            trigger: ".tech-icons-grid",
-            start: "top 85%",
-          },
-        },
-      );
+        tlHero
+          .fromTo(
+            ".hero-pill",
+            { y: -20, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.8, ease: "back.out(1.7)" },
+            "-=1.5",
+          )
+          .fromTo(
+            ".hero-title",
+            { y: 30, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out" },
+            "-=1.2",
+          )
+          .fromTo(
+            ".hero-desc",
+            { y: 20, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, duration: 0.8, ease: "power2.out" },
+            "-=1",
+          );
 
-      // 3. CURRICULUM / MATERI SECTION
-      gsap.fromTo(
-        ".curriculum-header",
-        { y: 30, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: ".curriculum-section",
-            start: "top 80%",
+        // Overview reveals
+        gsap.fromTo(
+          ".overview-img",
+          { x: -50, autoAlpha: 0 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".overview-section",
+              start: "top 80%",
+            },
           },
-        },
-      );
+        );
 
-      // Cards Stagger
-      gsap.fromTo(
-        ".curriculum-card",
-        { y: 60, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-          stagger: 0.2,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".curriculum-grid",
-            start: "top 85%",
+        gsap.fromTo(
+          ".floating-badge",
+          { scale: 0, autoAlpha: 0 },
+          {
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.6,
+            delay: 0.5,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+              trigger: ".overview-section",
+              start: "top 80%",
+            },
           },
-        },
-      );
+        );
 
-      // 4. CAREER PROSPECTS
-      gsap.fromTo(
-        ".career-title",
-        { x: -30, autoAlpha: 0 },
-        {
-          x: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-          scrollTrigger: {
-            trigger: ".career-section",
-            start: "top 80%",
+        gsap.fromTo(
+          ".overview-text",
+          { x: 50, autoAlpha: 0 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ".overview-section",
+              start: "top 80%",
+            },
           },
-        },
-      );
+        );
 
-      gsap.fromTo(
-        ".job-card",
-        { x: 30, autoAlpha: 0 },
-        {
-          x: 0,
-          autoAlpha: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: ".jobs-grid",
-            start: "top 85%",
+        gsap.fromTo(
+          ".tech-icon",
+          { scale: 0.8, autoAlpha: 0 },
+          {
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: "back.out(1.5)",
+            scrollTrigger: {
+              trigger: ".tech-icons-grid",
+              start: "top 85%",
+            },
           },
-        },
-      );
+        );
 
-      // 5. CTA FOOTER
-      gsap.fromTo(
-        ".cta-content",
-        { scale: 0.9, autoAlpha: 0 },
-        {
-          scale: 1,
-          autoAlpha: 1,
-          duration: 0.8,
-          ease: "back.out(1.2)",
-          scrollTrigger: {
-            trigger: ".cta-section",
-            start: "top 85%",
+        // Curriculum & career reveals
+        gsap.fromTo(
+          ".curriculum-header",
+          { y: 30, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: ".curriculum-section",
+              start: "top 80%",
+            },
           },
-        },
-      );
-    }, comp);
+        );
 
-    return () => ctx.revert();
+        gsap.fromTo(
+          ".curriculum-card",
+          { y: 60, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".curriculum-grid",
+              start: "top 85%",
+            },
+          },
+        );
+
+        gsap.fromTo(
+          ".career-title",
+          { x: -30, autoAlpha: 0 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            scrollTrigger: {
+              trigger: ".career-section",
+              start: "top 80%",
+            },
+          },
+        );
+
+        gsap.fromTo(
+          ".job-card",
+          { x: 30, autoAlpha: 0 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 0.6,
+            stagger: 0.1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: ".jobs-grid",
+              start: "top 85%",
+            },
+          },
+        );
+
+        gsap.fromTo(
+          ".cta-content",
+          { scale: 0.9, autoAlpha: 0 },
+          {
+            scale: 1,
+            autoAlpha: 1,
+            duration: 0.8,
+            ease: "back.out(1.2)",
+            scrollTrigger: {
+              trigger: ".cta-section",
+              start: "top 85%",
+            },
+          },
+        );
+      }, comp);
+
+      // Idle: schedule repeating tweens (header blob & floating icons)
+      idleHandleRef.current = rIC(
+        () => {
+          idleCtxRef.current = gsap.context(() => {
+            gsap.to(".header-blob", {
+              scale: 1.2,
+              rotation: 15,
+              x: 20,
+              y: 20,
+              duration: 8,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+            });
+
+            gsap.to(".float-icon-tkj-1", {
+              y: -15,
+              rotation: 5,
+              duration: 3,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+            });
+            gsap.to(".float-icon-tkj-2", {
+              y: -10,
+              duration: 4,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: 1,
+            });
+
+            gsap.to(".float-icon-dkv-1", {
+              y: -15,
+              rotation: -5,
+              duration: 3.5,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+            });
+            gsap.to(".float-icon-dkv-2", {
+              y: -10,
+              duration: 4.5,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: 0.5,
+            });
+          }, comp);
+        },
+        { timeout: 1200 },
+      );
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      try {
+        if (idleCtxRef.current) idleCtxRef.current.revert();
+        if (idleHandleRef.current) cIC(idleHandleRef.current);
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (err) {
+        /* ignore */
+      }
+    };
   }, []);
 
   return (

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Calendar,
@@ -46,14 +46,14 @@ const milestones = [
 const Sejarah = () => {
   const comp = useRef(null); // Ref container utama
 
-  // --- GSAP ANIMATION SETUP (SAFE MODE) ---
-  useLayoutEffect(() => {
-    // Delay 100ms biar layout stabil
-    const timer = setTimeout(() => {
-      let ctx = gsap.context((self) => {
+  // --- GSAP ANIMATION SETUP (deferred to idle to reduce main-thread blocking) ---
+  useEffect(() => {
+    let ctx;
+    const start = () => {
+      ctx = gsap.context((self) => {
         ScrollTrigger.refresh();
 
-        // 1. ANIMASI HEADER (Safe Fade In)
+        // 1. ANIMASI HEADER (Safe Fade In + idle loop)
         gsap.to(".header-blob", {
           scale: 1.2,
           rotation: 15,
@@ -86,10 +86,7 @@ const Sejarah = () => {
             autoAlpha: 1,
             duration: 0.8,
             ease: "back.out(1.7)",
-            scrollTrigger: {
-              trigger: ".intro-section",
-              start: "top 85%", // Trigger lebih awal
-            },
+            scrollTrigger: { trigger: ".intro-section", start: "top 85%" },
           },
         );
 
@@ -119,7 +116,7 @@ const Sejarah = () => {
           const tlItem = gsap.timeline({
             scrollTrigger: {
               trigger: item,
-              start: "top 90%", // Trigger pas item nongol dikit
+              start: "top 90%",
               toggleActions: "play none none reverse",
             },
           });
@@ -144,7 +141,6 @@ const Sejarah = () => {
         });
 
         // 5. ANIMASI CTA SECTION (Fixed Ghosting)
-        // Pakai fromTo biar dipaksa muncul
         gsap.fromTo(
           ".cta-content",
           { y: 50, autoAlpha: 0 },
@@ -153,20 +149,35 @@ const Sejarah = () => {
             autoAlpha: 1,
             duration: 0.8,
             ease: "power2.out",
-            scrollTrigger: {
-              trigger: ".cta-section",
-              start: "top 95%", // Trigger lebih awal banget (pas masuk layar dikit)
-            },
+            scrollTrigger: { trigger: ".cta-section", start: "top 95%" },
           },
         );
       }, comp);
-    }, 100);
+    };
 
-    return () => clearTimeout(timer);
+    const ric =
+      (typeof window !== "undefined" && (window.requestIdleCallback || null)) ||
+      null;
+    const handle = ric
+      ? window.requestIdleCallback(start)
+      : setTimeout(start, 120);
+
+    return () => {
+      try {
+        if (ric && window.cancelIdleCallback) window.cancelIdleCallback(handle);
+        else clearTimeout(handle);
+      } catch (e) {}
+      try {
+        if (ctx) ctx.revert();
+      } catch (e) {}
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (e) {}
+    };
   }, []);
 
-  // --- INTERAKSI HOVER ---
-  const handleMouseEnter = (e) => {
+  // --- INTERAKSI HOVER (stabilized handlers) ---
+  const handleMouseEnter = useCallback((e) => {
     const card = e.currentTarget;
     const title = card.querySelector(".anim-title");
     const yearBadge = card.querySelector(".anim-badge");
@@ -178,16 +189,15 @@ const Sejarah = () => {
       duration: 0.3,
       ease: "power2.out",
     });
-
     gsap.to(title, { color: "#ea580c", duration: 0.3 });
     gsap.to(yearBadge, {
       backgroundColor: "#f97316",
       color: "#ffffff",
       duration: 0.3,
     });
-  };
+  }, []);
 
-  const handleMouseLeave = (e) => {
+  const handleMouseLeave = useCallback((e) => {
     const card = e.currentTarget;
     const title = card.querySelector(".anim-title");
     const yearBadge = card.querySelector(".anim-badge");
@@ -199,25 +209,50 @@ const Sejarah = () => {
       duration: 0.3,
       ease: "power2.out",
     });
-
     gsap.to(title, { color: "#0f172a", duration: 0.3 });
     gsap.to(yearBadge, {
       backgroundColor: "#ffedd5",
       color: "#c2410c",
       duration: 0.3,
     });
-  };
+  }, []);
 
-  const onBtnEnter = (e) => {
-    gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 });
-  };
-  const onBtnLeave = (e) => {
-    gsap.to(e.currentTarget, { scale: 1, duration: 0.2 });
-  };
+  const onBtnEnter = useCallback(
+    (e) => gsap.to(e.currentTarget, { scale: 1.05, duration: 0.2 }),
+    [],
+  );
+  const onBtnLeave = useCallback(
+    (e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.2 }),
+    [],
+  );
+
+  // Lightweight SEO metadata
+  useEffect(() => {
+    try {
+      document.title = "Sejarah — SMK Diponegoro 1 Jakarta";
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("name", "description");
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute(
+        "content",
+        "Sejarah SMK Diponegoro 1 Jakarta — perjalanan, pencapaian, dan transformasi institusi vokasi.",
+      );
+      if (!document.querySelector('link[rel="canonical"]')) {
+        const link = document.createElement("link");
+        link.setAttribute("rel", "canonical");
+        link.setAttribute("href", window.location.href);
+        document.head.appendChild(link);
+      }
+    } catch (e) {}
+  }, []);
 
   return (
     <div
       ref={comp}
+      role="main"
       className="min-h-screen bg-[#F8FAFC] font-sans overflow-x-hidden"
     >
       {/* ==================== HEADER SECTION ==================== */}

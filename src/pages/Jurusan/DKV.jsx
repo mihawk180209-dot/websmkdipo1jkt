@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import {
   Palette,
   Camera,
@@ -20,8 +20,79 @@ gsap.registerPlugin(ScrollTrigger);
 
 const DKV = () => {
   const comp = useRef(null);
+  const idleCtxRef = useRef(null);
+  const idleHandleRef = useRef(null);
 
-  useLayoutEffect(() => {
+  const skills = useMemo(
+    () => [
+      { icon: <PenTool size={20} />, text: "Graphic Design" },
+      { icon: <Camera size={20} />, text: "Photography" },
+      { icon: <Video size={20} />, text: "Videography" },
+      { icon: <Layers size={20} />, text: "UI/UX Design" },
+    ],
+    [],
+  );
+
+  const jobs = useMemo(
+    () => [
+      {
+        title: "Graphic Designer",
+        desc: "Membuat desain visual untuk branding, iklan, dan media cetak.",
+      },
+      {
+        title: "Video Editor & Videographer",
+        desc: "Mengambil dan menyunting video untuk konten kreatif.",
+      },
+      {
+        title: "UI/UX Designer",
+        desc: "Merancang antarmuka aplikasi/web yang user-friendly.",
+      },
+      {
+        title: "Social Media Specialist",
+        desc: "Membuat konten visual menarik untuk media sosial.",
+      },
+      {
+        title: "Photographer",
+        desc: "Fotografer profesional untuk produk, event, atau fashion.",
+      },
+      {
+        title: "Freelance Illustrator",
+        desc: "Menawarkan jasa ilustrasi digital secara mandiri.",
+      },
+    ],
+    [],
+  );
+
+  useEffect(() => {
+    // Metadata (lightweight, avoids adding new dependencies)
+    try {
+      if (typeof document !== "undefined") {
+        document.title = "DKV — Desain Komunikasi Visual | SMK Diponegoro 1";
+        const md = document.querySelector('meta[name="description"]');
+        if (md)
+          md.setAttribute(
+            "content",
+            "Pelajari kurikulum, fasilitas, dan prospek karir Jurusan DKV di SMK Diponegoro 1.",
+          );
+        else {
+          const m = document.createElement("meta");
+          m.name = "description";
+          m.content =
+            "Pelajari kurikulum, fasilitas, dan prospek karir Jurusan DKV di SMK Diponegoro 1.";
+          document.head.appendChild(m);
+        }
+        const canon = document.querySelector('link[rel="canonical"]');
+        if (!canon) {
+          const c = document.createElement("link");
+          c.rel = "canonical";
+          c.href = window.location.href;
+          document.head.appendChild(c);
+        }
+      }
+    } catch (err) {
+      /* ignore DOM safety errors */
+    }
+
     let ctx = gsap.context(() => {
       // 1. HERO ANIMATION
       const tlHero = gsap.timeline();
@@ -196,16 +267,51 @@ const DKV = () => {
         },
       );
 
-      // Spinning Icon Animation (GSAP)
-      gsap.to(".spin-icon", {
-        rotation: 360,
-        duration: 30,
-        repeat: -1,
-        ease: "linear",
-      });
+      // do not create infinite repeats on main thread here; schedule below
     }, comp);
 
-    return () => ctx.revert();
+    // schedule long-running/looping tweens in idle time to reduce main-thread impact
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 600);
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
+
+    idleHandleRef.current = rIC(
+      () => {
+        idleCtxRef.current = gsap.context(() => {
+          gsap.to(".spin-icon", {
+            rotation: 360,
+            duration: 30,
+            repeat: -1,
+            ease: "linear",
+          });
+        }, comp);
+      },
+      { timeout: 1200 },
+    );
+
+    return () => {
+      try {
+        ctx.revert();
+      } catch (e) {
+        /* ignore */
+      }
+      try {
+        if (idleCtxRef.current) idleCtxRef.current.revert();
+        if (idleHandleRef.current) cIC(idleHandleRef.current);
+      } catch (e) {
+        /* ignore */
+      }
+      try {
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (e) {
+        /* ignore */
+      }
+    };
   }, []);
 
   return (

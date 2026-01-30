@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Search, User, Loader2, Sparkles, GraduationCap } from "lucide-react";
 import { supabase } from "../../lib/supabase"; // Sesuaikan path
 
@@ -15,10 +15,20 @@ const Guru = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Semua");
+  const idleCtxRef = useRef(null);
+  const idleHandleRef = useRef(null);
 
   // --- 1. FETCH DATA ---
   useEffect(() => {
-    fetchTeachers();
+    let mounted = true;
+    const run = async () => {
+      await fetchTeachers();
+      if (!mounted) return;
+    };
+    run();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const fetchTeachers = async () => {
@@ -37,61 +47,64 @@ const Guru = () => {
   };
 
   // --- 2. FILTER LOGIC ---
-  const filteredData = teachers.filter((item) => {
-    const matchesSearch =
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.role.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTab = activeTab === "Semua" || item.category === activeTab;
-    return matchesSearch && matchesTab;
-  });
+  const filteredData = useMemo(() => {
+    return teachers.filter((item) => {
+      const q = searchTerm.toLowerCase();
+      const matchesSearch =
+        item.name.toLowerCase().includes(q) ||
+        item.role.toLowerCase().includes(q);
+      const matchesTab = activeTab === "Semua" || item.category === activeTab;
+      return matchesSearch && matchesTab;
+    });
+  }, [teachers, searchTerm, activeTab]);
 
   // --- 3. GSAP ANIMATION (SAFE MODE / ANTI-GHOSTING) ---
-  useLayoutEffect(() => {
-    // Delay 100ms agar DOM stabil sebelum animasi jalan
-    const timer = setTimeout(() => {
-      let ctx = gsap.context(() => {
+  // Immediate reveals and data-driven card reveals. Defer repeating tweens to idle.
+  useEffect(() => {
+    const rIC =
+      typeof window !== "undefined" && window.requestIdleCallback
+        ? window.requestIdleCallback.bind(window)
+        : (fn) => setTimeout(fn, 200);
+
+    const cIC =
+      typeof window !== "undefined" && window.cancelIdleCallback
+        ? window.cancelIdleCallback.bind(window)
+        : (id) => clearTimeout(id);
+
+    // Immediate paint-critical reveals (header + toolbar)
+    const ctx = gsap.context(() => {
+      ScrollTrigger.refresh();
+
+      gsap.fromTo(
+        ".anim-header",
+        { y: 30, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "power3.out",
+        },
+      );
+
+      gsap.fromTo(
+        ".anim-toolbar",
+        { y: 20, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.6,
+          delay: 0.4,
+          ease: "power2.out",
+        },
+      );
+    }, comp);
+
+    // Data-driven reveals (run when data is ready)
+    const runCards = () => {
+      if (!loading) {
         ScrollTrigger.refresh();
-
-        // A. Background Blob Animation
-        gsap.to(".header-blob", {
-          scale: 1.2,
-          rotation: 15,
-          x: 20,
-          y: 20,
-          duration: 8,
-          repeat: -1,
-          yoyo: true,
-          ease: "sine.inOut",
-        });
-
-        // B. Header Text (Judul & Desc)
-        gsap.fromTo(
-          ".anim-header",
-          { y: 30, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.8,
-            stagger: 0.1,
-            ease: "power3.out",
-          },
-        );
-
-        // C. Toolbar (Search & Filter)
-        gsap.fromTo(
-          ".anim-toolbar",
-          { y: 20, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.6,
-            delay: 0.4, // Muncul setelah header
-            ease: "power2.out",
-          },
-        );
-
-        // D. Grid Cards (Jalan setiap filter berubah)
-        if (!loading) {
+        const ctxCards = gsap.context(() => {
           gsap.fromTo(
             ".anim-card",
             { y: 30, autoAlpha: 0 },
@@ -99,13 +112,12 @@ const Guru = () => {
               y: 0,
               autoAlpha: 1,
               duration: 0.5,
-              stagger: 0.05, // Stagger cepat biar responsif
+              stagger: 0.05,
               ease: "back.out(1.2)",
-              overwrite: "auto", // Mencegah konflik animasi saat filter cepat
+              overwrite: "auto",
             },
           );
 
-          // Empty State
           if (filteredData.length === 0) {
             gsap.fromTo(
               ".anim-empty",
@@ -113,15 +125,50 @@ const Guru = () => {
               { scale: 1, autoAlpha: 1, duration: 0.4 },
             );
           }
-        }
-      }, comp);
-    }, 100);
+        }, comp);
+        return ctxCards;
+      }
+      return null;
+    };
 
-    return () => clearTimeout(timer);
-  }, [loading, filteredData, activeTab]); // Dependencies penting!
+    let cardsCtx = null;
+    // schedule repeating/long-running tweens (background blob) on idle
+    idleHandleRef.current = rIC(
+      () => {
+        idleCtxRef.current = gsap.context(() => {
+          gsap.to(".header-blob", {
+            scale: 1.2,
+            rotation: 15,
+            x: 20,
+            y: 20,
+            duration: 8,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+          });
+        }, comp);
+      },
+      { timeout: 1200 },
+    );
+
+    // Run cards reveal now (depends on loading/filters)
+    cardsCtx = runCards();
+
+    return () => {
+      try {
+        ctx.revert();
+        if (cardsCtx) cardsCtx.revert();
+        if (idleCtxRef.current) idleCtxRef.current.revert();
+        if (idleHandleRef.current) cIC(idleHandleRef.current);
+        ScrollTrigger.getAll().forEach((t) => t.kill());
+      } catch (err) {
+        /* ignore */
+      }
+    };
+  }, [loading, filteredData, activeTab]);
 
   // --- INTERACTION HOVER (Sesuai Tema Sejarah) ---
-  const handleMouseEnter = (e) => {
+  const handleMouseEnter = useCallback((e) => {
     const card = e.currentTarget;
     const imgWrapper = card.querySelector(".img-wrapper");
     const name = card.querySelector(".anim-name");
@@ -144,9 +191,9 @@ const Guru = () => {
 
     // Text Color
     gsap.to(name, { color: "#ea580c", duration: 0.3 });
-  };
+  }, []);
 
-  const handleMouseLeave = (e) => {
+  const handleMouseLeave = useCallback((e) => {
     const card = e.currentTarget;
     const imgWrapper = card.querySelector(".img-wrapper");
     const name = card.querySelector(".anim-name");
@@ -167,7 +214,113 @@ const Guru = () => {
     });
 
     gsap.to(name, { color: "#0f172a", duration: 0.3 }); // slate-900
-  };
+  }, []);
+
+  // Memoize rendered card grid to avoid re-render unless data/handlers change
+  const renderedGrid = useMemo(() => {
+    if (loading) return null;
+
+    return filteredData.length > 0 ? (
+      filteredData.map((item) => (
+        <div
+          key={item.id}
+          className="anim-card bg-white rounded-3xl p-6 border border-slate-100 cursor-default group flex flex-col items-center text-center opacity-0"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div className="relative mb-6">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-orange-400 to-red-400 blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
+
+            <div className="img-wrapper w-32 h-32 rounded-full p-1.5 bg-white border-2 border-slate-200 relative z-10 transition-all duration-300">
+              <img
+                src={
+                  item.image_url || "https://placehold.co/150x150?text=No+Image" // FIX: Diganti ke placehold.co
+                }
+                alt={item.name}
+                className="w-full h-full rounded-full object-cover"
+                loading={item.category === "Pimpinan" ? "eager" : "lazy"}
+                decoding="async"
+                fetchpriority={item.category === "Pimpinan" ? "high" : "low"}
+              />
+            </div>
+
+            <span
+              className={`absolute bottom-0 right-0 px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider rounded-full z-20 border-2 border-white shadow-sm
+                        ${
+                          item.category === "Pimpinan"
+                            ? "bg-violet-500"
+                            : item.category === "Guru"
+                              ? "bg-orange-500"
+                              : "bg-slate-500"
+                        }
+                      `}
+            >
+              {item.category}
+            </span>
+          </div>
+
+          <h3
+            className="anim-name text-lg font-bold text-slate-900 transition-colors line-clamp-1 w-full"
+            title={item.name}
+          >
+            {item.name}
+          </h3>
+
+          <div className="mt-2 mb-6 h-10 w-full flex items-center justify-center">
+            <p className="text-sm text-slate-500 font-medium bg-slate-50 px-3 py-1 rounded-lg border border-slate-100 line-clamp-2">
+              {item.role}
+            </p>
+          </div>
+
+          <button className="mt-auto w-full py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-slate-50 border border-slate-200 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all flex items-center justify-center gap-2 group/btn">
+            <GraduationCap size={16} />
+            Lihat Profil
+          </button>
+        </div>
+      ))
+    ) : (
+      <div className="anim-empty col-span-full text-center py-20 opacity-0">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-slate-100 rounded-full mb-6">
+          <User size={40} className="text-slate-400" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-800 mb-2">
+          Tidak ditemukan
+        </h3>
+        <p className="text-slate-500 max-w-md mx-auto">
+          Maaf, kami tidak menemukan data yang cocok dengan kata kunci "
+          <span className="font-semibold text-orange-600">{searchTerm}</span>".
+          Coba gunakan kata kunci lain.
+        </p>
+      </div>
+    );
+  }, [filteredData, loading, handleMouseEnter, handleMouseLeave, searchTerm]);
+
+  // Lightweight metadata for SEO
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = "Guru & Tenaga Pendidik — SMK Diponegoro 1 Jakarta";
+
+    let meta = document.querySelector('meta[name="description"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content =
+      "Kenali tenaga pendidik dan kependidikan profesional di SMK Diponegoro 1 Jakarta.";
+
+    const existing = document.querySelector('link[rel="canonical"]');
+    if (!existing) {
+      const link = document.createElement("link");
+      link.rel = "canonical";
+      link.href = window.location.href;
+      document.head.appendChild(link);
+    }
+
+    return () => {
+      document.title = prevTitle;
+    };
+  }, []);
 
   return (
     <div
@@ -272,7 +425,7 @@ const Guru = () => {
                         <img
                           src={
                             item.image_url ||
-                            "https://via.placeholder.com/150?text=No+Image"
+                            "https://placehold.co/150x150?text=No+Image" // FIX: Diganti ke placehold.co
                           }
                           alt={item.name}
                           className="w-full h-full rounded-full object-cover"
