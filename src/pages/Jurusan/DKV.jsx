@@ -10,6 +10,7 @@ import {
   PenTool,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import dkvfoto from "../../assets/dkvfoto.webp";
 
 // --- GSAP IMPORTS ---
 import gsap from "gsap";
@@ -325,7 +326,7 @@ const DKV = () => {
         <div className="absolute inset-0 z-0">
           <div className="w-full h-full">
             <img
-              src="https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=1920"
+              src={dkvfoto}
               alt="Creative Studio"
               className="hero-bg-img w-full h-full object-cover opacity-0" // Start invisible
             />
