@@ -67,7 +67,7 @@ const DKV = () => {
     // Metadata (lightweight, avoids adding new dependencies)
     try {
       if (typeof document !== "undefined") {
-        document.title = "DKV — Desain Komunikasi Visual | SMK Diponegoro 1";
+        document.title = "Program Keahlian | SMK Diponegoro 1";
         const md = document.querySelector('meta[name="description"]');
         if (md)
           md.setAttribute(
