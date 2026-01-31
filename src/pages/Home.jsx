@@ -34,7 +34,6 @@ const Home = () => {
 
   // Refs for timelines to manage cleanup
   const heroTlRef = useRef();
-  const statsTlRef = useRef();
 
   // State untuk data
   const [homeArticles, setHomeArticles] = useState([]);
@@ -61,7 +60,6 @@ const Home = () => {
 
       // Kill all timelines
       if (heroTlRef.current) heroTlRef.current.kill();
-      if (statsTlRef.current) statsTlRef.current.kill();
     };
   }, []);
 
@@ -142,21 +140,6 @@ const Home = () => {
           },
           "-=0.8",
         );
-
-      // ================= ANIMASI STATS =================
-      statsTlRef.current = gsap.to(".stat-card", {
-        y: 0,
-        scale: 1,
-        autoAlpha: 1,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: ".stats-container",
-          start: "top 85%",
-          toggleActions: "play none none reset",
-        },
-      });
 
       // ================= IDLE ANIMATIONS (Floating) =================
       gsap.to(".blob-orange", {
@@ -445,7 +428,6 @@ const Home = () => {
               className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
-              style={{ opacity: 0, transform: "translateY(50px)" }}
             >
               <div className="mb-4 p-4 bg-orange-50 shadow-sm rounded-full text-primary">
                 {stat.icon}

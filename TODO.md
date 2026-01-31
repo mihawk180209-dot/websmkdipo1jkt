@@ -1,0 +1,4 @@
+- [x] Remove statsTlRef declaration
+- [ ] Remove statsTlRef kill in cleanup effect
+- [ ] Remove stats animation code from useGSAP hook
+- [ ] Remove inline styles from stat-card divs
