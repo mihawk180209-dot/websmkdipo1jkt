@@ -1,208 +1,243 @@
-# SMK Diponegoro 1 Jakarta - Official Website
+# SMK Diponegoro 1 Jakarta - Situs Web Resmi
 
 [![React](https://img.shields.io/badge/React-19.2.3-blue.svg)](https://reactjs.org/)
 [![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF.svg)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.18-38B2AC.svg)](https://tailwindcss.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-2.89.0-3ECF8E.svg)](https://supabase.com/)
 
-A modern, responsive web application for SMK Diponegoro 1 Jakarta, built with React and Vite. This platform serves as the official website for the vocational school, providing information about programs, facilities, teachers, and school activities, along with an administrative panel for content management.
+Aplikasi web modern dan responsif untuk SMK Diponegoro 1 Jakarta, dibangun dengan React dan Vite. Platform ini berfungsi sebagai situs web resmi untuk sekolah kejuruan, menyediakan informasi tentang program, fasilitas, guru, dan kegiatan sekolah, bersama dengan panel administrasi untuk pengelolaan konten.
 
-## 🌟 Features
+## 🌟 Fitur
 
-### Public Features
+### Fitur Publik
 
-- **Homepage**: Hero section with school branding, principal's welcome message, statistics, and featured programs
-- **About Section**: Comprehensive information including profile, vision & mission, history, uniform, facilities, organizational structure, and teachers
-- **Academic Programs**: Detailed information about TKJ (Computer & Network Engineering) and DKV (Visual Communication Design) majors
-- **Articles & News**: Latest school news, student achievements, and educational content
-- **Programs**: Information about outstanding programs and extracurricular activities
-- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
-- **Performance Optimized**: Lazy loading, code splitting, and optimized assets
+- **Beranda**: Bagian hero dengan branding sekolah, pesan sambutan kepala sekolah, statistik, dan program unggulan
+- **Bagian Tentang**: Informasi komprehensif termasuk profil, visi & misi, sejarah, seragam, fasilitas, struktur organisasi, dan guru
+- **Program Akademik**: Informasi detail tentang jurusan TKJ (Teknik Komputer & Jaringan) dan DKV (Desain Komunikasi Visual)
+- **Artikel & Berita**: Berita sekolah terbaru, prestasi siswa, dan konten edukasi dengan halaman detail
+- **Program**: Informasi tentang program unggulan dan kegiatan ekstrakurikuler dengan manfaat dinamis
+- **Desain Responsif**: Dioptimalkan untuk desktop, tablet, dan perangkat mobile
+- **Performa Dioptimalkan**: Lazy loading, code splitting, dan aset yang dioptimalkan
+- **Animasi Halus**: GSAP dan Framer Motion untuk pengalaman pengguna yang ditingkatkan
 
-### Administrative Features
+### Fitur Administratif
 
-- **Content Management**: Admin panel for managing articles, teachers, uniforms, facilities, and programs
-- **Authentication**: Secure login system for administrators
-- **CRUD Operations**: Create, read, update, and delete functionality for all content types
-- **File Upload**: Image upload capabilities for articles and content
-- **Protected Routes**: Secure access to admin-only sections
+- **Pengelolaan Konten**: Panel admin untuk mengelola artikel, guru, seragam, fasilitas, dan program
+- **Autentikasi**: Sistem login aman untuk administrator menggunakan Supabase Auth
+- **Operasi CRUD**: Fungsi create, read, update, dan delete untuk semua jenis konten
+- **Upload File**: Kemampuan upload gambar untuk artikel dan konten dengan konversi WebP otomatis
+- **Rute Terlindungi**: Akses aman ke bagian khusus admin
+- **Dashboard**: Ikhtisar statistik situs web dan tindakan cepat
+- **Pengelolaan Teks Kaya**: Dukungan untuk daftar manfaat dinamis dalam program
 
 ## 🛠️ Tech Stack
 
 ### Frontend
 
-- **React 19.2.3** - Modern JavaScript library for building user interfaces
-- **Vite 7.2.4** - Fast build tool and development server
-- **Tailwind CSS 4.1.18** - Utility-first CSS framework
-- **React Router DOM 7.11.0** - Declarative routing for React
+- **React 19.2.3** - Library JavaScript modern untuk membangun antarmuka pengguna
+- **Vite 7.2.4** - Alat build cepat dan server pengembangan
+- **Tailwind CSS 4.1.18** - Framework CSS utility-first
+- **React Router DOM 7.11.0** - Routing deklaratif untuk React
 
-### Animations & Interactions
+### Animasi & Interaksi
 
-- **GSAP 3.14.2** - High-performance JavaScript animation library
-- **Framer Motion 12.24.10** - Production-ready motion library for React
-- **AOS 2.3.4** - Animate on scroll library
+- **GSAP 3.14.2** - Library animasi JavaScript berperforma tinggi
+- **Framer Motion 12.24.10** - Library motion siap produksi untuk React
+- **AOS 2.3.4** - Library animasi saat scroll
 
 ### Backend & Database
 
-- **Supabase 2.89.0** - Open source Firebase alternative for backend services
+- **Supabase 2.89.0** - Alternatif Firebase open source untuk layanan backend
+- **Supabase Storage** - Penyimpanan file untuk gambar (bucket article-images, facility-images, uniform-images, teacher-images, program-images)
 
-### Development Tools
+### Alat Pengembangan
 
-- **ESLint 9.39.1** - JavaScript linting utility
-- **Lucide React 0.562.0** - Beautiful & consistent icon toolkit
-- **Recharts 3.6.0** - Composable charting library built on React components
-- **HTML2PDF.js 0.12.1** - Client-side HTML-to-PDF conversion
+- **ESLint 9.39.1** - Utilitas linting JavaScript
+- **Lucide React 0.562.0** - Toolkit ikon yang indah & konsisten
+- **Recharts 3.6.0** - Library charting yang dapat dikomposisi dibangun pada komponen React
+- **HTML2PDF.js 0.12.1** - Konversi HTML-ke-PDF sisi klien
 
 ### Build & Deployment
 
-- **Vercel Analytics 1.6.1** - Real-time analytics for web applications
-- **Vite Compression Plugin 0.5.1** - Compression plugin for Vite
-- **JavaScript Obfuscator 5.1.0** - JavaScript obfuscator for production builds
+- **Vercel Analytics 1.6.1** - Analytics real-time untuk aplikasi web
+- **Vite Compression Plugin 0.5.1** - Plugin kompresi untuk Vite
+- **JavaScript Obfuscator 5.1.0** - Obfuscator JavaScript untuk build produksi
 
-## 📋 Prerequisites
+## 📋 Prasyarat
 
-Before running this project, make sure you have the following installed:
+Sebelum menjalankan proyek ini, pastikan Anda telah menginstal yang berikut:
 
-- **Node.js** (version 16 or higher)
-- **npm** or **yarn** package manager
-- **Supabase** account for backend services
+- **Node.js** (versi 16 atau lebih tinggi)
+- **npm** atau **yarn** package manager
+- **Supabase** akun untuk layanan backend
 
-## 🚀 Installation
+## 🚀 Instalasi
 
-1. **Clone the repository**
+1. **Kloning repositori**
 
    ```bash
    git clone <repository-url>
    cd web-dipo
    ```
 
-2. **Install dependencies**
+2. **Instal dependensi**
 
    ```bash
    npm install
    ```
 
-3. **Environment Setup**
-   - Create a `.env` file in the root directory
-   - Add your Supabase configuration:
+3. **Pengaturan Lingkungan**
+   - Buat file `.env` di direktori root
+   - Tambahkan konfigurasi Supabase Anda:
      ```
      VITE_SUPABASE_URL=your_supabase_url
      VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
      ```
 
-4. **Start the development server**
+4. **Jalankan server pengembangan**
 
    ```bash
    npm run dev
    ```
 
-5. **Build for production**
+5. **Build untuk produksi**
 
    ```bash
    npm run build
    ```
 
-6. **Preview production build**
+6. **Pratinjau build produksi**
    ```bash
    npm run preview
    ```
 
-## 📁 Project Structure
+## 📁 Struktur Proyek
 
 ```
 web-dipo/
-├── public/                    # Static assets
+├── public/                    # Aset statis
 │   ├── logo yayasan al-hidayah-02.png
 │   └── vite.png
 ├── src/
-│   ├── assets/               # Images and media files
-│   ├── components/           # Reusable React components
-│   │   ├── Layout.jsx        # Main layout wrapper
-│   │   ├── Navbar.jsx        # Navigation component
-│   │   ├── Footer.jsx        # Footer component
-│   │   ├── Mobilemenu.jsx    # Mobile navigation
+│   ├── assets/               # Gambar dan file media
+│   │   ├── logo yayasan al-hidayah-02.webp
+│   │   ├── Bu Ipeh.webp
+│   │   ├── icon-tkj2.webp
+│   │   ├── icon-dkv2.webp
+│   │   └── ... (gambar guru dan fasilitas)
+│   ├── components/           # Komponen React yang dapat digunakan ulang
+│   │   ├── Layout.jsx        # Wrapper layout utama
+│   │   ├── Navbar.jsx        # Komponen navigasi dengan animasi GSAP
+│   │   ├── Footer.jsx        # Komponen footer
+│   │   ├── Mobilemenu.jsx    # Navigasi mobile
+│   │   ├── Dropdown.jsx      # Komponen menu dropdown
+│   │   ├── AdminLayout.jsx   # Layout panel admin
+│   │   ├── ProtectedRoute.jsx # Komponen perlindungan rute
 │   │   └── ...
-│   ├── data/                 # Static data and configurations
-│   ├── lib/                  # Utility libraries
-│   │   └── supabase.js       # Supabase client configuration
-│   ├── pages/                # Page components
-│   │   ├── Home.jsx          # Homepage
-│   │   ├── Login.jsx         # Admin login page
-│   │   ├── admin/            # Admin panel pages
+│   ├── data/                 # Data statis dan konfigurasi
+│   │   └── navigation.js     # Konfigurasi menu navigasi
+│   ├── lib/                  # Library utilitas
+│   │   └── supabase.js       # Konfigurasi klien Supabase
+│   ├── pages/                # Komponen halaman
+│   │   ├── Home.jsx          # Beranda dengan hero, statistik, dan program
+│   │   ├── Login.jsx         # Halaman login admin
+│   │   ├── Artikel.jsx       # Halaman daftar artikel
+│   │   ├── DetailArtikel.jsx # Halaman detail artikel
+│   │   ├── DetailProgram.jsx # Halaman detail program
+│   │   ├── ppdb.jsx          # Halaman placeholder PPDB
+│   │   ├── admin/            # Halaman panel admin
 │   │   │   ├── Dashboard.jsx
 │   │   │   ├── ManageArtikel.jsx
-│   │   │   └── ...
-│   │   ├── tentang/          # About section pages
+│   │   │   ├── FormArtikel.jsx
+│   │   │   ├── ManageGuru.jsx
+│   │   │   ├── FormGuru.jsx
+│   │   │   ├── ManageSeragam.jsx
+│   │   │   ├── FormSeragam.jsx
+│   │   │   ├── ManageFasilitas.jsx
+│   │   │   ├── FormFasilitas.jsx
+│   │   │   ├── ManageProgram.jsx
+│   │   │   ├── FormProgram.jsx
+│   │   ├── tentang/          # Halaman bagian tentang
 │   │   │   ├── Overview.jsx
 │   │   │   ├── Profil.jsx
-│   │   │   └── ...
-│   │   ├── Jurusan/          # Major programs pages
-│   │   │   ├── TKJ.jsx
-│   │   │   └── DKV.jsx
-│   │   └── ...
-│   ├── App.jsx               # Main application component
-│   ├── main.jsx              # Application entry point
-│   └── index.css             # Global styles
-├── index.html                # HTML template
-├── package.json              # Project dependencies and scripts
-├── vite.config.js            # Vite configuration
-├── tailwind.config.js        # Tailwind CSS configuration
-├── eslint.config.js          # ESLint configuration
-└── README.md                 # Project documentation
+│   │   │   ├── VisiMisi.jsx
+│   │   │   ├── Sejarah.jsx
+│   │   │   ├── ProgramUnggulan.jsx
+│   │   │   ├── Seragam.jsx
+│   │   │   ├── Fasilitas.jsx
+│   │   │   ├── Struktur.jsx
+│   │   │   └── Guru.jsx
+│   │   └── Jurusan/          # Halaman program jurusan
+│   │       ├── Jurusan.jsx
+│   │       ├── TKJ.jsx
+│   │       └── DKV.jsx
+│   ├── App.jsx               # Komponen aplikasi utama dengan routing
+│   ├── main.jsx              # Titik masuk aplikasi
+│   ├── App.css               # Gaya global
+│   └── index.css             # Gaya global tambahan
+├── index.html                # Template HTML
+├── package.json              # Dependensi proyek dan skrip
+├── vite.config.js            # Konfigurasi Vite dengan kompresi dan obfuscation
+├── tailwind.config.js        # Konfigurasi Tailwind CSS
+├── eslint.config.js          # Konfigurasi ESLint
+├── vercel.json               # Konfigurasi deployment Vercel
+└── README.md                 # Dokumentasi proyek
 ```
 
-## 🎯 Usage
+## 🎯 Penggunaan
 
-### For Visitors
+### Untuk Pengunjung
 
-- Browse school information, programs, and latest news
-- Learn about TKJ and DKV majors
-- Access contact information and registration details
-- View school facilities and teacher profiles
+- Jelajahi informasi sekolah, program, dan berita terbaru
+- Pelajari tentang jurusan TKJ dan DKV
+- Akses informasi kontak dan detail pendaftaran
+- Lihat fasilitas sekolah dan profil guru
+- Baca artikel dan detail program
 
-### For Administrators
+### Untuk Administrator
 
-1. Access the admin panel at `/admin`
-2. Log in with administrator credentials
-3. Manage content through the dashboard:
-   - Add/edit/delete articles and news
-   - Update teacher information
-   - Manage facility details
-   - Configure program information
-   - Upload and manage images
+1. Akses panel admin di `/admin` (memerlukan login)
+2. Login dengan kredensial administrator
+3. Kelola konten melalui dashboard:
+   - **Artikel**: Tambah/edit/hapus berita dan pengumuman
+   - **Guru**: Kelola profil guru dan staf
+   - **Fasilitas**: Perbarui informasi fasilitas sekolah
+   - **Seragam**: Konfigurasi jadwal dan detail seragam
+   - **Program**: Kelola program unggulan dengan manfaat
+   - Upload dan kelola gambar dengan konversi WebP otomatis
 
-## 🔧 Available Scripts
+## 🔧 Skrip Tersedia
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+- `npm run dev` - Jalankan server pengembangan
+- `npm run build` - Build untuk produksi
+- `npm run preview` - Pratinjau build produksi
+- `npm run lint` - Jalankan ESLint
 
 ## 🌐 Deployment
 
-This application is configured for deployment on Vercel with the following optimizations:
+Aplikasi ini dikonfigurasi untuk deployment di Vercel dengan optimasi berikut:
 
-- **Compression**: Static assets are compressed for faster loading
-- **Analytics**: Integrated with Vercel Analytics for performance monitoring
-- **Obfuscation**: JavaScript code is obfuscated in production builds
-- **Environment Variables**: Secure configuration through environment variables
+- **Kompresi**: Aset statis dikompresi untuk pemuatan lebih cepat
+- **Analytics**: Terintegrasi dengan Vercel Analytics untuk pemantauan performa
+- **Obfuscation**: Kode JavaScript di-obfuscate dalam build produksi
+- **Variabel Lingkungan**: Konfigurasi aman melalui variabel lingkungan
 
-## 🤝 Contributing
+## 🤝 Kontribusi
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Fork repositori
+2. Buat branch fitur (`git checkout -b feature/fitur-hebat`)
+3. Commit perubahan Anda (`git commit -m 'Tambah fitur hebat'`)
+4. Push ke branch (`git push origin feature/fitur-hebat`)
+5. Buka Pull Request
 
-## 📄 License
+## 📄 Lisensi
 
-This project is proprietary software for SMK Diponegoro 1 Jakarta.
+Proyek ini adalah perangkat lunak proprietary untuk SMK Diponegoro 1 Jakarta.
 
-## 📞 Contact
+## 📞 Kontak
 
-For questions or support, please contact the school administration.
+Untuk pertanyaan atau dukungan, silakan hubungi administrasi sekolah.
 
 ---
 
-**SMK Diponegoro 1 Jakarta** - Building Future Leaders Through Vocational Excellence
+**SMK Diponegoro 1 Jakarta** - Membangun Pemimpin Masa Depan Melalui Keunggulan Vokasi

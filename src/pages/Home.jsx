@@ -12,6 +12,8 @@ import {
   Palette,
   PenTool,
   Calendar,
+  Star,
+  LayoutGrid,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useState, useCallback, useMemo } from "react";
@@ -349,18 +351,22 @@ const Home = () => {
           <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8 xl:gap-20">
             {/* Text Content */}
             <div className="flex-1 text-center lg:text-left z-10">
-              <span className="hero-element inline-block py-1.5 px-4 rounded-full bg-orange-100 text-primary text-sm font-bold mb-6 tracking-wide">
-                ✨ TerAkreditasi A
-              </span>
+              <div className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm">
+                <Star size={14} fill="currentColor" />
+                <span>Terakreditasi A</span>
+              </div>
 
-              <h1 className="hero-element text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-tight mb-6 text-gray-900">
-                SMK DIPO 1
+              <h1 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900">
+                Mempersiapkan Generasi <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">
+                  Siap Teknologi & Berkarakter
+                </span>
               </h1>
 
               <p className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Mencetak lulusan yang tidak hanya cerdas secara teknologi 💻,
-                tetapi juga memiliki karakter akhlak mulia dan siap bersaing di
-                dunia industri global.
+                SMK Diponegoro 1 Jakarta menghadirkan pendidikan vokasi berbasis
+                teknologi, karakter, dan kebutuhan industri untuk masa depan
+                yang lebih baik.
               </p>
 
               <div className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -372,7 +378,7 @@ const Home = () => {
                   onMouseLeave={onButtonReset}
                   className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-orange-300/50 transition-shadow flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  Daftar Sekarang <ArrowRight size={20} />
+                  Daftar PPDB <ArrowRight size={20} />
                 </a>
                 <Link
                   to="/tentang/profil"
@@ -395,7 +401,7 @@ const Home = () => {
               <div className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20">
                 <img
                   src={logo}
-                  alt="Logo SMK Dipo 1"
+                  alt="Logo SMK Diponegoro 1 Jakarta"
                   className="hero-logo-img w-full h-full object-contain"
                   loading="eager"
                   decoding="async"
@@ -544,182 +550,110 @@ const Home = () => {
           </div>
 
           {/* ==================== CARDS CONTAINER ==================== */}
-          <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10 max-w-6xl mx-auto">
-            {/* TKJ CARD (THEME: TEAL / CYAN) */}
-            <div className="jurusan-card group relative bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-slate-100 flex flex-col h-full">
-              {/* Header Image */}
-              <div className="h-72 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
-                {/* Pattern Overlay */}
-                <div
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(#fff 1px, transparent 1px)",
-                    backgroundSize: "20px 20px",
-                  }}
-                ></div>
+          <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+            {/* TKJ Card */}
+            <div
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
+              onMouseEnter={onHoverScale}
+              onMouseLeave={onHoverScaleReset}
+            >
+              <div className="h-64 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
 
-                {/* Floating Icons */}
-                <div className="float-icon-tkj-1 absolute -right-10 -bottom-10 opacity-20">
-                  <Monitor
-                    size={140}
-                    className="text-white rotate-12 group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <div className="float-icon-tkj-2 absolute top-10 left-10 opacity-20">
-                  <Cpu size={80} className="text-white" />
-                </div>
+                {/* Decorative Icons */}
+                <Monitor className="float-icon absolute -right-6 -bottom-6 text-white/10 w-32 h-32 rotate-12" />
+                <Cpu className="float-icon absolute top-8 left-8 text-white/10 w-20 h-20" />
 
                 <div className="relative z-10 text-center">
-                  {/* ICON CUSTOM */}
-                  <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 border border-white/30 text-white shadow-lg group-hover:rotate-12 transition-transform duration-500">
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-lg">
                     <img
                       src={tkjCustomIcon}
-                      alt="Logo TKJ"
-                      className="w-16 h-16 object-contain drop-shadow-md"
-                      loading="lazy"
-                      decoding="async"
+                      alt="TKJ"
+                      className="w-12 h-12 object-contain"
                     />
                   </div>
-
-                  <h2 className="text-4xl font-extrabold text-white tracking-wide mb-1">
-                    TKJ
-                  </h2>
-                  <p className="text-teal-100 font-medium">
+                  <h3 className="text-2xl font-bold text-white mb-1">TKJ</h3>
+                  <p className="text-teal-100 text-sm font-medium">
                     Teknik Komputer & Jaringan
                   </p>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-8 lg:p-10 flex flex-col flex-grow">
-                <p className="text-slate-600 mb-8 leading-relaxed flex-grow text-lg">
-                  Mencetak teknisi handal yang ahli dalam perakitan komputer,
-                  instalasi jaringan (LAN/WAN), administrasi server, mikrotik,
-                  hingga keamanan siber (Cyber Security).
+              <div className="p-8 flex flex-col flex-grow">
+                <p className="text-slate-600 mb-8 leading-relaxed flex-grow">
+                  Fokus pada perakitan komputer, instalasi jaringan (LAN/WAN),
+                  administrasi server, mikrotik, dan dasar keamanan siber.
                 </p>
 
-                <div className="space-y-4 mb-10">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-teal-50 text-teal-600 rounded-xl mt-0.5">
-                      <Briefcase size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">
-                        Prospek Karir
-                      </h4>
-                      <p className="text-sm text-slate-500">
-                        Network Engineer, IT Support, Cyber Security Analyst
-                      </p>
-                    </div>
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <Briefcase size={18} className="text-teal-600" />
+                    <span>Network Engineer, IT Support</span>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-teal-50 text-teal-600 rounded-xl mt-0.5">
-                      <Award size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">Sertifikasi</h4>
-                      <p className="text-sm text-slate-500">
-                        Mikrotik MTCNA, BNSP Teknisi Jaringan
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <Award size={18} className="text-teal-600" />
+                    <span>Sertifikasi Mikrotik MTCNA</span>
                   </div>
                 </div>
 
                 <Link
                   to="/jurusan/tkj"
-                  className="block w-full py-4 bg-teal-50 text-teal-700 text-center font-bold rounded-2xl hover:bg-teal-600 hover:text-white transition-all shadow-sm hover:shadow-lg border border-teal-100 hover:border-teal-600"
+                  className="block w-full py-3.5 bg-teal-50 text-teal-700 text-center font-bold rounded-xl hover:bg-teal-600 hover:text-white transition-all duration-300"
                 >
-                  Jelajahi TKJ
+                  Detail TKJ
                 </Link>
               </div>
             </div>
 
-            {/* DKV CARD (THEME: PURPLE / VIOLET) */}
-            <div className="jurusan-card group relative bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 border border-slate-100 flex flex-col h-full">
-              {/* Header Image */}
-              <div className="h-72 bg-gradient-to-br from-violet-500 to-fuchsia-600 relative flex items-center justify-center overflow-hidden">
-                <div
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(#fff 1px, transparent 1px)",
-                    backgroundSize: "20px 20px",
-                  }}
-                ></div>
+            {/* DKV Card */}
+            <div
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
+              onMouseEnter={onHoverScale}
+              onMouseLeave={onHoverScaleReset}
+            >
+              <div className="h-64 bg-gradient-to-br from-violet-600 to-fuchsia-600 relative flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
 
-                {/* Floating Icons */}
-                <div className="float-icon-dkv-1 absolute -left-10 -bottom-10 opacity-20">
-                  <Palette
-                    size={140}
-                    className="text-white -rotate-12 group-hover:scale-110 transition-transform duration-500"
-                  />
-                </div>
-                <div className="float-icon-dkv-2 absolute top-10 right-10 opacity-20">
-                  <PenTool size={80} className="text-white" />
-                </div>
+                <Palette className="float-icon absolute -left-6 -bottom-6 text-white/10 w-32 h-32 -rotate-12" />
+                <PenTool className="float-icon absolute top-8 right-8 text-white/10 w-20 h-20" />
 
                 <div className="relative z-10 text-center">
-                  {/* ICON CUSTOM */}
-                  <div className="w-24 h-24 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center mx-auto mb-5 border border-white/30 text-white shadow-lg group-hover:-rotate-12 transition-transform duration-500">
+                  <div className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-lg">
                     <img
                       src={dkvCustomIcon}
-                      alt="Logo DKV"
-                      className="w-16 h-16 object-contain drop-shadow-md"
-                      loading="lazy"
-                      decoding="async"
+                      alt="DKV"
+                      className="w-12 h-12 object-contain"
                     />
                   </div>
-
-                  <h2 className="text-4xl font-extrabold text-white tracking-wide mb-1">
-                    DKV
-                  </h2>
-                  <p className="text-violet-100 font-medium">
+                  <h3 className="text-2xl font-bold text-white mb-1">DKV</h3>
+                  <p className="text-violet-100 text-sm font-medium">
                     Desain Komunikasi Visual
                   </p>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-8 lg:p-10 flex flex-col flex-grow">
-                <p className="text-slate-600 mb-8 leading-relaxed flex-grow text-lg">
+              <div className="p-8 flex flex-col flex-grow">
+                <p className="text-slate-600 mb-8 leading-relaxed flex-grow">
                   Mengembangkan kreativitas visual melalui penguasaan software
-                  desain grafis, fotografi, videografi, animasi 2D/3D, dan
-                  desain UI/UX untuk kebutuhan industri kreatif modern.
+                  desain, fotografi, videografi, dan multimedia interaktif.
                 </p>
 
-                <div className="space-y-4 mb-10">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-violet-50 text-violet-600 rounded-xl mt-0.5">
-                      <Briefcase size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">
-                        Prospek Karir
-                      </h4>
-                      <p className="text-sm text-slate-500">
-                        Graphic Designer, UI/UX Designer, Photographer
-                      </p>
-                    </div>
+                <div className="space-y-4 mb-8">
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <Briefcase size={18} className="text-violet-600" />
+                    <span>Graphic Designer, UI/UX, Fotografer</span>
                   </div>
-                  <div className="flex items-start gap-4">
-                    <div className="p-2 bg-violet-50 text-violet-600 rounded-xl mt-0.5">
-                      <Award size={20} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900">Sertifikasi</h4>
-                      <p className="text-sm text-slate-500">
-                        Adobe Certified Professional (ACP), BNSP Desain
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-3 text-sm text-slate-700">
+                    <Award size={18} className="text-violet-600" />
+                    <span>Adobe Certified Professional</span>
                   </div>
                 </div>
 
                 <Link
                   to="/jurusan/dkv"
-                  className="block w-full py-4 bg-violet-50 text-violet-700 text-center font-bold rounded-2xl hover:bg-violet-600 hover:text-white transition-all shadow-sm hover:shadow-lg border border-violet-100 hover:border-violet-600"
+                  className="block w-full py-3.5 bg-violet-50 text-violet-700 text-center font-bold rounded-xl hover:bg-violet-600 hover:text-white transition-all duration-300"
                 >
-                  Jelajahi DKV
+                  Detail DKV
                 </Link>
               </div>
             </div>
@@ -787,6 +721,15 @@ const Home = () => {
                             <Monitor size={48} className="opacity-20" />
                           </div>
                         )}
+
+                        {/* Badge Kategori */}
+                        <div className="absolute top-4 left-4 z-10">
+                          <span className="bg-white/90 backdrop-blur-md text-orange-600 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2">
+                            <LayoutGrid size={12} />
+                            {item.category || "Umum"}
+                          </span>
+                        </div>
+
                         {/* Date Badge */}
                         <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm">
                           <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">

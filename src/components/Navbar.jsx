@@ -12,7 +12,6 @@ import gsap from "gsap";
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
 
   // --- REFS UNTUK ANIMASI ---
   const headerRef = useRef(null);
@@ -41,8 +40,11 @@ const Navbar = () => {
   // --- GSAP ANIMATION: ENTRANCE & SCROLL EFFECT ---
   // UseEffect + rAF start to avoid blocking first paint (preserve timings)
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let ctx = gsap.context(() => {
-      const tl = gsap.timeline();
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out", duration: 0.6 },
+      });
 
       tl.from(headerRef.current, {
         yPercent: -100,
@@ -103,27 +105,19 @@ const Navbar = () => {
   // --- GSAP ANIMATION: REACTIVE SCROLL CHANGE ---
   // Menggantikan class conditional CSS agar transisi padding lebih smooth
   useEffect(() => {
-    if (isScrolled) {
-      gsap.to(headerRef.current, {
-        paddingTop: "0.5rem",
-        paddingBottom: "0.5rem",
-        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-        backgroundColor: "rgba(255, 255, 255, 0.95)", // Sedikit transparan
-        backdropFilter: "blur(8px)",
-        duration: 0.3,
-        ease: "power2.out",
-      });
-    } else {
-      gsap.to(headerRef.current, {
-        paddingTop: "1rem", // setara py-4
-        paddingBottom: "1rem",
-        boxShadow: "none",
-        backgroundColor: "rgba(255, 255, 255, 1)",
-        backdropFilter: "blur(0px)",
-        duration: 0.3,
-        ease: "power2.out",
-      });
-    }
+    if (!headerRef.current) return;
+
+    gsap.to(headerRef.current, {
+      paddingTop: isScrolled ? "0.5rem" : "1rem",
+      paddingBottom: isScrolled ? "0.5rem" : "1rem",
+      boxShadow: isScrolled ? "0 10px 30px -10px rgba(0,0,0,0.12)" : "none",
+      backgroundColor: isScrolled
+        ? "rgba(255,255,255,0.95)"
+        : "rgba(255,255,255,1)",
+      backdropFilter: isScrolled ? "blur(8px)" : "none",
+      duration: 0.3,
+      ease: "power2.out",
+    });
   }, [isScrolled]);
 
   // --- HELPER: HOVER ANIMATIONS (stable callbacks) ---
@@ -147,8 +141,7 @@ const Navbar = () => {
   return (
     <header
       ref={headerRef}
-      // Hapus conditional class py-2 / py-4 karena sudah dihandle GSAP
-      className="fixed top-0 w-full z-[999] bg-white border-b border-transparent"
+      className="fixed top-0 w-full z-[999] bg-white border-b border-transparent min-h-[72px]"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
         <div className="flex items-center justify-between gap-6">
@@ -156,12 +149,15 @@ const Navbar = () => {
           <NavLink to="/" className="flex items-center gap-3 group">
             <div
               ref={logoRef}
-              className="w-10 h-10 lg:w-16 lg:h-16 bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-primary group-hover:shadow-lg transition-shadow duration-300"
+              className="w-10 h-10 md:w-12 md:h-12 lg:w-16 lg:h-16  bg-white rounded-full flex items-center justify-center overflow-hidden border-2 border-primary group-hover:shadow-lg transition-shadow duration-300"
             >
               <img
                 src={logo}
                 alt="SMK Dipo 1"
                 className="w-full h-full object-contain p-1"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
             </div>
 
@@ -179,12 +175,15 @@ const Navbar = () => {
           <nav ref={navLinksRef} className="hidden lg:flex items-center gap-1">
             {desktopLinks.map((item, idx) => (
               // Wrapper div untuk target animasi stagger
-              <div key={idx} className="nav-item-anim">
+              <div key={item.title} className="nav-item-anim">
                 {item.submenu ? (
                   <Dropdown item={item} isMobile={false} />
                 ) : (
                   <NavLink
                     to={item.path}
+                    aria-current={({ isActive }) =>
+                      isActive ? "page" : undefined
+                    }
                     className={({ isActive }) => `
                             px-4 py-2 font-medium rounded-full transition-colors duration-200
                             ${
@@ -204,6 +203,7 @@ const Navbar = () => {
             <div className="nav-item-anim">
               <a
                 href="https://bkk-dipo.vercel.app/"
+                aria-label="Bursa Kerja Khusus SMK Dipo 1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-primary hover:bg-gray-50 px-4 py-2 font-medium rounded-full transition-colors duration-200"
@@ -217,6 +217,8 @@ const Navbar = () => {
               ref={ppdbBtnRef}
               onMouseEnter={onEnterBtn}
               onMouseLeave={onLeaveBtn}
+              onFocus={onEnterBtn}
+              onBlur={onLeaveBtn}
               href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
               target="_blank"
               rel="noopener noreferrer"
