@@ -29,9 +29,6 @@ import logo from "../assets/logo yayasan al-hidayah-02.webp";
 import tkjCustomIcon from "../assets/icon-tkj2.webp";
 import dkvCustomIcon from "../assets/icon-dkv2.webp";
 
-// Register GSAP Plugins
-gsap.registerPlugin(ScrollTrigger);
-
 const Home = () => {
   const container = useRef();
 
@@ -43,6 +40,13 @@ const Home = () => {
   useEffect(() => {
     fetchHomeArticles();
     document.title = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
+  }, []);
+
+  // --- REGISTER GSAP PLUGINS (CLIENT-SIDE ONLY) ---
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      gsap.registerPlugin(ScrollTrigger);
+    }
   }, []);
 
   // --- REFRESH SCROLLTRIGGER SAAT DATA MASUK ---
@@ -67,15 +71,7 @@ const Home = () => {
   // --- GSAP ANIMATION ---
   useGSAP(
     () => {
-      // 1. SET INITIAL STATE (Ganti invisible class)
-      // Kita sembunyikan elemen lewat JS, bukan CSS. Jadi kalau JS mati, konten tetap ada.
-      gsap.set(".hero-element", { autoAlpha: 0, y: 50 });
-      gsap.set(".hero-logo", { autoAlpha: 0, scale: 0.5 });
-      gsap.set(".stat-card", { autoAlpha: 0, y: 50 });
-      gsap.set(".kepsek-image-wrapper", { autoAlpha: 0, x: -50 });
-      gsap.set(".kepsek-text-wrapper", { autoAlpha: 0, x: 50 });
-      gsap.set(".jurusan-header", { autoAlpha: 0, y: 50 });
-      gsap.set(".jurusan-card", { autoAlpha: 0, y: 50 });
+      if (typeof window === "undefined") return;
 
       // ================= ANIMASI HERO =================
       const tlHero = gsap.timeline();
@@ -313,13 +309,19 @@ const Home = () => {
             {/* Text Content */}
             <div className="flex-1 text-center lg:text-left z-10">
               {/* REMOVED INVISIBLE CLASS HERE */}
-              <div className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm">
+              <div
+                className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm"
+                style={{ opacity: 0, transform: "translateY(50px)" }}
+              >
                 <Star size={14} fill="currentColor" />
                 <span>Terakreditasi A</span>
               </div>
 
               {/* REMOVED INVISIBLE CLASS HERE */}
-              <h1 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900">
+              <h1
+                className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900"
+                style={{ opacity: 0, transform: "translateY(50px)" }}
+              >
                 Mempersiapkan Generasi <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">
                   Siap Teknologi & Berkarakter
@@ -327,14 +329,20 @@ const Home = () => {
               </h1>
 
               {/* REMOVED INVISIBLE CLASS HERE */}
-              <p className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              <p
+                className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0"
+                style={{ opacity: 0, transform: "translateY(50px)" }}
+              >
                 SMK Diponegoro 1 Jakarta menghadirkan pendidikan vokasi berbasis
                 teknologi, karakter, dan kebutuhan industri untuk masa depan
                 yang lebih baik.
               </p>
 
               {/* REMOVED INVISIBLE CLASS HERE */}
-              <div className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <div
+                className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+                style={{ opacity: 0, transform: "translateY(50px)" }}
+              >
                 <a
                   href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
                   target="_blank"
@@ -362,7 +370,10 @@ const Home = () => {
               <div className="blob-green absolute bottom-0 left-0 w-60 h-60 lg:w-72 lg:h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
 
               {/* REMOVED INVISIBLE CLASS HERE */}
-              <div className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20">
+              <div
+                className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20"
+                style={{ opacity: 0, transform: "scale(0.5)" }}
+              >
                 <img
                   src={logo}
                   alt="Logo SMK Diponegoro 1 Jakarta"
@@ -384,7 +395,10 @@ const Home = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
             {/* FOTO KEPSEK - REMOVED INVISIBLE */}
-            <div className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end">
+            <div
+              className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end"
+              style={{ opacity: 0, transform: "translateX(-50px)" }}
+            >
               <div className="relative w-full max-w-md group cursor-default">
                 <div className="absolute top-4 -right-4 w-full h-full bg-orange-100 rounded-3xl -z-10 transition-transform duration-500 group-hover:rotate-6"></div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-teal-50 rounded-full -z-10 blur-xl"></div>
@@ -410,7 +424,10 @@ const Home = () => {
             </div>
 
             {/* TEKS SAMBUTAN - REMOVED INVISIBLE */}
-            <div className="kepsek-text-wrapper w-full lg:w-1/2">
+            <div
+              className="kepsek-text-wrapper w-full lg:w-1/2"
+              style={{ opacity: 0, transform: "translateX(50px)" }}
+            >
               <div className="relative">
                 <div className="inline-flex items-center gap-2 mb-6">
                   <span className="kepsek-progress block h-1 bg-primary rounded-full w-0"></span>
@@ -470,6 +487,7 @@ const Home = () => {
               className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
+              style={{ opacity: 0, transform: "translateY(50px)" }}
             >
               <div className="mb-4 p-4 bg-orange-50 shadow-sm rounded-full text-primary">
                 {stat.icon}
@@ -489,7 +507,10 @@ const Home = () => {
       <section className="py-20 bg-gray-50/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           {/* Header - REMOVED INVISIBLE */}
-          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16">
+          <div
+            className="jurusan-header text-center max-w-3xl mx-auto mb-16"
+            style={{ opacity: 0, transform: "translateY(50px)" }}
+          >
             <div className="inline-flex items-center gap-2 mb-4 justify-center">
               <span className="w-8 h-1 bg-primary rounded-full"></span>
               <span className="text-primary font-bold tracking-wider uppercase text-sm">
@@ -519,6 +540,7 @@ const Home = () => {
               className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
+              style={{ opacity: 0, transform: "translateY(50px)" }}
             >
               <div className="h-64 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
@@ -572,6 +594,7 @@ const Home = () => {
               className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
+              style={{ opacity: 0, transform: "translateY(50px)" }}
             >
               <div className="h-64 bg-gradient-to-br from-violet-600 to-fuchsia-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
