@@ -6,6 +6,8 @@ import { Loader2 } from "lucide-react"; // Import ikon loading
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ScrollToTop from "./components/ScrollToTop";
+import ScrollToTopFade from "./components/ScrollToTopFade";
 
 // --- 2. Ganti Import Biasa jadi Lazy Import ---
 // Pages Public
@@ -59,65 +61,73 @@ const PagePlaceholder = ({ title }) => (
 
 function App() {
   return (
-    // 3. Bungkus Routes dengan Suspense
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/login" element={<Login />} />
+    <>
+      {/* Komponen ScrollToTop untuk otomatis scroll ke atas saat pindah halaman */}
+      <ScrollToTop />
 
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          {/* ... Route lainnya sama persis seperti sebelumnya ... */}
-          <Route path="/tentang/overview" element={<Overview />} />
-          <Route path="/tentang/profil" element={<Profil />} />
-          <Route path="/tentang/visi-misi" element={<VisiMisi />} />
-          <Route path="/tentang/sejarah" element={<Sejarah />} />
-          <Route
-            path="tentang/program-unggulan"
-            element={<ProgramUnggulan />}
-          />
-          <Route path="/program/:id" element={<DetailProgram />} />
-          <Route
-            path="/tentang/osis"
-            element={<PagePlaceholder title="OSIS" />}
-          />
-          <Route path="/tentang/seragam" element={<Seragam />} />
-          <Route path="/tentang/fasilitas" element={<Fasilitas />} />
-          <Route path="/tentang/struktur" element={<Struktur />} />
-          <Route path="/tentang/guru" element={<Guru />} />
-          <Route path="/jurusan/jurusan" element={<Jurusan />} />
-          <Route path="/jurusan/tkj" element={<TKJ />} />
-          <Route path="/jurusan/dkv" element={<DKV />} />
-          <Route path="/artikel" element={<Artikel />} />
-          <Route path="/artikel/:id" element={<DetailArtikel />} />
-          <Route path="/ppdb" element={<PagePlaceholder title="PPDB" />} />
-        </Route>
+      {/* 3. Bungkus Routes dengan Suspense */}
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/admin" element={<AdminLayout />}>
-            {/* ... Route Admin juga sama ... */}
-            <Route index element={<Dashboard />} />
-            <Route path="artikel" element={<ManageArtikel />} />
-            <Route path="artikel/tambah" element={<FormArtikel />} />
-            <Route path="artikel/edit/:id" element={<FormArtikel />} />
-            <Route path="/admin/guru" element={<ManageGuru />} />
-            <Route path="/admin/guru/tambah" element={<FormGuru />} />
-            <Route path="/admin/guru/edit/:id" element={<FormGuru />} />
-            <Route path="/admin/seragam" element={<ManageSeragam />} />
-            <Route path="/admin/seragam/tambah" element={<FormSeragam />} />
-            <Route path="/admin/seragam/edit/:id" element={<FormSeragam />} />
-            <Route path="/admin/fasilitas" element={<ManageFasilitas />} />
-            <Route path="/admin/fasilitas/tambah" element={<FormFasilitas />} />
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            {/* ... Route lainnya sama persis seperti sebelumnya ... */}
+            <Route path="/tentang/overview" element={<Overview />} />
+            <Route path="/tentang/profil" element={<Profil />} />
+            <Route path="/tentang/visi-misi" element={<VisiMisi />} />
+            <Route path="/tentang/sejarah" element={<Sejarah />} />
             <Route
-              path="/admin/fasilitas/edit/:id"
-              element={<FormFasilitas />}
+              path="tentang/program-unggulan"
+              element={<ProgramUnggulan />}
             />
-            <Route path="/admin/program" element={<ManageProgram />} />
-            <Route path="/admin/program/tambah/" element={<FormProgram />} />
-            <Route path="/admin/program/edit/:id" element={<FormProgram />} />
+            <Route path="/program/:id" element={<DetailProgram />} />
+            <Route
+              path="/tentang/osis"
+              element={<PagePlaceholder title="OSIS" />}
+            />
+            <Route path="/tentang/seragam" element={<Seragam />} />
+            <Route path="/tentang/fasilitas" element={<Fasilitas />} />
+            <Route path="/tentang/struktur" element={<Struktur />} />
+            <Route path="/tentang/guru" element={<Guru />} />
+            <Route path="/jurusan/jurusan" element={<Jurusan />} />
+            <Route path="/jurusan/tkj" element={<TKJ />} />
+            <Route path="/jurusan/dkv" element={<DKV />} />
+            <Route path="/artikel" element={<Artikel />} />
+            <Route path="/artikel/:id" element={<DetailArtikel />} />
+            <Route path="/ppdb" element={<PagePlaceholder title="PPDB" />} />
           </Route>
-        </Route>
-      </Routes>
-    </Suspense>
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              {/* ... Route Admin juga sama ... */}
+              <Route index element={<Dashboard />} />
+              <Route path="artikel" element={<ManageArtikel />} />
+              <Route path="artikel/tambah" element={<FormArtikel />} />
+              <Route path="artikel/edit/:id" element={<FormArtikel />} />
+              <Route path="/admin/guru" element={<ManageGuru />} />
+              <Route path="/admin/guru/tambah" element={<FormGuru />} />
+              <Route path="/admin/guru/edit/:id" element={<FormGuru />} />
+              <Route path="/admin/seragam" element={<ManageSeragam />} />
+              <Route path="/admin/seragam/tambah" element={<FormSeragam />} />
+              <Route path="/admin/seragam/edit/:id" element={<FormSeragam />} />
+              <Route path="/admin/fasilitas" element={<ManageFasilitas />} />
+              <Route
+                path="/admin/fasilitas/tambah"
+                element={<FormFasilitas />}
+              />
+              <Route
+                path="/admin/fasilitas/edit/:id"
+                element={<FormFasilitas />}
+              />
+              <Route path="/admin/program" element={<ManageProgram />} />
+              <Route path="/admin/program/tambah/" element={<FormProgram />} />
+              <Route path="/admin/program/edit/:id" element={<FormProgram />} />
+            </Route>
+          </Route>
+        </Routes>
+      </Suspense>
+    </>
   );
 }
 

@@ -15,12 +15,12 @@
 
 /* Global Styles */
 html {
-  scroll-behavior: smooth;
+  /* Removed scroll-behavior: smooth to let Lenis handle scrolling */
 }
 
 @layer base {
   body {
-    overflow-x: hidden;
+    /* Removed overflow-x: hidden to let Lenis handle scrolling */
     width: 100%;
     position: relative;
     /* Menerapkan Inter sebagai default body */
