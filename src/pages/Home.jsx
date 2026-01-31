@@ -34,10 +34,7 @@ const Home = () => {
 
   // Refs for timelines to manage cleanup
   const heroTlRef = useRef();
-  const kepsekTlRef = useRef();
   const statsTlRef = useRef();
-  const jurusanTlRef = useRef();
-  const jurusanCardsTlRef = useRef();
 
   // State untuk data
   const [homeArticles, setHomeArticles] = useState([]);
@@ -64,10 +61,7 @@ const Home = () => {
 
       // Kill all timelines
       if (heroTlRef.current) heroTlRef.current.kill();
-      if (kepsekTlRef.current) kepsekTlRef.current.kill();
       if (statsTlRef.current) statsTlRef.current.kill();
-      if (jurusanTlRef.current) jurusanTlRef.current.kill();
-      if (jurusanCardsTlRef.current) jurusanCardsTlRef.current.kill();
     };
   }, []);
 
@@ -149,43 +143,6 @@ const Home = () => {
           "-=0.8",
         );
 
-      // ================= ANIMASI KEPSEK =================
-      kepsekTlRef.current = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".kepsek-section",
-          start: "top 75%",
-          toggleActions: "play none none reset",
-        },
-      });
-
-      kepsekTlRef.current
-        .to(".kepsek-image-wrapper", {
-          x: 0,
-          autoAlpha: 1,
-          duration: 1.2,
-          ease: "power3.out",
-        })
-        .to(
-          ".kepsek-text-wrapper",
-          {
-            x: 0,
-            autoAlpha: 1,
-            duration: 1.2,
-            ease: "power3.out",
-          },
-          "<0.2",
-        )
-        .fromTo(
-          ".kepsek-progress",
-          { width: 0 },
-          {
-            width: "8rem",
-            duration: 1,
-            ease: "power2.out",
-          },
-          "<0.5",
-        );
-
       // ================= ANIMASI STATS =================
       statsTlRef.current = gsap.to(".stat-card", {
         y: 0,
@@ -197,45 +154,6 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".stats-container",
           start: "top 85%",
-          toggleActions: "play none none reset",
-        },
-      });
-
-      // ================= ANIMASI JURUSAN =================
-      jurusanTlRef.current = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".jurusan-header",
-          start: "top 80%",
-          toggleActions: "play none none reset",
-        },
-      });
-
-      jurusanTlRef.current
-        .to(".jurusan-header", {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-        })
-        .fromTo(
-          ".jurusan-divider",
-          { width: 0 },
-          {
-            width: 80,
-            duration: 0.8,
-          },
-          "<0.2",
-        );
-
-      // Cards Jurusan
-      jurusanCardsTlRef.current = gsap.to(".jurusan-card", {
-        y: 0,
-        autoAlpha: 1,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".jurusan-cards-container",
-          start: "top 75%",
           toggleActions: "play none none reset",
         },
       });
@@ -441,10 +359,7 @@ const Home = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
             {/* FOTO KEPSEK - REMOVED INVISIBLE */}
-            <div
-              className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end"
-              style={{ opacity: 0, transform: "translateX(-50px)" }}
-            >
+            <div className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end">
               <div className="relative w-full max-w-md group cursor-default">
                 <div className="absolute top-4 -right-4 w-full h-full bg-orange-100 rounded-3xl -z-10 transition-transform duration-500 group-hover:rotate-6"></div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-teal-50 rounded-full -z-10 blur-xl"></div>
@@ -470,13 +385,10 @@ const Home = () => {
             </div>
 
             {/* TEKS SAMBUTAN - REMOVED INVISIBLE */}
-            <div
-              className="kepsek-text-wrapper w-full lg:w-1/2"
-              style={{ opacity: 0, transform: "translateX(50px)" }}
-            >
+            <div className="kepsek-text-wrapper w-full lg:w-1/2">
               <div className="relative">
                 <div className="inline-flex items-center gap-2 mb-6">
-                  <span className="kepsek-progress block h-1 bg-primary rounded-full w-0"></span>
+                  <span className="kepsek-progress block h-1 bg-primary rounded-full w-32"></span>
                   <span className="text-primary font-bold tracking-wider uppercase text-sm">
                     Sambutan Kepala Sekolah
                   </span>
@@ -553,10 +465,7 @@ const Home = () => {
       <section className="py-20 bg-gray-50/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           {/* Header - REMOVED INVISIBLE */}
-          <div
-            className="jurusan-header text-center max-w-3xl mx-auto mb-16"
-            style={{ opacity: 0, transform: "translateY(50px)" }}
-          >
+          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 mb-4 justify-center">
               <span className="w-8 h-1 bg-primary rounded-full"></span>
               <span className="text-primary font-bold tracking-wider uppercase text-sm">
@@ -576,7 +485,7 @@ const Home = () => {
               Pilih masa depanmu dengan program keahlian yang relevan dengan
               kebutuhan industri masa kini.
             </p>
-            <div className="jurusan-divider h-1 bg-orange-200 mx-auto mt-6 rounded-full w-0"></div>
+            <div className="jurusan-divider h-1 bg-orange-200 mx-auto mt-6 rounded-full w-20"></div>
           </div>
 
           {/* ==================== CARDS CONTAINER ==================== */}
@@ -586,7 +495,6 @@ const Home = () => {
               className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
-              style={{ opacity: 0, transform: "translateY(50px)" }}
             >
               <div className="h-64 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
@@ -640,7 +548,6 @@ const Home = () => {
               className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
-              style={{ opacity: 0, transform: "translateY(50px)" }}
             >
               <div className="h-64 bg-gradient-to-br from-violet-600 to-fuchsia-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
