@@ -41,6 +41,16 @@ const Home = () => {
   // Refs for timelines to manage cleanup
   const heroTlRef = useRef();
 
+  // Performance optimizations: detect touch device and reduced motion preference
+  const isTouchDevice = useMemo(
+    () => "ontouchstart" in window || navigator.maxTouchPoints > 0,
+    [],
+  );
+  const prefersReducedMotion = useMemo(
+    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  );
+
   // State untuk data
   const [homeArticles, setHomeArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
@@ -119,6 +129,13 @@ const Home = () => {
       ogu.content = window.location.href;
       document.head.appendChild(ogu);
     }
+
+    // Preload critical above-the-fold images
+    const preloadImage = (src) => {
+      const img = new Image();
+      img.src = src;
+    };
+    preloadImage(fotokepsek);
   }, []);
 
   // --- REGISTER GSAP PLUGINS (CLIENT-SIDE ONLY) ---
@@ -192,7 +209,7 @@ const Home = () => {
   // --- GSAP ANIMATION ---
   useGSAP(
     () => {
-      if (typeof window === "undefined") return;
+      if (typeof window === "undefined" || prefersReducedMotion) return;
 
       // ================= ANIMASI HERO =================
       heroTlRef.current = gsap.timeline();
@@ -204,6 +221,7 @@ const Home = () => {
           duration: 1,
           stagger: 0.15,
           ease: "power3.out",
+          force3D: true,
         })
         .to(
           ".hero-logo",
@@ -213,6 +231,7 @@ const Home = () => {
             rotation: 0,
             duration: 1.2,
             ease: "elastic.out(1, 0.5)",
+            force3D: true,
           },
           "-=0.8",
         );
@@ -229,6 +248,7 @@ const Home = () => {
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
+          force3D: true,
         });
 
         gsap.to(".blob-green", {
@@ -239,6 +259,7 @@ const Home = () => {
           yoyo: true,
           delay: 1,
           ease: "sine.inOut",
+          force3D: true,
         });
 
         gsap.to(".hero-logo-img", {
@@ -247,6 +268,7 @@ const Home = () => {
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
+          force3D: true,
         });
 
         gsap.to(".float-icon-tkj-1", {
@@ -256,6 +278,7 @@ const Home = () => {
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
+          force3D: true,
         });
 
         gsap.to(".float-icon-dkv-1", {
@@ -265,6 +288,7 @@ const Home = () => {
           repeat: -1,
           yoyo: true,
           ease: "sine.inOut",
+          force3D: true,
         });
       }
     },
@@ -397,16 +421,16 @@ const Home = () => {
                   href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
                   target="_blank"
                   rel="noopener noreferrer"
-                  onMouseEnter={onButtonHover}
-                  onMouseLeave={onButtonReset}
+                  onMouseEnter={!isTouchDevice ? onButtonHover : undefined}
+                  onMouseLeave={!isTouchDevice ? onButtonReset : undefined}
                   className="px-8 py-4 bg-primary text-white font-bold rounded-xl shadow-lg hover:shadow-orange-300/50 transition-shadow flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Daftar PPDB <ArrowRight size={20} />
                 </a>
                 <Link
                   to="/tentang/profil"
-                  onMouseEnter={onButtonHover}
-                  onMouseLeave={onButtonReset}
+                  onMouseEnter={!isTouchDevice ? onButtonHover : undefined}
+                  onMouseLeave={!isTouchDevice ? onButtonReset : undefined}
                   className="px-8 py-4 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:border-primary hover:text-primary transition-colors flex items-center justify-center cursor-pointer"
                 >
                   Pelajari Profil
@@ -496,8 +520,8 @@ const Home = () => {
 
                 <div
                   className="relative bg-gray-50 p-8 rounded-2xl border-l-4 border-primary shadow-sm cursor-default"
-                  onMouseEnter={onKepsekHover}
-                  onMouseLeave={onKepsekLeave}
+                  onMouseEnter={!isTouchDevice ? onKepsekHover : undefined}
+                  onMouseLeave={!isTouchDevice ? onKepsekLeave : undefined}
                 >
                   <Quote
                     size={40}
@@ -536,8 +560,8 @@ const Home = () => {
               key={idx}
               // REMOVED INVISIBLE CLASS
               className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
-              onMouseEnter={onHoverScale}
-              onMouseLeave={onHoverScaleReset}
+              onMouseEnter={!isTouchDevice ? onHoverScale : undefined}
+              onMouseLeave={!isTouchDevice ? onHoverScaleReset : undefined}
             >
               <div className="mb-4 p-4 bg-orange-50 shadow-sm rounded-full text-primary">
                 {stat.icon}
@@ -585,8 +609,8 @@ const Home = () => {
             {/* TKJ Card - REMOVED INVISIBLE */}
             <div
               className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
-              onMouseEnter={onHoverScale}
-              onMouseLeave={onHoverScaleReset}
+              onMouseEnter={!isTouchDevice ? onHoverScale : undefined}
+              onMouseLeave={!isTouchDevice ? onHoverScaleReset : undefined}
             >
               <div className="h-64 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
@@ -638,8 +662,8 @@ const Home = () => {
             {/* DKV Card - REMOVED INVISIBLE */}
             <div
               className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
-              onMouseEnter={onHoverScale}
-              onMouseLeave={onHoverScaleReset}
+              onMouseEnter={!isTouchDevice ? onHoverScale : undefined}
+              onMouseLeave={!isTouchDevice ? onHoverScaleReset : undefined}
             >
               <div className="h-64 bg-gradient-to-br from-violet-600 to-fuchsia-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
@@ -800,8 +824,8 @@ const Home = () => {
               <div className="artikel-footer mt-16 flex justify-center">
                 <Link
                   to="/artikel"
-                  onMouseEnter={onButtonHover}
-                  onMouseLeave={onButtonReset}
+                  onMouseEnter={!isTouchDevice ? onButtonHover : undefined}
+                  onMouseLeave={!isTouchDevice ? onButtonReset : undefined}
                   className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-orange-200 hover:shadow-xl hover:bg-orange-600 transition-all duration-300 group"
                 >
                   Lihat Semua Artikel
