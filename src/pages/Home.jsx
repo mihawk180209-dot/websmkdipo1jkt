@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, useState, useMemo } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -43,6 +49,76 @@ const Home = () => {
   useEffect(() => {
     fetchHomeArticles();
     document.title = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
+
+    // Add SEO meta tags
+    const metaDescription = document.querySelector('meta[name="description"]');
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    const metaOgTitle = document.querySelector('meta[property="og:title"]');
+    const metaOgDescription = document.querySelector(
+      'meta[property="og:description"]',
+    );
+    const metaOgImage = document.querySelector('meta[property="og:image"]');
+    const metaOgUrl = document.querySelector('meta[property="og:url"]');
+
+    if (metaDescription)
+      metaDescription.content =
+        "SMK Diponegoro 1 Jakarta - Sekolah Menengah Kejuruan terakreditasi A yang menghadirkan pendidikan vokasi berbasis teknologi dan karakter.";
+    else {
+      const desc = document.createElement("meta");
+      desc.name = "description";
+      desc.content =
+        "SMK Diponegoro 1 Jakarta - Sekolah Menengah Kejuruan terakreditasi A yang menghadirkan pendidikan vokasi berbasis teknologi dan karakter.";
+      document.head.appendChild(desc);
+    }
+
+    if (metaKeywords)
+      metaKeywords.content =
+        "SMK Diponegoro 1 Jakarta, sekolah vokasi, TKJ, DKV, pendidikan teknologi, karakter, Jakarta";
+    else {
+      const key = document.createElement("meta");
+      key.name = "keywords";
+      key.content =
+        "SMK Diponegoro 1 Jakarta, sekolah vokasi, TKJ, DKV, pendidikan teknologi, karakter, Jakarta";
+      document.head.appendChild(key);
+    }
+
+    if (metaOgTitle)
+      metaOgTitle.content = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
+    else {
+      const ogt = document.createElement("meta");
+      ogt.setAttribute("property", "og:title");
+      ogt.content = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
+      document.head.appendChild(ogt);
+    }
+
+    if (metaOgDescription)
+      metaOgDescription.content =
+        "SMK Diponegoro 1 Jakarta - Sekolah Menengah Kejuruan terakreditasi A yang menghadirkan pendidikan vokasi berbasis teknologi dan karakter.";
+    else {
+      const ogd = document.createElement("meta");
+      ogd.setAttribute("property", "og:description");
+      ogd.content =
+        "SMK Diponegoro 1 Jakarta - Sekolah Menengah Kejuruan terakreditasi A yang menghadirkan pendidikan vokasi berbasis teknologi dan karakter.";
+      document.head.appendChild(ogd);
+    }
+
+    if (metaOgImage)
+      metaOgImage.content =
+        window.location.origin + "/logo yayasan al-hidayah-02.webp";
+    else {
+      const ogi = document.createElement("meta");
+      ogi.setAttribute("property", "og:image");
+      ogi.content = window.location.origin + "/logo yayasan al-hidayah-02.webp";
+      document.head.appendChild(ogi);
+    }
+
+    if (metaOgUrl) metaOgUrl.content = window.location.href;
+    else {
+      const ogu = document.createElement("meta");
+      ogu.setAttribute("property", "og:url");
+      ogu.content = window.location.href;
+      document.head.appendChild(ogu);
+    }
   }, []);
 
   // --- REGISTER GSAP PLUGINS (CLIENT-SIDE ONLY) ---
@@ -142,50 +218,55 @@ const Home = () => {
         );
 
       // ================= IDLE ANIMATIONS (Floating) =================
-      gsap.to(".blob-orange", {
-        scale: 1.1,
-        opacity: 0.5,
-        duration: 8,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+      // Disable floating animations on mobile for performance
+      const isMobile = window.innerWidth < 768;
 
-      gsap.to(".blob-green", {
-        scale: 1.2,
-        opacity: 0.5,
-        duration: 10,
-        repeat: -1,
-        yoyo: true,
-        delay: 1,
-        ease: "sine.inOut",
-      });
+      if (!isMobile) {
+        gsap.to(".blob-orange", {
+          scale: 1.1,
+          opacity: 0.5,
+          duration: 8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
 
-      gsap.to(".hero-logo-img", {
-        y: -15,
-        duration: 2.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+        gsap.to(".blob-green", {
+          scale: 1.2,
+          opacity: 0.5,
+          duration: 10,
+          repeat: -1,
+          yoyo: true,
+          delay: 1,
+          ease: "sine.inOut",
+        });
 
-      gsap.to(".float-icon-tkj-1", {
-        y: -15,
-        rotation: 5,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+        gsap.to(".hero-logo-img", {
+          y: -15,
+          duration: 2.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
 
-      gsap.to(".float-icon-dkv-1", {
-        y: -15,
-        rotation: -5,
-        duration: 3.5,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
+        gsap.to(".float-icon-tkj-1", {
+          y: -15,
+          rotation: 5,
+          duration: 3,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+
+        gsap.to(".float-icon-dkv-1", {
+          y: -15,
+          rotation: -5,
+          duration: 3.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      }
     },
     { scope: container },
   );
@@ -193,33 +274,51 @@ const Home = () => {
   // --- INTERACTION HANDLERS (HOVER) --- //
   const { contextSafe } = useGSAP({ scope: container });
 
-  const onHoverScale = contextSafe((e) => {
-    gsap.to(e.currentTarget, {
-      scale: 1.05,
-      duration: 0.3,
-      ease: "power2.out",
-    });
-  });
+  const onHoverScale = useCallback(
+    contextSafe((e) => {
+      gsap.to(e.currentTarget, {
+        scale: 1.05,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    }),
+    [contextSafe],
+  );
 
-  const onHoverScaleReset = contextSafe((e) => {
-    gsap.to(e.currentTarget, { scale: 1, duration: 0.3, ease: "power2.out" });
-  });
+  const onHoverScaleReset = useCallback(
+    contextSafe((e) => {
+      gsap.to(e.currentTarget, { scale: 1, duration: 0.3, ease: "power2.out" });
+    }),
+    [contextSafe],
+  );
 
-  const onButtonHover = contextSafe((e) => {
-    gsap.to(e.currentTarget, { y: -3, scale: 1.05, duration: 0.2 });
-  });
+  const onButtonHover = useCallback(
+    contextSafe((e) => {
+      gsap.to(e.currentTarget, { y: -3, scale: 1.05, duration: 0.2 });
+    }),
+    [contextSafe],
+  );
 
-  const onButtonReset = contextSafe((e) => {
-    gsap.to(e.currentTarget, { y: 0, scale: 1, duration: 0.2 });
-  });
+  const onButtonReset = useCallback(
+    contextSafe((e) => {
+      gsap.to(e.currentTarget, { y: 0, scale: 1, duration: 0.2 });
+    }),
+    [contextSafe],
+  );
 
   // Kepsek hover handlers
-  const onKepsekHover = contextSafe((e) => {
-    gsap.to(e.currentTarget, { x: 5, duration: 0.3 });
-  });
-  const onKepsekLeave = contextSafe((e) => {
-    gsap.to(e.currentTarget, { x: 0, duration: 0.3 });
-  });
+  const onKepsekHover = useCallback(
+    contextSafe((e) => {
+      gsap.to(e.currentTarget, { x: 5, duration: 0.3 });
+    }),
+    [contextSafe],
+  );
+  const onKepsekLeave = useCallback(
+    contextSafe((e) => {
+      gsap.to(e.currentTarget, { x: 0, duration: 0.3 });
+    }),
+    [contextSafe],
+  );
 
   const stats = useMemo(
     () => [
@@ -250,7 +349,10 @@ const Home = () => {
   return (
     <div ref={container} className="w-full font-sans overflow-x-hidden">
       {/* ==================== HERO SECTION ==================== */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/30 pt-24 pb-20 lg:pt-32 lg:pb-32">
+      <section
+        className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/30 pt-24 pb-20 lg:pt-32 lg:pb-32"
+        aria-labelledby="hero-heading"
+      >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8 xl:gap-20">
             {/* Text Content */}
@@ -266,6 +368,7 @@ const Home = () => {
 
               {/* REMOVED INVISIBLE CLASS HERE */}
               <h1
+                id="hero-heading"
                 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900"
                 style={{ opacity: 0, transform: "translateY(50px)" }}
               >
@@ -313,8 +416,14 @@ const Home = () => {
 
             {/* Image / Logo Section */}
             <div className="flex-1 relative flex justify-center lg:justify-end">
-              <div className="blob-orange absolute top-0 right-0 w-60 h-60 lg:w-72 lg:h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
-              <div className="blob-green absolute bottom-0 left-0 w-60 h-60 lg:w-72 lg:h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
+              <div
+                className="blob-orange absolute top-0 right-0 w-60 h-60 lg:w-72 lg:h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"
+                style={{ willChange: "transform, opacity" }}
+              ></div>
+              <div
+                className="blob-green absolute bottom-0 left-0 w-60 h-60 lg:w-72 lg:h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"
+                style={{ willChange: "transform, opacity" }}
+              ></div>
 
               {/* REMOVED INVISIBLE CLASS HERE */}
               <div
@@ -328,6 +437,7 @@ const Home = () => {
                   loading="eager"
                   decoding="async"
                   fetchpriority="high"
+                  style={{ willChange: "transform" }}
                 />
               </div>
             </div>
