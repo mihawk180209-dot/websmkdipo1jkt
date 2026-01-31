@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import {
   ArrowRight,
   BookOpen,
@@ -16,7 +16,6 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
 import { supabase } from "../lib/supabase";
 
 // GSAP IMPORTS
@@ -40,27 +39,57 @@ const Home = () => {
   const [homeArticles, setHomeArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
 
+  // --- FETCH DATA ---
+  useEffect(() => {
+    fetchHomeArticles();
+    document.title = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
+  }, []);
+
+  // --- REFRESH SCROLLTRIGGER SAAT DATA MASUK ---
+  // Ini PENTING supaya animasi di bawah gak rusak posisinya saat artikel keload
+  useEffect(() => {
+    if (!loadingArticles) {
+      ScrollTrigger.refresh();
+    }
+  }, [loadingArticles, homeArticles]);
+
+  const fetchHomeArticles = async () => {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(3);
+
+    if (!error) setHomeArticles(data || []);
+    setLoadingArticles(false);
+  };
+
+  // --- GSAP ANIMATION ---
   useGSAP(
     () => {
-      // ================= ANIMASI HERO (Ganti ke fromTo) =================
-      // fromTo memaksa animasi mereset state awal (hidden) dan akhir (visible) setiap kali load
+      // 1. SET INITIAL STATE (Ganti invisible class)
+      // Kita sembunyikan elemen lewat JS, bukan CSS. Jadi kalau JS mati, konten tetap ada.
+      gsap.set(".hero-element", { autoAlpha: 0, y: 50 });
+      gsap.set(".hero-logo", { autoAlpha: 0, scale: 0.5 });
+      gsap.set(".kepsek-image-wrapper", { autoAlpha: 0, x: -50 });
+      gsap.set(".kepsek-text-wrapper", { autoAlpha: 0, x: 50 });
+      gsap.set(".stat-card", { autoAlpha: 0, y: 50 });
+      gsap.set(".jurusan-header", { autoAlpha: 0, y: 30 });
+      gsap.set(".jurusan-card", { autoAlpha: 0, y: 100 });
+
+      // ================= ANIMASI HERO =================
       const tlHero = gsap.timeline();
 
       tlHero
-        .fromTo(
-          ".hero-element",
-          { y: 60, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 1,
-            stagger: 0.15,
-            ease: "power3.out",
-          },
-        )
-        .fromTo(
+        .to(".hero-element", {
+          y: 0,
+          autoAlpha: 1,
+          duration: 1,
+          stagger: 0.15,
+          ease: "power3.out",
+        })
+        .to(
           ".hero-logo",
-          { scale: 0.5, autoAlpha: 0, rotation: -10 },
           {
             scale: 1,
             autoAlpha: 1,
@@ -81,19 +110,14 @@ const Home = () => {
       });
 
       tlKepsek
-        .fromTo(
-          ".kepsek-image-wrapper",
-          { x: -100, autoAlpha: 0 },
-          {
-            x: 0,
-            autoAlpha: 1,
-            duration: 1.2,
-            ease: "power3.out",
-          },
-        )
-        .fromTo(
+        .to(".kepsek-image-wrapper", {
+          x: 0,
+          autoAlpha: 1,
+          duration: 1.2,
+          ease: "power3.out",
+        })
+        .to(
           ".kepsek-text-wrapper",
-          { x: 100, autoAlpha: 0 },
           {
             x: 0,
             autoAlpha: 1,
@@ -106,7 +130,7 @@ const Home = () => {
           ".kepsek-progress",
           { width: 0 },
           {
-            width: 32, // 8rem approx
+            width: "8rem",
             duration: 1,
             ease: "power2.out",
           },
@@ -114,23 +138,19 @@ const Home = () => {
         );
 
       // ================= ANIMASI STATS =================
-      gsap.fromTo(
-        ".stat-card",
-        { y: 60, scale: 0.8, autoAlpha: 0 },
-        {
-          y: 0,
-          scale: 1,
-          autoAlpha: 1,
-          duration: 0.8,
-          stagger: 0.1,
-          ease: "back.out(1.7)",
-          scrollTrigger: {
-            trigger: ".stats-container",
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
+      gsap.to(".stat-card", {
+        y: 0,
+        scale: 1,
+        autoAlpha: 1,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+          trigger: ".stats-container",
+          start: "top 85%",
+          toggleActions: "play none none reverse",
         },
-      );
+      });
 
       // ================= ANIMASI JURUSAN =================
       const tlJurusan = gsap.timeline({
@@ -142,15 +162,11 @@ const Home = () => {
       });
 
       tlJurusan
-        .fromTo(
-          ".jurusan-header",
-          { y: 30, autoAlpha: 0 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 0.8,
-          },
-        )
+        .to(".jurusan-header", {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.8,
+        })
         .fromTo(
           ".jurusan-divider",
           { width: 0 },
@@ -162,27 +178,20 @@ const Home = () => {
         );
 
       // Cards Jurusan
-      gsap.fromTo(
-        ".jurusan-card",
-        { y: 100, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 1,
-          stagger: 0.2,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: ".jurusan-cards-container",
-            start: "top 75%",
-            toggleActions: "play none none reverse",
-          },
+      gsap.to(".jurusan-card", {
+        y: 0,
+        autoAlpha: 1,
+        duration: 1,
+        stagger: 0.2,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".jurusan-cards-container",
+          start: "top 75%",
+          toggleActions: "play none none reverse",
         },
-      );
+      });
 
       // ================= IDLE ANIMATIONS (Floating) =================
-      // Kita pakai contextSafe/useEffect terpisah atau biarkan di sini tapi tanpa set()
-      // GSAP Context akan membersihkan ini otomatis saat unmount
-
       gsap.to(".blob-orange", {
         scale: 1.1,
         opacity: 0.5,
@@ -262,27 +271,6 @@ const Home = () => {
     gsap.to(e.currentTarget, { x: 0, duration: 0.3 });
   });
 
-  useEffect(() => {
-    fetchHomeArticles();
-    document.title = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
-
-    // CATATAN PENTING:
-    // Saya MENGHAPUS manual cleanup ScrollTrigger.getAll().forEach((t) => t.kill());
-    // Karena useGSAP sudah menangani cleanup (revert) secara otomatis.
-    // Manual kill di sini malah bikin konflik saat pindah halaman.
-  }, []);
-
-  const fetchHomeArticles = async () => {
-    const { data, error } = await supabase
-      .from("articles")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(3);
-
-    if (!error) setHomeArticles(data || []);
-    setLoadingArticles(false);
-  };
-
   const stats = useMemo(
     () => [
       {
@@ -317,26 +305,29 @@ const Home = () => {
           <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8 xl:gap-20">
             {/* Text Content */}
             <div className="flex-1 text-center lg:text-left z-10">
-              {/* Tambahkan invisible secara default di class CSS/Tailwind sebagai fallback */}
-              <div className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm invisible">
+              {/* REMOVED INVISIBLE CLASS HERE */}
+              <div className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm">
                 <Star size={14} fill="currentColor" />
                 <span>Terakreditasi A</span>
               </div>
 
-              <h1 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900 invisible">
+              {/* REMOVED INVISIBLE CLASS HERE */}
+              <h1 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900">
                 Mempersiapkan Generasi <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">
                   Siap Teknologi & Berkarakter
                 </span>
               </h1>
 
-              <p className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0 invisible">
+              {/* REMOVED INVISIBLE CLASS HERE */}
+              <p className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 SMK Diponegoro 1 Jakarta menghadirkan pendidikan vokasi berbasis
                 teknologi, karakter, dan kebutuhan industri untuk masa depan
                 yang lebih baik.
               </p>
 
-              <div className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start invisible">
+              {/* REMOVED INVISIBLE CLASS HERE */}
+              <div className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <a
                   href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
                   target="_blank"
@@ -360,12 +351,11 @@ const Home = () => {
 
             {/* Image / Logo Section */}
             <div className="flex-1 relative flex justify-center lg:justify-end">
-              {/* Background Blobs */}
               <div className="blob-orange absolute top-0 right-0 w-60 h-60 lg:w-72 lg:h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
               <div className="blob-green absolute bottom-0 left-0 w-60 h-60 lg:w-72 lg:h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
 
-              {/* Logo Floating */}
-              <div className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20 invisible">
+              {/* REMOVED INVISIBLE CLASS HERE */}
+              <div className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20">
                 <img
                   src={logo}
                   alt="Logo SMK Diponegoro 1 Jakarta"
@@ -382,15 +372,13 @@ const Home = () => {
 
       {/* ==================== SAMBUTAN KEPSEK ==================== */}
       <section className="kepsek-section py-24 bg-white relative overflow-hidden">
-        {/* Background Decor */}
         <div className="absolute top-1/2 right-0 w-96 h-96 bg-orange-50/50 rounded-full blur-[100px] pointer-events-none"></div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-            {/* FOTO KEPSEK */}
-            <div className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end invisible">
+            {/* FOTO KEPSEK - REMOVED INVISIBLE */}
+            <div className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end">
               <div className="relative w-full max-w-md group cursor-default">
-                {/* Background Shape */}
                 <div className="absolute top-4 -right-4 w-full h-full bg-orange-100 rounded-3xl -z-10 transition-transform duration-500 group-hover:rotate-6"></div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-teal-50 rounded-full -z-10 blur-xl"></div>
 
@@ -405,7 +393,6 @@ const Home = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80"></div>
                 </div>
 
-                {/* Mobile Badge */}
                 <div className="lg:hidden absolute bottom-6 left-6 right-6 bg-white/95 backdrop-blur-md p-4 rounded-xl shadow-lg border border-gray-100">
                   <h4 className="font-bold text-gray-900">
                     Ibu. Nurlathifah, M.Pd.Gr
@@ -415,8 +402,8 @@ const Home = () => {
               </div>
             </div>
 
-            {/* TEKS SAMBUTAN */}
-            <div className="kepsek-text-wrapper w-full lg:w-1/2 invisible">
+            {/* TEKS SAMBUTAN - REMOVED INVISIBLE */}
+            <div className="kepsek-text-wrapper w-full lg:w-1/2">
               <div className="relative">
                 <div className="inline-flex items-center gap-2 mb-6">
                   <span className="kepsek-progress block h-1 bg-primary rounded-full w-0"></span>
@@ -472,7 +459,8 @@ const Home = () => {
           {stats.map((stat, idx) => (
             <div
               key={idx}
-              className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default invisible"
+              // REMOVED INVISIBLE CLASS
+              className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
@@ -493,8 +481,8 @@ const Home = () => {
       {/* ==================== JURUSAN SECTION ==================== */}
       <section className="py-20 bg-gray-50/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
-          {/* Header */}
-          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16 invisible">
+          {/* Header - REMOVED INVISIBLE */}
+          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 mb-4 justify-center">
               <span className="w-8 h-1 bg-primary rounded-full"></span>
               <span className="text-primary font-bold tracking-wider uppercase text-sm">
@@ -514,22 +502,20 @@ const Home = () => {
               Pilih masa depanmu dengan program keahlian yang relevan dengan
               kebutuhan industri masa kini.
             </p>
-            {/* Divider animasi terpisah */}
             <div className="jurusan-divider h-1 bg-orange-200 mx-auto mt-6 rounded-full w-0"></div>
           </div>
 
           {/* ==================== CARDS CONTAINER ==================== */}
           <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-            {/* TKJ Card */}
+            {/* TKJ Card - REMOVED INVISIBLE */}
             <div
-              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full invisible"
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
               <div className="h-64 bg-gradient-to-br from-teal-500 to-cyan-600 relative flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
 
-                {/* Decorative Icons with Classes for Animation */}
                 <Monitor className="float-icon-tkj-1 absolute -right-6 -bottom-6 text-white/10 w-32 h-32 rotate-12" />
                 <Cpu className="float-icon-tkj-2 absolute top-8 left-8 text-white/10 w-20 h-20" />
 
@@ -574,9 +560,9 @@ const Home = () => {
               </div>
             </div>
 
-            {/* DKV Card */}
+            {/* DKV Card - REMOVED INVISIBLE */}
             <div
-              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full invisible"
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
@@ -632,11 +618,9 @@ const Home = () => {
 
       {/* ==================== ARTIKEL TERBARU ==================== */}
       <section className="artikel-section py-24 bg-white relative overflow-hidden">
-        {/* Dekorasi Background */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-50 -translate-x-1/2 -translate-y-1/2"></div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20 relative z-10">
-          {/* Header Section (Centered) */}
           <div className="artikel-header text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 mb-4 justify-center">
               <span className="w-8 h-1 bg-primary rounded-full"></span>
@@ -657,7 +641,6 @@ const Home = () => {
             </p>
           </div>
 
-          {/* Content Section */}
           {loadingArticles ? (
             <div className="flex flex-col items-center py-20">
               <div className="w-12 h-12 border-4 border-orange-100 border-t-primary rounded-full animate-spin"></div>
@@ -675,7 +658,6 @@ const Home = () => {
                       to={`/artikel/${item.id}`}
                       className="artikel-card group bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-orange-200/40 transition-all duration-500 overflow-hidden flex flex-col h-full hover:-translate-y-2"
                     >
-                      {/* Image Wrapper */}
                       <div className="relative h-60 overflow-hidden">
                         {item.image_url ? (
                           <img
@@ -691,7 +673,6 @@ const Home = () => {
                           </div>
                         )}
 
-                        {/* Badge Kategori */}
                         <div className="absolute top-4 left-4 z-10">
                           <span className="bg-white/90 backdrop-blur-md text-orange-600 text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm flex items-center gap-2">
                             <LayoutGrid size={12} />
@@ -699,7 +680,6 @@ const Home = () => {
                           </span>
                         </div>
 
-                        {/* Date Badge */}
                         <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-sm">
                           <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider">
                             <Calendar size={14} />
@@ -715,7 +695,6 @@ const Home = () => {
                         </div>
                       </div>
 
-                      {/* Content Body */}
                       <div className="p-8 flex flex-col flex-grow">
                         <h3 className="font-extrabold text-xl text-gray-900 line-clamp-2 mb-4 group-hover:text-primary transition-colors">
                           {item.title}
@@ -743,7 +722,6 @@ const Home = () => {
                 )}
               </div>
 
-              {/* Action Button */}
               <div className="artikel-footer mt-16 flex justify-center">
                 <Link
                   to="/artikel"
