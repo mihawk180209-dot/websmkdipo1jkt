@@ -71,11 +71,11 @@ const Home = () => {
       // Kita sembunyikan elemen lewat JS, bukan CSS. Jadi kalau JS mati, konten tetap ada.
       gsap.set(".hero-element", { autoAlpha: 0, y: 50 });
       gsap.set(".hero-logo", { autoAlpha: 0, scale: 0.5 });
+      gsap.set(".stat-card", { autoAlpha: 0, y: 50 });
       gsap.set(".kepsek-image-wrapper", { autoAlpha: 0, x: -50 });
       gsap.set(".kepsek-text-wrapper", { autoAlpha: 0, x: 50 });
-      gsap.set(".stat-card", { autoAlpha: 0, y: 50 });
-      gsap.set(".jurusan-header", { autoAlpha: 0, y: 30 });
-      gsap.set(".jurusan-card", { autoAlpha: 0, y: 100 });
+      gsap.set(".jurusan-header", { autoAlpha: 0, y: 50 });
+      gsap.set(".jurusan-card", { autoAlpha: 0, y: 50 });
 
       // ================= ANIMASI HERO =================
       const tlHero = gsap.timeline();
@@ -105,7 +105,8 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".kepsek-section",
           start: "top 75%",
-          toggleActions: "play none none reverse",
+          toggleActions: "play none none none",
+          once: true,
         },
       });
 
@@ -148,7 +149,8 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".stats-container",
           start: "top 85%",
-          toggleActions: "play none none reverse",
+          toggleActions: "play none none none",
+          once: true,
         },
       });
 
@@ -157,7 +159,8 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".jurusan-header",
           start: "top 80%",
-          toggleActions: "play none none reverse",
+          toggleActions: "play none none none",
+          once: true,
         },
       });
 
@@ -187,7 +190,8 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".jurusan-cards-container",
           start: "top 75%",
-          toggleActions: "play none none reverse",
+          toggleActions: "play none none none",
+          once: true,
         },
       });
 
@@ -236,6 +240,9 @@ const Home = () => {
         yoyo: true,
         ease: "sine.inOut",
       });
+
+      // Refresh ScrollTrigger to handle navigation scenarios
+      ScrollTrigger.refresh();
     },
     { scope: container },
   );
