@@ -55,19 +55,18 @@ const Home = () => {
   // --- CLEANUP GSAP ON UNMOUNT ---
   useEffect(() => {
     return () => {
+      // Kill all ScrollTriggers
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+
+      // Kill all timelines
       if (heroTlRef.current) heroTlRef.current.kill();
     };
   }, []);
 
-  // --- REFRESH SCROLLTRIGGER SAAT DATA MASUK ---
+  // --- REFRESH SCROLLTRIGGER SAAT DATA MASUK DAN SETELAH MOUNT ---
   useEffect(() => {
     if (!loadingArticles) {
-      // Memberi sedikit delay agar DOM render sempurna sebelum refresh
-      const timer = setTimeout(() => {
-        ScrollTrigger.refresh();
-      }, 100);
-      return () => clearTimeout(timer);
+      ScrollTrigger.refresh();
     }
   }, [loadingArticles, homeArticles]);
 
@@ -91,7 +90,7 @@ const Home = () => {
         handleImageLoad();
       } else {
         img.addEventListener("load", handleImageLoad);
-        img.addEventListener("error", handleImageLoad);
+        img.addEventListener("error", handleImageLoad); // Count errors as loaded too
       }
     });
 
@@ -125,7 +124,7 @@ const Home = () => {
       heroTlRef.current
         .to(".hero-element", {
           y: 0,
-          autoAlpha: 1, // autoAlpha handles opacity + visibility
+          autoAlpha: 1,
           duration: 1,
           stagger: 0.15,
           ease: "power3.out",
@@ -187,75 +186,6 @@ const Home = () => {
         yoyo: true,
         ease: "sine.inOut",
       });
-
-      // ================= ANIMASI KEPSEK =================
-      // Animasi Foto Kepsek (Slide dari kiri)
-      gsap.to(".gsap-kepsek-image", {
-        scrollTrigger: {
-          trigger: ".kepsek-section",
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-        x: 0,
-        y: 0,
-        autoAlpha: 1,
-        duration: 1,
-        ease: "power3.out",
-      });
-
-      // Animasi Teks Kepsek (Slide dari kanan/bawah)
-      gsap.to(".gsap-kepsek-text", {
-        scrollTrigger: {
-          trigger: ".kepsek-section",
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-        y: 0,
-        autoAlpha: 1,
-        duration: 1,
-        delay: 0.2, // Sedikit delay setelah gambar
-        ease: "power3.out",
-      });
-
-      // ================= ANIMASI STATS =================
-      gsap.to(".gsap-stat-item", {
-        scrollTrigger: {
-          trigger: ".stats-container",
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-        y: 0,
-        autoAlpha: 1,
-        duration: 0.8,
-        stagger: 0.15, // Efek muncul berurutan
-        ease: "back.out(1.7)",
-      });
-
-      // ================= ANIMASI JURUSAN =================
-      // Header Jurusan
-      gsap.to(".gsap-jurusan-header", {
-        scrollTrigger: {
-          trigger: ".jurusan-header",
-          start: "top 85%",
-        },
-        y: 0,
-        autoAlpha: 1,
-        duration: 1,
-        ease: "power2.out",
-      });
-
-      // Kartu Jurusan
-      gsap.to(".gsap-jurusan-card", {
-        scrollTrigger: {
-          trigger: ".jurusan-cards-container",
-          start: "top 80%",
-        },
-        y: 0,
-        autoAlpha: 1,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out",
-      });
     },
     { scope: container },
   );
@@ -310,8 +240,8 @@ const Home = () => {
       },
       {
         icon: <Users size={28} className="text-primary" />,
-        count: "100%",
-        label: " Siap Bekerja",
+        count: "99%",
+        label: "Lulusan Bekerja",
       },
     ],
     [],
@@ -325,6 +255,7 @@ const Home = () => {
           <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8 xl:gap-20">
             {/* Text Content */}
             <div className="flex-1 text-center lg:text-left z-10">
+              {/* REMOVED INVISIBLE CLASS HERE */}
               <div
                 className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm"
                 style={{ opacity: 0, transform: "translateY(50px)" }}
@@ -333,6 +264,7 @@ const Home = () => {
                 <span>Terakreditasi A</span>
               </div>
 
+              {/* REMOVED INVISIBLE CLASS HERE */}
               <h1
                 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900"
                 style={{ opacity: 0, transform: "translateY(50px)" }}
@@ -343,6 +275,7 @@ const Home = () => {
                 </span>
               </h1>
 
+              {/* REMOVED INVISIBLE CLASS HERE */}
               <p
                 className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0"
                 style={{ opacity: 0, transform: "translateY(50px)" }}
@@ -352,6 +285,7 @@ const Home = () => {
                 yang lebih baik.
               </p>
 
+              {/* REMOVED INVISIBLE CLASS HERE */}
               <div
                 className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
                 style={{ opacity: 0, transform: "translateY(50px)" }}
@@ -382,6 +316,7 @@ const Home = () => {
               <div className="blob-orange absolute top-0 right-0 w-60 h-60 lg:w-72 lg:h-72 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
               <div className="blob-green absolute bottom-0 left-0 w-60 h-60 lg:w-72 lg:h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
 
+              {/* REMOVED INVISIBLE CLASS HERE */}
               <div
                 className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20"
                 style={{ opacity: 0, transform: "scale(0.5)" }}
@@ -406,12 +341,8 @@ const Home = () => {
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-            {/* FOTO KEPSEK */}
-            {/* Added gsap-kepsek-image class & inline style for initial hidden state */}
-            <div
-              className="gsap-kepsek-image kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end"
-              style={{ opacity: 0, transform: "translateX(-50px)" }}
-            >
+            {/* FOTO KEPSEK - REMOVED INVISIBLE */}
+            <div className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end">
               <div className="relative w-full max-w-md group cursor-default">
                 <div className="absolute top-4 -right-4 w-full h-full bg-orange-100 rounded-3xl -z-10 transition-transform duration-500 group-hover:rotate-6"></div>
                 <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-teal-50 rounded-full -z-10 blur-xl"></div>
@@ -436,12 +367,8 @@ const Home = () => {
               </div>
             </div>
 
-            {/* TEKS SAMBUTAN */}
-            {/* Added gsap-kepsek-text class & inline style for initial hidden state */}
-            <div
-              className="gsap-kepsek-text kepsek-text-wrapper w-full lg:w-1/2"
-              style={{ opacity: 0, transform: "translateY(50px)" }}
-            >
+            {/* TEKS SAMBUTAN - REMOVED INVISIBLE */}
+            <div className="kepsek-text-wrapper w-full lg:w-1/2">
               <div className="relative">
                 <div className="inline-flex items-center gap-2 mb-6">
                   <span className="kepsek-progress block h-1 bg-primary rounded-full w-32"></span>
@@ -497,9 +424,8 @@ const Home = () => {
           {stats.map((stat, idx) => (
             <div
               key={idx}
-              // Added gsap-stat-item class & inline style
-              className="gsap-stat-item stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
-              style={{ opacity: 0, transform: "translateY(30px)" }}
+              // REMOVED INVISIBLE CLASS
+              className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
@@ -520,12 +446,8 @@ const Home = () => {
       {/* ==================== JURUSAN SECTION ==================== */}
       <section className="py-20 bg-gray-50/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
-          {/* Header */}
-          {/* Added gsap-jurusan-header class & inline style */}
-          <div
-            className="gsap-jurusan-header jurusan-header text-center max-w-3xl mx-auto mb-16"
-            style={{ opacity: 0, transform: "translateY(30px)" }}
-          >
+          {/* Header - REMOVED INVISIBLE */}
+          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 mb-4 justify-center">
               <span className="w-8 h-1 bg-primary rounded-full"></span>
               <span className="text-primary font-bold tracking-wider uppercase text-sm">
@@ -550,11 +472,9 @@ const Home = () => {
 
           {/* ==================== CARDS CONTAINER ==================== */}
           <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
-            {/* TKJ Card */}
-            {/* Added gsap-jurusan-card class & inline style */}
+            {/* TKJ Card - REMOVED INVISIBLE */}
             <div
-              className="gsap-jurusan-card jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
-              style={{ opacity: 0, transform: "translateY(50px)" }}
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
@@ -605,11 +525,9 @@ const Home = () => {
               </div>
             </div>
 
-            {/* DKV Card */}
-            {/* Added gsap-jurusan-card class & inline style */}
+            {/* DKV Card - REMOVED INVISIBLE */}
             <div
-              className="gsap-jurusan-card jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
-              style={{ opacity: 0, transform: "translateY(50px)" }}
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
