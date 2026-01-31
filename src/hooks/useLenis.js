@@ -19,7 +19,7 @@ export const useLenis = () => {
       mouseMultiplier: 1,
       smoothTouch: true,
       touchMultiplier: 3,
-      infinite: true,
+      infinite: false,
     });
 
     // Integrate Lenis with GSAP ScrollTrigger
