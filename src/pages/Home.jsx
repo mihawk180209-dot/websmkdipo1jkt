@@ -32,6 +32,13 @@ import dkvCustomIcon from "../assets/icon-dkv2.webp";
 const Home = () => {
   const container = useRef();
 
+  // Refs for timelines to manage cleanup
+  const heroTlRef = useRef();
+  const kepsekTlRef = useRef();
+  const statsTlRef = useRef();
+  const jurusanTlRef = useRef();
+  const jurusanCardsTlRef = useRef();
+
   // State untuk data
   const [homeArticles, setHomeArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState(true);
@@ -49,13 +56,59 @@ const Home = () => {
     }
   }, []);
 
-  // --- REFRESH SCROLLTRIGGER SAAT DATA MASUK ---
-  // Ini PENTING supaya animasi di bawah gak rusak posisinya saat artikel keload
+  // --- CLEANUP GSAP ON UNMOUNT ---
+  useEffect(() => {
+    return () => {
+      // Kill all ScrollTriggers
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+
+      // Kill all timelines
+      if (heroTlRef.current) heroTlRef.current.kill();
+      if (kepsekTlRef.current) kepsekTlRef.current.kill();
+      if (statsTlRef.current) statsTlRef.current.kill();
+      if (jurusanTlRef.current) jurusanTlRef.current.kill();
+      if (jurusanCardsTlRef.current) jurusanCardsTlRef.current.kill();
+    };
+  }, []);
+
+  // --- REFRESH SCROLLTRIGGER SAAT DATA MASUK DAN SETELAH MOUNT ---
   useEffect(() => {
     if (!loadingArticles) {
       ScrollTrigger.refresh();
     }
   }, [loadingArticles, homeArticles]);
+
+  // --- REFRESH SCROLLTRIGGER SETELAH IMAGES LOAD ---
+  useEffect(() => {
+    const images = container.current?.querySelectorAll("img");
+    if (!images || images.length === 0) return;
+
+    let loadedCount = 0;
+    const totalImages = images.length;
+
+    const handleImageLoad = () => {
+      loadedCount++;
+      if (loadedCount === totalImages) {
+        ScrollTrigger.refresh();
+      }
+    };
+
+    images.forEach((img) => {
+      if (img.complete) {
+        handleImageLoad();
+      } else {
+        img.addEventListener("load", handleImageLoad);
+        img.addEventListener("error", handleImageLoad); // Count errors as loaded too
+      }
+    });
+
+    return () => {
+      images.forEach((img) => {
+        img.removeEventListener("load", handleImageLoad);
+        img.removeEventListener("error", handleImageLoad);
+      });
+    };
+  }, []);
 
   const fetchHomeArticles = async () => {
     const { data, error } = await supabase
@@ -74,9 +127,9 @@ const Home = () => {
       if (typeof window === "undefined") return;
 
       // ================= ANIMASI HERO =================
-      const tlHero = gsap.timeline();
+      heroTlRef.current = gsap.timeline();
 
-      tlHero
+      heroTlRef.current
         .to(".hero-element", {
           y: 0,
           autoAlpha: 1,
@@ -97,16 +150,15 @@ const Home = () => {
         );
 
       // ================= ANIMASI KEPSEK =================
-      const tlKepsek = gsap.timeline({
+      kepsekTlRef.current = gsap.timeline({
         scrollTrigger: {
           trigger: ".kepsek-section",
           start: "top 75%",
-          toggleActions: "play none none none",
-          once: true,
+          toggleActions: "play none none reset",
         },
       });
 
-      tlKepsek
+      kepsekTlRef.current
         .to(".kepsek-image-wrapper", {
           x: 0,
           autoAlpha: 1,
@@ -135,7 +187,7 @@ const Home = () => {
         );
 
       // ================= ANIMASI STATS =================
-      gsap.to(".stat-card", {
+      statsTlRef.current = gsap.to(".stat-card", {
         y: 0,
         scale: 1,
         autoAlpha: 1,
@@ -145,22 +197,20 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".stats-container",
           start: "top 85%",
-          toggleActions: "play none none none",
-          once: true,
+          toggleActions: "play none none reset",
         },
       });
 
       // ================= ANIMASI JURUSAN =================
-      const tlJurusan = gsap.timeline({
+      jurusanTlRef.current = gsap.timeline({
         scrollTrigger: {
           trigger: ".jurusan-header",
           start: "top 80%",
-          toggleActions: "play none none none",
-          once: true,
+          toggleActions: "play none none reset",
         },
       });
 
-      tlJurusan
+      jurusanTlRef.current
         .to(".jurusan-header", {
           y: 0,
           autoAlpha: 1,
@@ -177,7 +227,7 @@ const Home = () => {
         );
 
       // Cards Jurusan
-      gsap.to(".jurusan-card", {
+      jurusanCardsTlRef.current = gsap.to(".jurusan-card", {
         y: 0,
         autoAlpha: 1,
         duration: 1,
@@ -186,8 +236,7 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".jurusan-cards-container",
           start: "top 75%",
-          toggleActions: "play none none none",
-          once: true,
+          toggleActions: "play none none reset",
         },
       });
 
@@ -236,9 +285,6 @@ const Home = () => {
         yoyo: true,
         ease: "sine.inOut",
       });
-
-      // Refresh ScrollTrigger to handle navigation scenarios
-      ScrollTrigger.refresh();
     },
     { scope: container },
   );
