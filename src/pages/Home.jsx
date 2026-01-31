@@ -36,38 +36,31 @@ gsap.registerPlugin(ScrollTrigger);
 const Home = () => {
   const container = useRef();
 
+  // State untuk data
+  const [homeArticles, setHomeArticles] = useState([]);
+  const [loadingArticles, setLoadingArticles] = useState(true);
+
   useGSAP(
     () => {
-      // 1. Setup Initial States (Mencegah Ghosting/FOUC)
-      // Kita set elemen menjadi hidden & posisi awal SEBELUM animasi berjalan
-      gsap.set(".hero-element", { y: 60, autoAlpha: 0 }); // autoAlpha = opacity + visibility
-      gsap.set(".hero-logo", { scale: 0.5, autoAlpha: 0, rotation: -10 });
-
-      // Setup Kepsek Section
-      gsap.set(".kepsek-image-wrapper", { x: -100, autoAlpha: 0 });
-      gsap.set(".kepsek-text-wrapper", { x: 100, autoAlpha: 0 });
-      gsap.set(".kepsek-progress", { width: 0 });
-
-      // Setup Jurusan Section
-      gsap.set(".jurusan-header", { y: 30, autoAlpha: 0 });
-      gsap.set(".jurusan-divider", { width: 0 });
-      gsap.set(".jurusan-card", { y: 100, autoAlpha: 0 });
-
-      // Setup Stats
-      gsap.set(".stat-card", { y: 60, scale: 0.8, autoAlpha: 0 });
-
-      // ================= ANIMASI HERO =================
+      // ================= ANIMASI HERO (Ganti ke fromTo) =================
+      // fromTo memaksa animasi mereset state awal (hidden) dan akhir (visible) setiap kali load
       const tlHero = gsap.timeline();
+
       tlHero
-        .to(".hero-element", {
-          y: 0,
-          autoAlpha: 1,
-          duration: 1,
-          stagger: 0.15,
-          ease: "power3.out",
-        })
-        .to(
+        .fromTo(
+          ".hero-element",
+          { y: 60, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+          },
+        )
+        .fromTo(
           ".hero-logo",
+          { scale: 0.5, autoAlpha: 0, rotation: -10 },
           {
             scale: 1,
             autoAlpha: 1,
@@ -78,37 +71,42 @@ const Home = () => {
           "-=0.8",
         );
 
-      // ================= ANIMASI KEPSEK (Timeline) =================
-      // Menggunakan Timeline agar sinkron dan tidak ghosting saat scroll cepat
+      // ================= ANIMASI KEPSEK =================
       const tlKepsek = gsap.timeline({
         scrollTrigger: {
           trigger: ".kepsek-section",
           start: "top 75%",
-          toggleActions: "play none none reverse", // Animasi play saat masuk, reverse saat keluar atas
+          toggleActions: "play none none reverse",
         },
       });
 
       tlKepsek
-        .to(".kepsek-image-wrapper", {
-          x: 0,
-          autoAlpha: 1,
-          duration: 1.2,
-          ease: "power3.out",
-        })
-        .to(
-          ".kepsek-text-wrapper",
+        .fromTo(
+          ".kepsek-image-wrapper",
+          { x: -100, autoAlpha: 0 },
           {
             x: 0,
             autoAlpha: 1,
             duration: 1.2,
             ease: "power3.out",
           },
-          "<0.2", // Mulai 0.2 detik setelah animasi sebelumnya (overlap)
         )
-        .to(
-          ".kepsek-progress",
+        .fromTo(
+          ".kepsek-text-wrapper",
+          { x: 100, autoAlpha: 0 },
           {
-            width: 32,
+            x: 0,
+            autoAlpha: 1,
+            duration: 1.2,
+            ease: "power3.out",
+          },
+          "<0.2",
+        )
+        .fromTo(
+          ".kepsek-progress",
+          { width: 0 },
+          {
+            width: 32, // 8rem approx
             duration: 1,
             ease: "power2.out",
           },
@@ -116,21 +114,25 @@ const Home = () => {
         );
 
       // ================= ANIMASI STATS =================
-      gsap.to(".stat-card", {
-        y: 0,
-        scale: 1,
-        autoAlpha: 1,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: ".stats-container",
-          start: "top 85%",
-          toggleActions: "play none none reverse",
+      gsap.fromTo(
+        ".stat-card",
+        { y: 60, scale: 0.8, autoAlpha: 0 },
+        {
+          y: 0,
+          scale: 1,
+          autoAlpha: 1,
+          duration: 0.8,
+          stagger: 0.1,
+          ease: "back.out(1.7)",
+          scrollTrigger: {
+            trigger: ".stats-container",
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
         },
-      });
+      );
 
-      // ================= ANIMASI JURUSAN (Timeline) =================
+      // ================= ANIMASI JURUSAN =================
       const tlJurusan = gsap.timeline({
         scrollTrigger: {
           trigger: ".jurusan-header",
@@ -140,13 +142,18 @@ const Home = () => {
       });
 
       tlJurusan
-        .to(".jurusan-header", {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.8,
-        })
-        .to(
+        .fromTo(
+          ".jurusan-header",
+          { y: 30, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+          },
+        )
+        .fromTo(
           ".jurusan-divider",
+          { width: 0 },
           {
             width: 80,
             duration: 0.8,
@@ -154,78 +161,72 @@ const Home = () => {
           "<0.2",
         );
 
-      // Cards terpisah trigger-nya agar muncul saat card-nya sendiri yang terlihat
-      gsap.to(".jurusan-card", {
-        y: 0,
-        autoAlpha: 1,
-        duration: 1,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ".jurusan-cards-container",
-          start: "top 75%",
-          toggleActions: "play none none reverse",
+      // Cards Jurusan
+      gsap.fromTo(
+        ".jurusan-card",
+        { y: 100, autoAlpha: 0 },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 1,
+          stagger: 0.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ".jurusan-cards-container",
+            start: "top 75%",
+            toggleActions: "play none none reverse",
+          },
         },
-      });
+      );
 
       // ================= IDLE ANIMATIONS (Floating) =================
-      const startIdleTweens = () => {
-        try {
-          // Floating Blob
-          gsap.to(".blob-orange", {
-            scale: 1.1,
-            opacity: 0.5,
-            duration: 8,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
-          gsap.to(".blob-green", {
-            scale: 1.2,
-            opacity: 0.5,
-            duration: 10,
-            repeat: -1,
-            yoyo: true,
-            delay: 1,
-            ease: "sine.inOut",
-          });
+      // Kita pakai contextSafe/useEffect terpisah atau biarkan di sini tapi tanpa set()
+      // GSAP Context akan membersihkan ini otomatis saat unmount
 
-          // Floating Logo
-          gsap.to(".hero-logo-img", {
-            y: -15,
-            duration: 2.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
+      gsap.to(".blob-orange", {
+        scale: 1.1,
+        opacity: 0.5,
+        duration: 8,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
 
-          // Floating Icons TKJ
-          gsap.to(".float-icon-tkj-1", {
-            y: -15,
-            rotation: 5,
-            duration: 3,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
+      gsap.to(".blob-green", {
+        scale: 1.2,
+        opacity: 0.5,
+        duration: 10,
+        repeat: -1,
+        yoyo: true,
+        delay: 1,
+        ease: "sine.inOut",
+      });
 
-          // Floating Icons DKV
-          gsap.to(".float-icon-dkv-1", {
-            y: -15,
-            rotation: -5,
-            duration: 3.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
-        } catch (e) {
-          // defensive
-        }
-      };
+      gsap.to(".hero-logo-img", {
+        y: -15,
+        duration: 2.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
 
-      // Jalankan idle animation dengan delay agar tidak memberatkan load awal
-      const timer = setTimeout(startIdleTweens, 1000);
-      return () => clearTimeout(timer);
+      gsap.to(".float-icon-tkj-1", {
+        y: -15,
+        rotation: 5,
+        duration: 3,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      gsap.to(".float-icon-dkv-1", {
+        y: -15,
+        rotation: -5,
+        duration: 3.5,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
     },
     { scope: container },
   );
@@ -261,23 +262,14 @@ const Home = () => {
     gsap.to(e.currentTarget, { x: 0, duration: 0.3 });
   });
 
-  const [homeArticles, setHomeArticles] = useState([]);
-  const [loadingArticles, setLoadingArticles] = useState(true);
-
   useEffect(() => {
     fetchHomeArticles();
-  }, []);
+    document.title = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
 
-  // SEO & Cleanup
-  useEffect(() => {
-    try {
-      document.title = "SMK DIPO 1 — SMK Diponegoro 1 Jakarta";
-    } catch (e) {}
-
-    return () => {
-      // Kill all scrolltriggers on unmount specific to this page
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
+    // CATATAN PENTING:
+    // Saya MENGHAPUS manual cleanup ScrollTrigger.getAll().forEach((t) => t.kill());
+    // Karena useGSAP sudah menangani cleanup (revert) secara otomatis.
+    // Manual kill di sini malah bikin konflik saat pindah halaman.
   }, []);
 
   const fetchHomeArticles = async () => {
@@ -325,25 +317,26 @@ const Home = () => {
           <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8 xl:gap-20">
             {/* Text Content */}
             <div className="flex-1 text-center lg:text-left z-10">
-              <div className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm opacity-0 invisible">
+              {/* Tambahkan invisible secara default di class CSS/Tailwind sebagai fallback */}
+              <div className="hero-element inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-orange-50 border border-orange-100 text-primary text-sm font-semibold mb-6 shadow-sm invisible">
                 <Star size={14} fill="currentColor" />
                 <span>Terakreditasi A</span>
               </div>
 
-              <h1 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900 opacity-0 invisible">
+              <h1 className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900 invisible">
                 Mempersiapkan Generasi <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">
                   Siap Teknologi & Berkarakter
                 </span>
               </h1>
 
-              <p className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0 opacity-0 invisible">
+              <p className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0 invisible">
                 SMK Diponegoro 1 Jakarta menghadirkan pendidikan vokasi berbasis
                 teknologi, karakter, dan kebutuhan industri untuk masa depan
                 yang lebih baik.
               </p>
 
-              <div className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start opacity-0 invisible">
+              <div className="hero-element flex flex-col sm:flex-row gap-4 justify-center lg:justify-start invisible">
                 <a
                   href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
                   target="_blank"
@@ -372,7 +365,7 @@ const Home = () => {
               <div className="blob-green absolute bottom-0 left-0 w-60 h-60 lg:w-72 lg:h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30"></div>
 
               {/* Logo Floating */}
-              <div className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20 opacity-0 invisible">
+              <div className="hero-logo relative w-64 h-64 lg:w-80 lg:h-80 xl:w-96 xl:h-96 bg-white/80 backdrop-blur-sm rounded-full shadow-2xl flex items-center justify-center p-8 border-4 border-white z-20 invisible">
                 <img
                   src={logo}
                   alt="Logo SMK Diponegoro 1 Jakarta"
@@ -395,7 +388,7 @@ const Home = () => {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
             {/* FOTO KEPSEK */}
-            <div className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end opacity-0 invisible">
+            <div className="kepsek-image-wrapper w-full lg:w-1/2 relative flex justify-center lg:justify-end invisible">
               <div className="relative w-full max-w-md group cursor-default">
                 {/* Background Shape */}
                 <div className="absolute top-4 -right-4 w-full h-full bg-orange-100 rounded-3xl -z-10 transition-transform duration-500 group-hover:rotate-6"></div>
@@ -423,7 +416,7 @@ const Home = () => {
             </div>
 
             {/* TEKS SAMBUTAN */}
-            <div className="kepsek-text-wrapper w-full lg:w-1/2 opacity-0 invisible">
+            <div className="kepsek-text-wrapper w-full lg:w-1/2 invisible">
               <div className="relative">
                 <div className="inline-flex items-center gap-2 mb-6">
                   <span className="kepsek-progress block h-1 bg-primary rounded-full w-0"></span>
@@ -479,7 +472,7 @@ const Home = () => {
           {stats.map((stat, idx) => (
             <div
               key={idx}
-              className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default opacity-0 invisible"
+              className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default invisible"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
@@ -501,7 +494,7 @@ const Home = () => {
       <section className="py-20 bg-gray-50/50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           {/* Header */}
-          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16 opacity-0 invisible">
+          <div className="jurusan-header text-center max-w-3xl mx-auto mb-16 invisible">
             <div className="inline-flex items-center gap-2 mb-4 justify-center">
               <span className="w-8 h-1 bg-primary rounded-full"></span>
               <span className="text-primary font-bold tracking-wider uppercase text-sm">
@@ -529,7 +522,7 @@ const Home = () => {
           <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
             {/* TKJ Card */}
             <div
-              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full opacity-0 invisible"
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full invisible"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
@@ -583,7 +576,7 @@ const Home = () => {
 
             {/* DKV Card */}
             <div
-              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full opacity-0 invisible"
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full invisible"
               onMouseEnter={onHoverScale}
               onMouseLeave={onHoverScaleReset}
             >
