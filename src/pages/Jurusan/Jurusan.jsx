@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 
 // --- IMPORT ICON GAMBAR ---
-import tkjCustomIcon from "../../assets/icon-tkj2.webp";
-import dkvCustomIcon from "../../assets/icon-dkv2.webp";
+import tkjCustomIcon from "../../assets/icon-tkj2 (1).webp";
+import dkvCustomIcon from "../../assets/icon-dkv2 (1).webp";
 
 // --- GSAP IMPORTS ---
 import gsap from "gsap";

@@ -32,8 +32,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 // ASSETS IMPORT
 import fotokepsek from "../assets/Bu Ipeh.webp";
 import logo from "../assets/logo yayasan al-hidayah-02.webp";
-import tkjCustomIcon from "../assets/icon-tkj2.webp";
-import dkvCustomIcon from "../assets/icon-dkv2.webp";
+import tkjCustomIcon from "../assets/icon-tkj2 (1).webp";
+import dkvCustomIcon from "../assets/icon-dkv2 (1).webp";
 
 const Home = () => {
   const container = useRef();
