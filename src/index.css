@@ -16,8 +16,6 @@
 /* Global Styles */
 html {
   /* Removed scroll-behavior: smooth to let Lenis handle scrolling */
-  -webkit-text-size-adjust: 100%;
-  font-size: 16px;
 }
 
 @layer base {
@@ -28,9 +26,6 @@ html {
     /* Menerapkan Inter sebagai default body */
     font-family: var(--font-sans);
     @apply bg-gray-50 text-gray-800;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
   }
 
   /* Menerapkan Poppins otomatis ke semua tag heading */
@@ -42,6 +37,5 @@ html {
   h6 {
     font-family: var(--font-heading);
     @apply font-bold; /* Membuat heading otomatis tebal */
-    font-weight: 700; /* default */
   }
 }
