@@ -83,12 +83,12 @@ const Home = () => {
 
     if (metaKeywords)
       metaKeywords.content =
-        "SMK Diponegoro 1 Jakarta, sekolah vokasi, TKJ, smk terbaik, DKV, pendidikan teknologi, karakter, Jakarta";
+        "SMK Diponegoro 1 Jakarta, sekolah vokasi, TKJ, DKV, pendidikan teknologi, karakter, Jakarta";
     else {
       const key = document.createElement("meta");
       key.name = "keywords";
       key.content =
-        "SMK Diponegoro 1 Jakarta, sekolah vokasi, TKJ, smk terbaik, DKV, pendidikan teknologi, karakter, Jakarta";
+        "SMK Diponegoro 1 Jakarta, sekolah vokasi, TKJ, DKV, pendidikan teknologi, karakter, Jakarta";
       document.head.appendChild(key);
     }
 
@@ -211,283 +211,86 @@ const Home = () => {
     () => {
       if (typeof window === "undefined" || prefersReducedMotion) return;
 
-      let heroTl;
+      // ================= ANIMASI HERO =================
+      heroTlRef.current = gsap.timeline();
 
-      // ⛔ TUNGGU FONT SIAP (INI KUNCI UTAMA)
-      document.fonts.ready.then(() => {
-        // ================= ANIMASI HERO =================
-        heroTl = gsap.timeline();
-
-        heroTl
-          .to(".hero-element", {
-            y: 0,
+      heroTlRef.current
+        .to(".hero-element", {
+          y: 0,
+          autoAlpha: 1,
+          duration: 1,
+          stagger: 0.15,
+          ease: "power3.out",
+          force3D: true,
+        })
+        .to(
+          ".hero-logo",
+          {
+            scale: 1,
             autoAlpha: 1,
-            duration: 1,
-            stagger: 0.15,
-            ease: "power3.out",
-            // ❌ jangan force3D di text
-          })
-          .to(
-            ".hero-logo",
-            {
-              scale: 1,
-              autoAlpha: 1,
-              rotation: 0,
-              duration: 1.2,
-              ease: "elastic.out(1, 0.5)",
-              force3D: true, // logo aman
-            },
-            "-=0.8",
-          );
-
-        heroTlRef.current = heroTl;
-
-        // ================= SCROLL-BASED ANIMATIONS =================
-        // Use gsap.context() for proper scoping and cleanup to prevent ghosting
-        const ctx = gsap.context(() => {
-          // --- SAMBUTAN KEPSEK SECTION ---
-          gsap.fromTo(
-            ".anim-kepsek-progress",
-            { x: -30, autoAlpha: 0 },
-            {
-              x: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".kepsek-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          gsap.fromTo(
-            ".anim-kepsek-title",
-            { y: 30, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".kepsek-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          gsap.fromTo(
-            ".anim-kepsek-desc",
-            { y: 30, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              delay: 0.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".kepsek-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          gsap.fromTo(
-            ".anim-kepsek-quote",
-            { y: 30, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              delay: 0.4,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".kepsek-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          // --- STATS SECTION ---
-          gsap.fromTo(
-            ".anim-stat-card",
-            { y: 30, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.6,
-              stagger: 0.1,
-              ease: "back.out(1.7)",
-              scrollTrigger: {
-                trigger: ".stats-container",
-                start: "top 90%",
-              },
-            },
-          );
-
-          // --- JURUSAN SECTION ---
-          gsap.fromTo(
-            ".anim-jurusan-progress",
-            { x: -30, autoAlpha: 0 },
-            {
-              x: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".jurusan-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          gsap.fromTo(
-            ".anim-jurusan-title",
-            { y: 30, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".jurusan-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          gsap.fromTo(
-            ".anim-jurusan-desc",
-            { y: 30, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              delay: 0.2,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".jurusan-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          gsap.fromTo(
-            ".anim-jurusan-divider",
-            { scaleX: 0, autoAlpha: 0 },
-            {
-              scaleX: 1,
-              autoAlpha: 1,
-              duration: 0.8,
-              delay: 0.4,
-              ease: "power3.out",
-              scrollTrigger: {
-                trigger: ".jurusan-section",
-                start: "top 85%",
-              },
-            },
-          );
-
-          gsap.fromTo(
-            ".anim-jurusan-card",
-            { y: 50, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.8,
-              stagger: 0.2,
-              ease: "back.out(1.7)",
-              scrollTrigger: {
-                trigger: ".jurusan-cards-container",
-                start: "top 90%",
-              },
-            },
-          );
-        }, container);
-
-        // ================= IDLE ANIMATIONS =================
-        const isMobile =
-          window.matchMedia("(max-width: 767px)").matches &&
-          window.matchMedia("(pointer: coarse)").matches;
-
-        if (!isMobile) {
-          gsap.to(".blob-orange", {
-            scale: 1.1,
-            opacity: 0.5,
-            duration: 8,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
+            rotation: 0,
+            duration: 1.2,
+            ease: "elastic.out(1, 0.5)",
             force3D: true,
-          });
+          },
+          "-=0.8",
+        );
 
-          gsap.to(".blob-green", {
-            scale: 1.2,
-            opacity: 0.5,
-            duration: 10,
-            repeat: -1,
-            yoyo: true,
-            delay: 1,
-            ease: "sine.inOut",
-            force3D: true,
-          });
+      // ================= IDLE ANIMATIONS (Floating) =================
+      // Disable floating animations on mobile for performance
+      const isMobile = window.innerWidth < 768;
 
-          gsap.to(".hero-logo-img", {
-            y: -15,
-            duration: 2.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            force3D: true,
-          });
+      if (!isMobile) {
+        gsap.to(".blob-orange", {
+          scale: 1.1,
+          opacity: 0.5,
+          duration: 8,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          force3D: true,
+        });
 
-          gsap.to(".float-icon-tkj-1", {
-            y: -15,
-            rotation: 5,
-            duration: 3,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            force3D: true,
-          });
+        gsap.to(".blob-green", {
+          scale: 1.2,
+          opacity: 0.5,
+          duration: 10,
+          repeat: -1,
+          yoyo: true,
+          delay: 1,
+          ease: "sine.inOut",
+          force3D: true,
+        });
 
-          gsap.to(".float-icon-dkv-1", {
-            y: -15,
-            rotation: -5,
-            duration: 3.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            force3D: true,
-          });
+        gsap.to(".hero-logo-img", {
+          y: -15,
+          duration: 2.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          force3D: true,
+        });
 
-          gsap.to(".float-icon-tkj-hero", {
-            y: -10,
-            rotation: 3,
-            duration: 4,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            force3D: true,
-          });
+        gsap.to(".float-icon-tkj-1", {
+          y: -15,
+          rotation: 5,
+          duration: 3,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          force3D: true,
+        });
 
-          gsap.to(".float-icon-dkv-hero", {
-            y: -10,
-            rotation: -3,
-            duration: 4.5,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-            force3D: true,
-          });
-        }
-
-        // 🧹 CLEANUP
-        return () => {
-          ctx.revert();
-          heroTl?.kill();
-        };
-      });
+        gsap.to(".float-icon-dkv-1", {
+          y: -15,
+          rotation: -5,
+          duration: 3.5,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          force3D: true,
+        });
+      }
     },
     { scope: container },
   );
@@ -571,10 +374,9 @@ const Home = () => {
     <div ref={container} className="w-full font-sans overflow-x-hidden">
       {/* ==================== HERO SECTION ==================== */}
       <section
-        className="min-w-[1024px] max-w-full relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/30 pt-24 pb-20 lg:pt-32 lg:pb-32"
+        className="relative overflow-hidden bg-gradient-to-br from-orange-50 via-white to-orange-50/30 pt-24 pb-20 lg:pt-32 lg:pb-32"
         aria-labelledby="hero-heading"
       >
-        .
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
           <div className="flex flex-col-reverse lg:flex-row items-center gap-12 lg:gap-8 xl:gap-20">
             {/* Text Content */}
@@ -591,30 +393,23 @@ const Home = () => {
               {/* REMOVED INVISIBLE CLASS HERE */}
               <h1
                 id="hero-heading"
-                className="hero-element text-[28px] lg:text-[36px] xl:text-[44px] font-[800] leading-[1.15] mb-4 text-gray-900"
+                className="hero-element text-3xl lg:text-4xl xl:text-5xl font-extrabold leading-tight mb-6 text-gray-900"
                 style={{ opacity: 0, transform: "translateY(50px)" }}
               >
-                Membentuk Generasi Unggul <br />
+                Mempersiapkan Generasi <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">
-                  di Era Digital
+                  Siap Teknologi & Berkarakter
                 </span>
               </h1>
 
-              <p
-                className="hero-element text-lg text-orange-600 font-semibold mb-6"
-                style={{ opacity: 0, transform: "translateY(50px)" }}
-              >
-                Berkarakter, Berkarya, Berteknologi
-              </p>
-
               {/* REMOVED INVISIBLE CLASS HERE */}
               <p
-                className="hero-element text-base lg:text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0"
+                className="hero-element text-lg text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0"
                 style={{ opacity: 0, transform: "translateY(50px)" }}
               >
-                Melalui pendidikan vokasi berbasis teknologi, SMK Dipo 1
-                membentuk generasi berkarakter, kreatif, dan kompeten agar siap
-                menghadapi dunia kerja dan tantangan era digital.
+                SMK Diponegoro 1 Jakarta menghadirkan pendidikan vokasi berbasis
+                teknologi, karakter, dan kebutuhan industri untuk masa depan
+                yang lebih baik.
               </p>
 
               {/* REMOVED INVISIBLE CLASS HERE */}
@@ -710,13 +505,13 @@ const Home = () => {
             <div className="kepsek-text-wrapper w-full lg:w-1/2">
               <div className="relative">
                 <div className="inline-flex items-center gap-2 mb-6">
-                  <span className="anim-kepsek-progress block h-1 bg-primary rounded-full w-32"></span>
+                  <span className="kepsek-progress block h-1 bg-primary rounded-full w-32"></span>
                   <span className="text-primary font-bold tracking-wider uppercase text-sm">
                     Sambutan Kepala Sekolah
                   </span>
                 </div>
 
-                <h2 className="anim-kepsek-title text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-8 leading-tight">
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-8 leading-tight">
                   Membangun Generasi <br />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
                     Unggul & Berkarakter
@@ -724,7 +519,7 @@ const Home = () => {
                 </h2>
 
                 <div
-                  className="anim-kepsek-quote relative bg-gray-50 p-8 rounded-2xl border-l-4 border-primary shadow-sm cursor-default"
+                  className="relative bg-gray-50 p-8 rounded-2xl border-l-4 border-primary shadow-sm cursor-default"
                   onMouseEnter={!isTouchDevice ? onKepsekHover : undefined}
                   onMouseLeave={!isTouchDevice ? onKepsekLeave : undefined}
                 >
@@ -732,7 +527,7 @@ const Home = () => {
                     size={40}
                     className="text-orange-200 absolute top-4 right-4 opacity-50 rotate-180"
                   />
-                  <p className="anim-kepsek-desc text-gray-700 text-lg leading-relaxed italic relative z-10 font-medium">
+                  <p className="text-gray-700 text-lg leading-relaxed italic relative z-10 font-medium">
                     "Selamat datang di era baru pendidikan vokasi. Di SMK Dipo
                     1, kami berkomitmen tidak hanya mencetak lulusan yang siap
                     kerja, tetapi juga generasi yang adaptif terhadap perubahan
@@ -764,7 +559,7 @@ const Home = () => {
             <div
               key={idx}
               // REMOVED INVISIBLE CLASS
-              className="anim-stat-card stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
+              className="stat-card flex flex-col items-center text-center p-4 rounded-xl cursor-default"
               onMouseEnter={!isTouchDevice ? onHoverScale : undefined}
               onMouseLeave={!isTouchDevice ? onHoverScaleReset : undefined}
             >
@@ -813,7 +608,7 @@ const Home = () => {
           <div className="jurusan-cards-container grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
             {/* TKJ Card - REMOVED INVISIBLE */}
             <div
-              className="anim-jurusan-card jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={!isTouchDevice ? onHoverScale : undefined}
               onMouseLeave={!isTouchDevice ? onHoverScaleReset : undefined}
             >
@@ -866,7 +661,7 @@ const Home = () => {
 
             {/* DKV Card - REMOVED INVISIBLE */}
             <div
-              className="anim-jurusan-card jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
+              className="jurusan-card bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-full"
               onMouseEnter={!isTouchDevice ? onHoverScale : undefined}
               onMouseLeave={!isTouchDevice ? onHoverScaleReset : undefined}
             >
