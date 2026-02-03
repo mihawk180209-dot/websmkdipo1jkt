@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* --- 1. SETUP FONT LOCAL --- */
+
+/* INTER (Body Font) */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/inter-v20-latin-regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/inter-v20-latin-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/inter-v20-latin-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/inter-v20-latin-700.woff2") format("woff2");
+}
+
+/* POPPINS (Heading Font) */
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/poppins-v24-latin-regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/poppins-v24-latin-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/poppins-v24-latin-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/poppins-v24-latin-700.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/poppins-v24-latin-800.woff2") format("woff2");
+}
+
+/* --- 2. TAILWIND THEME --- */
+
+@theme {
+  /* Karena kita sudah define @font-face bernama "Inter" di atas, 
+     variabel ini akan otomatis mengambil file lokal */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Sama juga dengan Poppins */
+  --font-heading: "Poppins", sans-serif;
+
+  --color-primary: #f97316;
+  --color-secondary: #1e293b;
+  --color-accent: #22c55e;
+}
+
+/* --- 3. GLOBAL STYLES --- */
+
+html {
+}
+
+@layer base {
+  body {
+    width: 100%;
+    position: relative;
+    font-family: var(--font-sans);
+    @apply bg-gray-50 text-gray-800;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    @apply font-bold;
+  }
+}
