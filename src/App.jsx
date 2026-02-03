@@ -47,6 +47,8 @@ const FormStruktur = lazy(() => import("./pages/admin/FormStruktur"));
 const ManageStruktur = lazy(() => import("./pages/admin/ManageStruktur"));
 const ManageTkj = lazy(() => import("./pages/admin/ManageTkj"));
 const FormTkj = lazy(() => import("./pages/admin/FormTkj"));
+const ManageDkv = lazy(() => import("./pages/admin/ManageDkv"));
+const FormDkv = lazy(() => import("./pages/admin/FormDkv"));
 // Loading Component (Muncul pas pindah halaman)
 const PageLoader = () => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
@@ -143,6 +145,9 @@ function App() {
               <Route path="/admin/tkj" element={<ManageTkj />} />
               <Route path="/admin/tkj/form/:id" element={<FormTkj />}></Route>
               <Route path="/admin/tkj/form" element={<FormTkj />}></Route>
+              <Route path="/admin/dkv" element={<ManageDkv />} />
+              <Route path="/admin/dkv/edit/:id" element={<FormDkv />}></Route>
+              <Route path="/admin/dkv/tambah" element={<FormDkv />}></Route>
             </Route>
           </Route>
         </Routes>

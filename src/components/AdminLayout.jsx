@@ -13,6 +13,7 @@ import {
   BellRing,
   UserRoundPen,
   Bot,
+  Palette,
   // <--- TAMBAHAN ICON BARU
 } from "lucide-react";
 import { useState } from "react";
@@ -191,6 +192,17 @@ const AdminLayout = () => {
           >
             <Bot size={20} />
             Materi TKJ
+          </Link>
+
+          <Link
+            to="/admin/dkv"
+            onClick={() => setIsSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${isActive(
+              "/admin/dkv",
+            )}`}
+          >
+            <Palette size={20} />
+            Materi DKV
           </Link>
 
           {/* BAGIAN AKUN */}
