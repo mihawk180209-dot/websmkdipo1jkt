@@ -143,7 +143,7 @@ const Navbar = () => {
       ref={headerRef}
       className="fixed top-0 w-full z-[999] bg-white border-b border-transparent min-h-[72px]"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 xl:px-20">
+      <div className="mx-auto max-w px-4 sm:px-6 lg:px-12 xl:px-20">
         <div className="flex items-center justify-between gap-6">
           {/* Logo Section */}
           <NavLink to="/" className="flex items-center gap-3 group">
