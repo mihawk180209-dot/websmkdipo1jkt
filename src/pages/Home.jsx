@@ -377,9 +377,9 @@ const Home = () => {
 
   return (
     <div ref={container} className="w-full font-sans overflow-x-hidden">
-    {/* ==================== HERO SECTION ==================== */}
+ {/* ==================== HERO SECTION (RESPONSIVE FIXED) ==================== */}
 <section
-  className="relative overflow-hidden bg-white pt-32 pb-20 lg:pt-48 lg:pb-32"
+  className="relative overflow-hidden bg-white pt-24 pb-16 md:pt-32 md:pb-24 lg:pt-48 lg:pb-32"
   aria-labelledby="hero-heading"
 >
   {/* --- 1. BACKGROUND LAYERS --- */}
@@ -387,13 +387,13 @@ const Home = () => {
   {/* Base Gradient */}
   <div className="absolute inset-0 bg-gradient-to-b from-orange-50/80 via-white to-white pointer-events-none" />
 
-  {/* Grid Pattern (Technical Vibe) */}
-  <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+  {/* Grid Pattern */}
+  <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:16px_16px] sm:bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
-  {/* Animated Blobs */}
+  {/* Animated Blobs (Scaled for Mobile) */}
   <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] bg-orange-400/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '6s' }} />
-    <div className="absolute top-[10%] -right-[15%] w-[45vw] h-[45vw] bg-amber-300/20 rounded-full blur-[120px] mix-blend-multiply" />
+    <div className="absolute -top-[10%] -left-[20%] w-[80vw] h-[80vw] sm:w-[50vw] sm:h-[50vw] sm:-left-[10%] bg-orange-400/20 rounded-full blur-[60px] sm:blur-[100px] animate-pulse" style={{ animationDuration: '6s' }} />
+    <div className="absolute top-[20%] -right-[20%] w-[70vw] h-[70vw] sm:w-[45vw] sm:h-[45vw] sm:top-[10%] sm:-right-[15%] bg-amber-300/20 rounded-full blur-[80px] sm:blur-[120px] mix-blend-multiply" />
   </div>
 
   {/* Noise Texture */}
@@ -402,106 +402,103 @@ const Home = () => {
   </div>
 
   {/* --- 2. CONTENT CONTAINER --- */}
-  <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+  <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
     
     {/* Badge */}
-    <div className="inline-flex items-center gap-2 py-1.5 px-4 pr-5 mb-8 rounded-full bg-white/80 backdrop-blur-md border border-orange-200/60 shadow-sm hover:shadow-orange-100/50 hover:border-orange-300 transition-all duration-300 cursor-default">
-      <span className="relative flex h-2.5 w-2.5">
+    <div className="inline-flex items-center gap-2 py-1.5 px-3 sm:px-4 pr-4 sm:pr-5 mb-6 sm:mb-8 rounded-full bg-white/80 backdrop-blur-md border border-orange-200/60 shadow-sm hover:shadow-orange-100/50 transition-all cursor-default">
+      <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+        <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-orange-500"></span>
       </span>
-      <span className="text-orange-800 text-xs sm:text-sm font-bold tracking-wide uppercase font-inter">
+      <span className="text-orange-800 text-[10px] sm:text-xs md:text-sm font-bold tracking-wide uppercase font-inter">
         Modern Vocational School
       </span>
     </div>
 
-    {/* Heading */}
+    {/* Heading Responsive */}
     <h1
       id="hero-heading"
-      className="font-poppins text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] sm:leading-[1.1] mb-8 text-slate-900 tracking-tight max-w-4xl mx-auto"
+      className="font-poppins text-4xl xs:text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.15] sm:leading-[1.1] mb-6 sm:mb-8 text-slate-900 tracking-tight max-w-4xl mx-auto"
       style={{ textWrap: 'balance' }}
     >
       Siap Kerja, Siap Kuliah. <br className="hidden md:block" />
       Bangun{' '}
-      <span className="relative inline-block whitespace-nowrap">
-        <svg className="absolute w-full h-[12px] -bottom-1 left-0 text-orange-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+      {/* Wrapper agar Sparkles dan Teks menyatu tapi aman di mobile */}
+      <span className="relative inline-block">
+        <svg className="absolute w-[105%] h-[8px] sm:h-[12px] -bottom-1 -left-1 text-orange-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
            <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
         </svg>
         <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600">
           Masa Depanmu
         </span>
-        {/* Pastikan import Sparkles dari lucide-react */}
-        <Sparkles className="inline-block w-8 h-8 sm:w-10 sm:h-10 text-amber-400 absolute -top-6 -right-6 animate-bounce" style={{ animationDuration: '3s' }} />
+        {/* Sparkles: Ukuran dan posisi disesuaikan per layar */}
+        <Sparkles className="absolute -top-4 -right-5 w-6 h-6 sm:w-8 sm:h-8 sm:-top-6 sm:-right-6 md:w-10 md:h-10 text-amber-400 animate-bounce" style={{ animationDuration: '3s' }} />
       </span>{' '}
       Disini.
     </h1>
 
     {/* Description */}
-    <p className="font-inter text-lg sm:text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto" style={{ textWrap: 'balance' }}>
-      Sekolah vokasi modern dengan kurikulum <span className="text-orange-600 font-semibold">Link & Match</span> industri. 
-      Fokus pada praktik nyata dan pembentukan karakter profesional.
+    <p className="font-inter text-base sm:text-lg lg:text-xl text-slate-600 mb-8 sm:mb-10 leading-relaxed max-w-2xl mx-auto px-2" style={{ textWrap: 'balance' }}>
+      Sekolah vokasi modern dengan kurikulum <span className="text-orange-600 font-semibold whitespace-nowrap">Link & Match</span> industri. 
+      Fokus pada praktik nyata dan karakter profesional.
     </p>
 
-    {/* Buttons */}
-    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center items-center mb-16">
+    {/* Buttons: Full width di mobile, auto di desktop */}
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto justify-center items-center mb-12 sm:mb-16 px-2 sm:px-0">
       {/* Primary Button */}
       <a
         href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative w-full sm:w-auto px-8 py-4 bg-orange-600 text-white font-poppins font-semibold rounded-2xl shadow-[0_10px_25px_-5px_rgba(249,115,22,0.4)] hover:shadow-[0_20px_35px_-10px_rgba(249,115,22,0.5)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2"
+        className="group relative w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-orange-600 text-white font-poppins font-semibold rounded-xl sm:rounded-2xl shadow-[0_10px_25px_-5px_rgba(249,115,22,0.4)] hover:shadow-[0_20px_35px_-10px_rgba(249,115,22,0.5)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2 active:scale-95"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-500 opacity-100 group-hover:opacity-90 transition-opacity" />
         <span className="relative z-10">Daftar Sekarang</span>
-        {/* Pastikan import ArrowRight dari lucide-react */}
         <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
       </a>
       
       {/* Secondary Button */}
       <Link
         to="/tentang/profil"
-        className="group w-full sm:w-auto px-8 py-4 bg-white text-slate-600 font-poppins font-medium rounded-2xl border-2 border-slate-100 hover:border-orange-200 hover:text-orange-600 hover:bg-orange-50/50 transition-all duration-300 flex justify-center items-center gap-2"
+        className="group w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white text-slate-600 font-poppins font-medium rounded-xl sm:rounded-2xl border-2 border-slate-100 hover:border-orange-200 hover:text-orange-600 hover:bg-orange-50/50 transition-all duration-300 flex justify-center items-center gap-2 active:scale-95 shadow-sm sm:shadow-none"
       >
-        {/* Pastikan import TrendingUp dari lucide-react */}
         <TrendingUp size={18} className="text-slate-400 group-hover:text-orange-500 transition-colors" />
         Pelajari Profil
       </Link>
     </div>
 
-    {/* Trust Stats Bar */}
-    <div className="relative group">
+    {/* Trust Stats Bar: Padding & Gap optimized for mobile */}
+    <div className="relative group w-full max-w-[90vw] sm:max-w-none">
       <div className="absolute -inset-1 bg-gradient-to-r from-orange-100 to-amber-100 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-      <div className="relative flex flex-wrap justify-center gap-6 sm:gap-12 px-8 py-6 bg-white/60 backdrop-blur-md border border-white/50 rounded-2xl shadow-sm">
+      
+      <div className="relative flex flex-col sm:flex-row flex-wrap justify-center items-start sm:items-center gap-4 sm:gap-12 px-6 py-5 sm:px-8 sm:py-6 bg-white/60 backdrop-blur-md border border-white/50 rounded-2xl shadow-sm">
         
         {/* Stat Item 1 */}
-        <div className="flex items-center gap-2.5 text-slate-600 hover:text-slate-900 transition-colors">
-          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600">
-             {/* Pastikan import Star dari lucide-react */}
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-start sm:justify-center">
+          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600 shrink-0">
              <Star size={18} /> 
           </div>
-          <span className="text-sm font-semibold font-inter">Terakreditasi A</span>
+          <span className="text-sm font-semibold font-inter text-slate-700">Terakreditasi A</span>
         </div>
 
-        <div className="hidden sm:block w-px h-8 bg-slate-200/60"></div>
+        <div className="hidden sm:block w-full sm:w-px h-px sm:h-8 bg-slate-200/60"></div>
 
         {/* Stat Item 2 */}
-        <div className="flex items-center gap-2.5 text-slate-600 hover:text-slate-900 transition-colors">
-          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600">
-             {/* Pastikan import ShieldCheck dari lucide-react */}
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-start sm:justify-center">
+          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600 shrink-0">
              <ShieldCheck size={18} />
           </div>
-          <span className="text-sm font-semibold font-inter">Kurikulum Merdeka</span>
+          <span className="text-sm font-semibold font-inter text-slate-700">Kurikulum Merdeka</span>
         </div>
 
-        <div className="hidden sm:block w-px h-8 bg-slate-200/60"></div>
+        <div className="hidden sm:block w-full sm:w-px h-px sm:h-8 bg-slate-200/60"></div>
 
         {/* Stat Item 3 */}
-        <div className="flex items-center gap-2.5 text-slate-600 hover:text-slate-900 transition-colors">
-          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600">
-             {/* Pastikan import Zap dari lucide-react */}
+        <div className="flex items-center gap-3 w-full sm:w-auto justify-start sm:justify-center">
+          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600 shrink-0">
              <Zap size={18} />
           </div>
-          <span className="text-sm font-semibold font-inter">Link & Match Industri</span>
+          <span className="text-sm font-semibold font-inter text-slate-700">Link & Match Industri</span>
         </div>
 
       </div>
@@ -509,7 +506,7 @@ const Home = () => {
   </div>
 
   {/* Fade Bottom */}
-  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
+  <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
 </section>
 
 
