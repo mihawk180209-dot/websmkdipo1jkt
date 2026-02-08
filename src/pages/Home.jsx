@@ -22,7 +22,8 @@ import {
   LayoutGrid,
   Sparkles,
   TrendingUp,
-
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "../lib/supabase";
@@ -376,128 +377,140 @@ const Home = () => {
 
   return (
     <div ref={container} className="w-full font-sans overflow-x-hidden">
-      {/* ==================== HERO SECTION ==================== */}
-   <section
-      className="relative overflow-hidden bg-white pt-32 pb-24 lg:pt-48 lg:pb-40"
-      aria-labelledby="hero-heading"
+    {/* ==================== HERO SECTION ==================== */}
+<section
+  className="relative overflow-hidden bg-white pt-32 pb-20 lg:pt-48 lg:pb-32"
+  aria-labelledby="hero-heading"
+>
+  {/* --- 1. BACKGROUND LAYERS --- */}
+  
+  {/* Base Gradient */}
+  <div className="absolute inset-0 bg-gradient-to-b from-orange-50/80 via-white to-white pointer-events-none" />
+
+  {/* Grid Pattern (Technical Vibe) */}
+  <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
+  {/* Animated Blobs */}
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] bg-orange-400/20 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '6s' }} />
+    <div className="absolute top-[10%] -right-[15%] w-[45vw] h-[45vw] bg-amber-300/20 rounded-full blur-[120px] mix-blend-multiply" />
+  </div>
+
+  {/* Noise Texture */}
+  <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" 
+       style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }}>
+  </div>
+
+  {/* --- 2. CONTENT CONTAINER --- */}
+  <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+    
+    {/* Badge */}
+    <div className="inline-flex items-center gap-2 py-1.5 px-4 pr-5 mb-8 rounded-full bg-white/80 backdrop-blur-md border border-orange-200/60 shadow-sm hover:shadow-orange-100/50 hover:border-orange-300 transition-all duration-300 cursor-default">
+      <span className="relative flex h-2.5 w-2.5">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500"></span>
+      </span>
+      <span className="text-orange-800 text-xs sm:text-sm font-bold tracking-wide uppercase font-inter">
+        Modern Vocational School
+      </span>
+    </div>
+
+    {/* Heading */}
+    <h1
+      id="hero-heading"
+      className="font-poppins text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.1] sm:leading-[1.1] mb-8 text-slate-900 tracking-tight max-w-4xl mx-auto"
+      style={{ textWrap: 'balance' }}
     >
-      {/* --- BACKGROUND LAYERS --- */}
+      Siap Kerja, Siap Kuliah. <br className="hidden md:block" />
+      Bangun{' '}
+      <span className="relative inline-block whitespace-nowrap">
+        <svg className="absolute w-full h-[12px] -bottom-1 left-0 text-orange-200 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+           <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
+        </svg>
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-amber-500 to-orange-600">
+          Masa Depanmu
+        </span>
+        {/* Pastikan import Sparkles dari lucide-react */}
+        <Sparkles className="inline-block w-8 h-8 sm:w-10 sm:h-10 text-amber-400 absolute -top-6 -right-6 animate-bounce" style={{ animationDuration: '3s' }} />
+      </span>{' '}
+      Disini.
+    </h1>
+
+    {/* Description */}
+    <p className="font-inter text-lg sm:text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto" style={{ textWrap: 'balance' }}>
+      Sekolah vokasi modern dengan kurikulum <span className="text-orange-600 font-semibold">Link & Match</span> industri. 
+      Fokus pada praktik nyata dan pembentukan karakter profesional.
+    </p>
+
+    {/* Buttons */}
+    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center items-center mb-16">
+      {/* Primary Button */}
+      <a
+        href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative w-full sm:w-auto px-8 py-4 bg-orange-600 text-white font-poppins font-semibold rounded-2xl shadow-[0_10px_25px_-5px_rgba(249,115,22,0.4)] hover:shadow-[0_20px_35px_-10px_rgba(249,115,22,0.5)] hover:-translate-y-1 transition-all duration-300 overflow-hidden flex items-center justify-center gap-2"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-amber-500 opacity-100 group-hover:opacity-90 transition-opacity" />
+        <span className="relative z-10">Daftar Sekarang</span>
+        {/* Pastikan import ArrowRight dari lucide-react */}
+        <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+      </a>
       
-      {/* 1. Base Gradient (Warmth) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-orange-50/50 to-white pointer-events-none" />
+      {/* Secondary Button */}
+      <Link
+        to="/tentang/profil"
+        className="group w-full sm:w-auto px-8 py-4 bg-white text-slate-600 font-poppins font-medium rounded-2xl border-2 border-slate-100 hover:border-orange-200 hover:text-orange-600 hover:bg-orange-50/50 transition-all duration-300 flex justify-center items-center gap-2"
+      >
+        {/* Pastikan import TrendingUp dari lucide-react */}
+        <TrendingUp size={18} className="text-slate-400 group-hover:text-orange-500 transition-colors" />
+        Pelajari Profil
+      </Link>
+    </div>
 
-      {/* 2. Animated Blobs (Modern Mesh) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Blob Kiri Atas */}
-        <div className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-orange-300/20 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDuration: '4s' }} />
-        {/* Blob Kanan Bawah */}
-        <div className="absolute top-[20%] -right-[10%] w-[60vw] h-[60vw] bg-amber-200/30 rounded-full blur-[100px] mix-blend-multiply" />
-      </div>
-
-      {/* 3. Dot Pattern (Tech Vibe) */}
-      <div className="absolute inset-0 bg-[radial-gradient(#fb923c_1px,transparent_1px)] [background-size:24px_24px] opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)] pointer-events-none" />
-
-      {/* 4. Noise Texture (Premium Feel) */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none mix-blend-overlay" 
-           style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E")` }}>
-      </div>
-
-      {/* --- CONTENT CONTAINER --- */}
-      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center">
+    {/* Trust Stats Bar */}
+    <div className="relative group">
+      <div className="absolute -inset-1 bg-gradient-to-r from-orange-100 to-amber-100 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
+      <div className="relative flex flex-wrap justify-center gap-6 sm:gap-12 px-8 py-6 bg-white/60 backdrop-blur-md border border-white/50 rounded-2xl shadow-sm">
         
-        {/* Badge: Glassmorphism + Float Animation */}
-        <div
-          className="hero-element inline-flex items-center gap-2 py-1.5 px-4 pr-5 rounded-full bg-white/60 backdrop-blur-md border border-orange-200/50 text-orange-700 text-xs sm:text-sm font-inter font-semibold tracking-wide mb-8 shadow-sm hover:shadow-md hover:bg-white/80 transition-all cursor-default select-none animate-fade-in-up"
-          style={{ animationFillMode: 'both' }}
-        >
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-          </span>
-          <span className="uppercase tracking-wider">Modern Vocational School</span>
+        {/* Stat Item 1 */}
+        <div className="flex items-center gap-2.5 text-slate-600 hover:text-slate-900 transition-colors">
+          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600">
+             {/* Pastikan import Star dari lucide-react */}
+             <Star size={18} /> 
+          </div>
+          <span className="text-sm font-semibold font-inter">Terakreditasi A</span>
         </div>
 
-        {/* Heading: Balanced Text for Perfect Layout */}
-        <h1
-          id="hero-heading"
-          className="hero-element font-poppins text-4xl sm:text-5xl lg:text-7xl font-bold leading-[1.1] sm:leading-[1.15] mb-6 text-slate-900 tracking-tight mx-auto"
-          style={{ 
-            animationDelay: '0.1s', 
-            animationFillMode: 'both',
-            textWrap: 'balance' // Kunci biar teks rapih di mobile/tablet
-          }}
-        >
-          Siap Kerja, Siap Kuliah. <br className="hidden lg:block"/>
-          Bangun{' '}
-          <span className="relative whitespace-nowrap">
-            <span className="absolute -inset-1 -inset-x-2 bg-orange-100/50 skew-y-2 rounded-lg -z-10 block sm:hidden"></span>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 drop-shadow-sm">
-              Masa Depanmu
-            </span>
-            <Sparkles className="inline-block w-6 h-6 sm:w-8 sm:h-8 text-amber-400 absolute -top-4 -right-4 animate-bounce" style={{ animationDuration: '3s' }} />
-          </span>{' '}
-          Disini.
-        </h1>
+        <div className="hidden sm:block w-px h-8 bg-slate-200/60"></div>
 
-        {/* Description: Readable & Balanced */}
-        <p
-          className="hero-element font-inter text-base sm:text-lg lg:text-xl text-slate-600 mb-10 leading-relaxed max-w-2xl mx-auto"
-          style={{ 
-            animationDelay: '0.2s', 
-            animationFillMode: 'both',
-            textWrap: 'balance' 
-          }}
-        >
-          Sekolah vokasi modern dengan kurikulum berbasis industri. 
-          Fokus pada <strong>praktik nyata</strong> dan pembentukan karakter siap kerja.
-        </p>
-
-        {/* Buttons: Action Oriented */}
-        <div
-          className="hero-element flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:w-auto"
-          style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
-        >
-          {/* Primary Button */}
-          <a
-            href="https://ppdb-smkdipo1.perguruandiponegoro.sch.id/home"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-br from-orange-500 to-orange-600 text-white font-poppins font-semibold rounded-2xl shadow-[0_10px_20px_-10px_rgba(249,115,22,0.5)] hover:shadow-[0_20px_30px_-15px_rgba(249,115,22,0.6)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
-          >
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-            <span className="relative">Daftar Sekarang</span>
-            <ArrowRight size={20} className="relative group-hover:translate-x-1 transition-transform" />
-          </a>
-          
-          {/* Secondary Button */}
-          <Link
-            to="/tentang/profil"
-            className="group w-full sm:w-auto px-8 py-4 bg-white text-slate-700 font-poppins font-medium rounded-2xl border border-slate-200 hover:border-orange-200 hover:text-orange-600 hover:bg-orange-50/30 transition-all duration-300 flex justify-center items-center gap-2 shadow-sm hover:shadow-md"
-          >
-            <TrendingUp size={18} className="text-slate-400 group-hover:text-orange-500 transition-colors" />
-            Pelajari Profil
-          </Link>
+        {/* Stat Item 2 */}
+        <div className="flex items-center gap-2.5 text-slate-600 hover:text-slate-900 transition-colors">
+          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600">
+             {/* Pastikan import ShieldCheck dari lucide-react */}
+             <ShieldCheck size={18} />
+          </div>
+          <span className="text-sm font-semibold font-inter">Kurikulum Merdeka</span>
         </div>
 
-        {/* Trust Badge / Stats (Optional - Adds Credibility) */}
-        <div 
-          className="hero-element mt-16 pt-8 border-t border-slate-100 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm font-medium text-slate-400"
-          style={{ animationDelay: '0.4s', animationFillMode: 'both' }}
-        >
-            <span className="flex items-center gap-2">
-                <Star size={16} className="text-orange-400 fill-orange-400" />
-                Terakreditasi A
-            </span>
-            <span className="hidden sm:inline-block text-slate-300">•</span>
-            <span>Kurikulum Merdeka</span>
-            <span className="hidden sm:inline-block text-slate-300">•</span>
-            <span>Link & Match Industri</span>
+        <div className="hidden sm:block w-px h-8 bg-slate-200/60"></div>
+
+        {/* Stat Item 3 */}
+        <div className="flex items-center gap-2.5 text-slate-600 hover:text-slate-900 transition-colors">
+          <div className="p-1.5 rounded-lg bg-orange-100/50 text-orange-600">
+             {/* Pastikan import Zap dari lucide-react */}
+             <Zap size={18} />
+          </div>
+          <span className="text-sm font-semibold font-inter">Link & Match Industri</span>
         </div>
+
       </div>
+    </div>
+  </div>
 
-      {/* Fade Bottom Transition */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
-    </section>
+  {/* Fade Bottom */}
+  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none"></div>
+</section>
 
 
       {/* ==================== SAMBUTAN KEPSEK ==================== */}
